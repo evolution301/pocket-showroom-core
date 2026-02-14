@@ -14,6 +14,25 @@ jobs:
     
     steps:
       - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create ZIP package
+        run: |
+          mkdir pocket-showroom-core
+          rsync -av --exclude='pocket-showroom-core' --exclude='.git' --exclude='.github' --exclude='.gitignore' --exclude='release.ps1' ./ pocket-showroom-core/
+          zip -r pocket-showroom-core.zip pocket-showroom-core
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: pocket-showroom-core.zip
+          name: Pocket Showroom Core ${{ steps.get_version.outputs.VERSION }}
+          body: |
             ## Pocket Showroom Core ${{ steps.get_version.outputs.VERSION }}
             
             ### Installation
