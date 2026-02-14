@@ -67,6 +67,9 @@ class PS_Settings
         register_setting('ps_settings_group', 'ps_button_text_color');
         register_setting('ps_settings_group', 'ps_banner_title_color');
         register_setting('ps_settings_group', 'ps_banner_desc_color');
+
+        // Card Display Settings
+        register_setting('ps_settings_group', 'ps_card_aspect_ratio');
     }
 
     public function render_settings_page()
@@ -87,7 +90,9 @@ class PS_Settings
             'primary_color' => 'rgba(0, 124, 186, 1)', // Default Blue
             'button_text_color' => '#ffffff', // Default White
             'banner_title_color' => '#ffffff',
-            'banner_desc_color' => 'rgba(255, 255, 255, 0.95)'
+            'banner_desc_color' => 'rgba(255, 255, 255, 0.95)',
+            // Card display
+            'card_aspect_ratio' => '3/4',
         );
 
         $type = get_option('ps_watermark_type', $defaults['type']);
@@ -206,7 +211,7 @@ class PS_Settings
                         </div>
 
                         <!-- Text Settings -->
-                        <div class="ps-banner-settings-col" style="flex: 1.5;">
+                        <div class="ps-banner-settings-col" style="flex: 1;">
                             <h3><?php _e('Text Content', 'pocket-showroom'); ?></h3>
                             <div class="ps-form-group">
                                 <label><?php _e('Banner Title (H1)', 'pocket-showroom'); ?></label>
@@ -231,6 +236,38 @@ class PS_Settings
                                         value="<?php echo esc_attr(get_option('ps_banner_button_url', '')); ?>"
                                         class="large-text ps-input" placeholder="https://..." />
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Card Display -->
+                        <div class="ps-banner-settings-col" style="flex: 0.8;">
+                            <h3><?php _e('Product Card Display', 'pocket-showroom'); ?></h3>
+                            <div class="ps-form-group">
+                                <label><?php _e('Image Aspect Ratio', 'pocket-showroom'); ?></label>
+                                <select name="ps_card_aspect_ratio" id="ps_card_aspect_ratio" class="ps-input" style="width: 100%;">
+                                    <?php
+                                    $card_ratio = get_option('ps_card_aspect_ratio', $defaults['card_aspect_ratio']);
+                                    $ratio_options = array(
+                                        '1/1' => __('1:1 — Square', 'pocket-showroom'),
+                                        '3/4' => __('3:4 — Portrait (Recommended)', 'pocket-showroom'),
+                                        '4/3' => __('4:3 — Landscape', 'pocket-showroom'),
+                                        '16/9' => __('16:9 — Widescreen', 'pocket-showroom'),
+                                        '9/16' => __('9:16 — Tall Portrait', 'pocket-showroom'),
+                                        'auto' => __('Auto — Original Ratio', 'pocket-showroom'),
+                                    );
+                                    foreach ($ratio_options as $value => $label) {
+                                        printf(
+                                            '<option value="%s" %s>%s</option>',
+                                            esc_attr($value),
+                                            selected($card_ratio, $value, false),
+                                            esc_html($label)
+                                        );
+                                    }
+                                    ?>
+                                </select>
+                                <p class="description" style="margin-top: 8px; color: #888;">
+                                    <?php _e('Controls how product images are displayed in the gallery grid. Images will always be fully visible (no cropping).', 'pocket-showroom'); ?>
+                                </p>
                             </div>
                         </div>
 
@@ -272,192 +309,190 @@ class PS_Settings
                         </div>
                     </div>
 
-                    <!-- Row 2: Live Preview (full width) -->
-                    <div class="ps-banner-preview-row">
-                        <h3><?php _e('Live Preview', 'pocket-showroom'); ?></h3>
-                        <div class="ps-canvas-wrapper"
-                            style="background:#fff; border:none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; overflow:hidden;">
-                            <div id="ps-live-preview-container"
-                                style="position:relative; width:100%; height:300px; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; <?php echo $banner_image_url ? 'background-image:url(' . esc_url($banner_image_url) . ');' : 'background-image:url(' . PS_CORE_URL . 'assets/placeholder-furniture.jpg);'; ?>">
-                                <div id="ps-banner-overlay-layer"
-                                    style="position:absolute; top:0; left:0; right:0; bottom:0; background-color: <?php echo esc_attr($banner_overlay_color); ?>;">
+                <!-- Row 2: Live Preview (full width) -->
+                <div class="ps-banner-preview-row">
+                    <h3><?php _e('Live Preview', 'pocket-showroom'); ?></h3>
+                    <div class="ps-canvas-wrapper"
+                        style="background:#fff; border:none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; overflow:hidden;">
+                        <div id="ps-live-preview-container"
+                            style="position:relative; width:100%; height:300px; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; <?php echo $banner_image_url ? 'background-image:url(' . esc_url($banner_image_url) . ');' : 'background-image:url(' . PS_CORE_URL . 'assets/placeholder-furniture.jpg);'; ?>">
+                            <div id="ps-banner-overlay-layer"
+                                style="position:absolute; top:0; left:0; right:0; bottom:0; background-color: <?php echo esc_attr($banner_overlay_color); ?>;">
+                            </div>
+                            <div style="position:relative; z-index:2; padding:20px;">
+                                <h1 id="ps-preview-banner-title"
+                                    style="margin:0 0 0; font-size:28px; font-weight:700; text-shadow:0 2px 4px rgba(0,0,0,0.3); color:<?php echo esc_attr($banner_title_color); ?>;">
+                                    <?php echo esc_html($banner_title); ?>
+                                </h1>
+                                <div id="ps-preview-banner-desc"
+                                    style="font-size:16px; opacity:0.9; color:<?php echo esc_attr($banner_desc_color); ?>; max-width: 500px; margin: 5px auto 10px auto; white-space: pre-wrap; line-height: 1.4;">
+                                    <?php echo wpautop(esc_html($banner_desc)); ?>
                                 </div>
-                                <div style="position:relative; z-index:2; padding:20px;">
-                                    <h1 id="ps-preview-banner-title"
-                                        style="margin:0 0 0; font-size:28px; font-weight:700; text-shadow:0 2px 4px rgba(0,0,0,0.3); color:<?php echo esc_attr($banner_title_color); ?>;">
-                                        <?php echo esc_html($banner_title); ?>
-                                    </h1>
-                                    <div id="ps-preview-banner-desc"
-                                        style="font-size:16px; opacity:0.9; color:<?php echo esc_attr($banner_desc_color); ?>; max-width: 500px; margin: 5px auto 10px auto; white-space: pre-wrap; line-height: 1.4;">
-                                        <?php echo wpautop(esc_html($banner_desc)); ?>
-                                    </div>
-                                    <div style="margin-top: 0;">
-                                        <span class="ps-preview-btn" id="ps-preview-banner-btn"
-                                            style="display:inline-block; padding: 10px 24px; background-color: <?php echo esc_attr($primary_color); ?>; color:<?php echo esc_attr($button_text_color); ?>; border-radius:4px; font-size:14px; font-weight:600;"><?php echo esc_html(get_option('ps_banner_button_text', 'Explore Now')); ?></span>
-                                    </div>
+                                <div style="margin-top: 0;">
+                                    <span class="ps-preview-btn" id="ps-preview-banner-btn"
+                                        style="display:inline-block; padding: 10px 24px; background-color: <?php echo esc_attr($primary_color); ?>; color:<?php echo esc_attr($button_text_color); ?>; border-radius:4px; font-size:14px; font-weight:600;"><?php echo esc_html(get_option('ps_banner_button_text', 'Explore Now')); ?></span>
                                 </div>
-                                <div
-                                    style="position:absolute; bottom:20px; right:20px; background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); padding:10px 15px; border-radius:8px; border:1px solid rgba(255,255,255,0.3);">
-                                    <span style="display:block; font-size:24px; font-weight:800; line-height:1;">12</span>
-                                    <span
-                                        style="font-size:10px; text-transform:uppercase; letter-spacing:1px;"><?php _e('Products Ready', 'pocket-showroom'); ?></span>
-                                </div>
+                            </div>
+                            <div
+                                style="position:absolute; bottom:20px; right:20px; background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); padding:10px 15px; border-radius:8px; border:1px solid rgba(255,255,255,0.3);">
+                                <span style="display:block; font-size:24px; font-weight:800; line-height:1;">12</span>
+                                <span
+                                    style="font-size:10px; text-transform:uppercase; letter-spacing:1px;"><?php _e('Products Ready', 'pocket-showroom'); ?></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="ps-form-group" style="margin-top: 30px;">
+                    <?php submit_button(__('Save Changes', 'pocket-showroom'), 'primary ps-btn ps-btn-primary', 'submit', false); ?>
+                </div>
+        </div>
+
+        <div class="ps-tab-content" id="ps-tab-watermark" style="">
+            <div class="ps-settings-layout-3col">
+                <!-- Col 1: Controls -->
+                <div class="ps-col-inputs">
+                    <h3><?php _e('Watermark Configuration', 'pocket-showroom'); ?></h3>
+
+                    <div class="ps-form-group">
+                        <label><?php _e('Enable Watermarking', 'pocket-showroom'); ?></label>
+                        <label class="ps-switch">
+                            <input type="checkbox" name="ps_enable_watermark" value="1" <?php checked(1, get_option('ps_enable_watermark'), true); ?> />
+                            <span class="ps-slider round"></span>
+                        </label>
+                        <p class="description">
+                            <?php _e('If enabled, the watermark will be permanently merged into new uploads.', 'pocket-showroom'); ?>
+                        </p>
+                    </div>
+
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+                    <div class="ps-form-group">
+                        <label><?php _e('Watermark Type', 'pocket-showroom'); ?></label>
+                        <div class="ps-radio-group">
+                            <label><input type="radio" name="ps_watermark_type" value="text" <?php checked('text', $type); ?>>
+                                <?php _e('Text', 'pocket-showroom'); ?></label>
+                            <label><input type="radio" name="ps_watermark_type" value="image" <?php checked('image', $type); ?>>
+                                <?php _e('Image', 'pocket-showroom'); ?></label>
+                        </div>
+                    </div>
+
+                    <div class="ps-form-group ps-type-text" style="<?php echo $type === 'image' ? 'display:none;' : ''; ?>">
+                        <label><?php _e('Watermark Text', 'pocket-showroom'); ?></label>
+                        <input type="text" name="ps_watermark_text" id="ps_watermark_text"
+                            value="<?php echo esc_attr($text); ?>" class="regular-text ps-input" />
+                    </div>
+
+                    <div class="ps-form-group ps-type-image" style="<?php echo $type === 'text' ? 'display:none;' : ''; ?>">
+                        <label><?php _e('Watermark Image', 'pocket-showroom'); ?></label>
+                        <div class="ps-image-upload">
+                            <input type="hidden" name="ps_watermark_image_id" id="ps_watermark_image_id"
+                                value="<?php echo esc_attr($image_id); ?>">
+                            <div id="ps-watermark-image-preview" style="margin-bottom: 10px;">
+                                <?php if ($image_url): ?>
+                                    <img src="<?php echo esc_url($image_url); ?>" style="max-width: 100px; border-radius: 4px;">
+                                <?php endif; ?>
+                            </div>
+                            <div class="ps-actions">
+                                <button type="button" class="ps-btn ps-btn-secondary"
+                                    id="ps-upload-watermark"><?php _e('Select Image', 'pocket-showroom'); ?></button>
+                                <button type="button" class="ps-btn ps-btn-secondary" id="ps-remove-watermark"
+                                    style="<?php echo $image_id ? '' : 'display:none;'; ?> color: #d63638; border-color: #d63638;"><?php _e('Remove', 'pocket-showroom'); ?></button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Save Button -->
+                    <div class="ps-form-group">
+                        <label><?php _e('Opacity', 'pocket-showroom'); ?> (<span
+                                id="ps-opacity-val"><?php echo $opacity; ?></span>%)</label>
+                        <input type="range" name="ps_watermark_opacity" id="ps_watermark_opacity" min="0" max="100"
+                            value="<?php echo esc_attr($opacity); ?>" style="width: 100%;">
+                    </div>
+
+                    <div class="ps-form-group">
+                        <label><?php _e('Size', 'pocket-showroom'); ?> (<span
+                                id="ps-size-val"><?php echo $size; ?></span>%)</label>
+                        <input type="range" name="ps_watermark_size" id="ps_watermark_size" min="5" max="100"
+                            value="<?php echo esc_attr($size); ?>" style="width: 100%;">
+                    </div>
+                </div>
+
+                <!-- Col 2: Visual Preview -->
+                <div class="ps-col-preview">
+                    <h3><?php _e('Visual Preview', 'pocket-showroom'); ?></h3>
+                    <div class="ps-canvas-wrapper" style="border-radius: 8px; overflow: hidden; border: 1px solid #ddd;">
+                        <div id="ps-preview-canvas"
+                            style="background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 50%, #c8c8c8 100%); height: 65px; position: relative;">
+                            <div id="ps-watermark-layer">
+                                <span class="ps-wm-text"></span>
+                                <img src="" class="ps-wm-image" style="display:none;">
+                            </div>
+                        </div>
+                        <p class="description"
+                            style="padding: 10px; background: #f9f9f9; margin: 0; font-size: 12px; color: #888; border-top: 1px solid #eee;">
+                            <?php _e('This is a simulation. Actual result depends on uploaded image resolution.', 'pocket-showroom'); ?>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Col 3: Position & Rotation & SAVE -->
+                <div class="ps-col-colors">
+                    <h3 style="visibility:hidden">Pos</h3>
+
+                    <div class="ps-form-group">
+                        <label><?php _e('Position', 'pocket-showroom'); ?></label>
+                        <div class="ps-position-grid">
+                            <?php
+                            $positions = array(
+                                'tl' => 'Top Left',
+                                'tc' => 'Top Center',
+                                'tr' => 'Top Right',
+                                'ml' => 'Middle Left',
+                                'c' => 'Center',
+                                'mr' => 'Middle Right',
+                                'bl' => 'Bottom Left',
+                                'bc' => 'Bottom Center',
+                                'br' => 'Bottom Right'
+                            );
+                            foreach ($positions as $key => $label) {
+                                $checked = ($position === $key) ? 'checked' : '';
+                                echo '<label title="' . $label . '"><input type="radio" name="ps_watermark_position" value="' . $key . '" ' . $checked . '><span></span></label>';
+                            }
+                            ?>
+                        </div>
+                    </div>
+
+                    <div class="ps-form-group">
+                        <label><?php _e('Rotation', 'pocket-showroom'); ?></label>
+                        <select name="ps_watermark_rotation" id="ps_watermark_rotation" class="ps-input">
+                            <option value="0" <?php selected('0', $rotation); ?>>
+                                <?php _e('None (0°)', 'pocket-showroom'); ?>
+                            </option>
+                            <option value="90" <?php selected('90', $rotation); ?>>
+                                <?php _e('90° Vertical', 'pocket-showroom'); ?>
+                            </option>
+                            <option value="-90" <?php selected('-90', $rotation); ?>>
+                                <?php _e('-90° Vertical', 'pocket-showroom'); ?>
+                            </option>
+                            <option value="45" <?php selected('45', $rotation); ?>>
+                                <?php _e('45° Diagonal', 'pocket-showroom'); ?>
+                            </option>
+                            <option value="-45" <?php selected('-45', $rotation); ?>>
+                                <?php _e('-45° Diagonal', 'pocket-showroom'); ?>
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Move Submit Button Here -->
                     <div class="ps-form-group" style="margin-top: 30px;">
                         <?php submit_button(__('Save Changes', 'pocket-showroom'), 'primary ps-btn ps-btn-primary', 'submit', false); ?>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="ps-tab-content" id="ps-tab-watermark" style="">
-                    <div class="ps-settings-layout-3col">
-                        <!-- Col 1: Controls -->
-                        <div class="ps-col-inputs">
-                            <h3><?php _e('Watermark Configuration', 'pocket-showroom'); ?></h3>
-
-                            <div class="ps-form-group">
-                                <label><?php _e('Enable Watermarking', 'pocket-showroom'); ?></label>
-                                <label class="ps-switch">
-                                    <input type="checkbox" name="ps_enable_watermark" value="1" <?php checked(1, get_option('ps_enable_watermark'), true); ?> />
-                                    <span class="ps-slider round"></span>
-                                </label>
-                                <p class="description">
-                                    <?php _e('If enabled, the watermark will be permanently merged into new uploads.', 'pocket-showroom'); ?>
-                                </p>
-                            </div>
-
-                            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-
-                            <div class="ps-form-group">
-                                <label><?php _e('Watermark Type', 'pocket-showroom'); ?></label>
-                                <div class="ps-radio-group">
-                                    <label><input type="radio" name="ps_watermark_type" value="text" <?php checked('text', $type); ?>> <?php _e('Text', 'pocket-showroom'); ?></label>
-                                    <label><input type="radio" name="ps_watermark_type" value="image" <?php checked('image', $type); ?>> <?php _e('Image', 'pocket-showroom'); ?></label>
-                                </div>
-                            </div>
-
-                            <div class="ps-form-group ps-type-text"
-                                style="<?php echo $type === 'image' ? 'display:none;' : ''; ?>">
-                                <label><?php _e('Watermark Text', 'pocket-showroom'); ?></label>
-                                <input type="text" name="ps_watermark_text" id="ps_watermark_text"
-                                    value="<?php echo esc_attr($text); ?>" class="regular-text ps-input" />
-                            </div>
-
-                            <div class="ps-form-group ps-type-image"
-                                style="<?php echo $type === 'text' ? 'display:none;' : ''; ?>">
-                                <label><?php _e('Watermark Image', 'pocket-showroom'); ?></label>
-                                <div class="ps-image-upload">
-                                    <input type="hidden" name="ps_watermark_image_id" id="ps_watermark_image_id"
-                                        value="<?php echo esc_attr($image_id); ?>">
-                                    <div id="ps-watermark-image-preview" style="margin-bottom: 10px;">
-                                        <?php if ($image_url): ?>
-                                            <img src="<?php echo esc_url($image_url); ?>"
-                                                style="max-width: 100px; border-radius: 4px;">
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="ps-actions">
-                                        <button type="button" class="ps-btn ps-btn-secondary"
-                                            id="ps-upload-watermark"><?php _e('Select Image', 'pocket-showroom'); ?></button>
-                                        <button type="button" class="ps-btn ps-btn-secondary" id="ps-remove-watermark"
-                                            style="<?php echo $image_id ? '' : 'display:none;'; ?> color: #d63638; border-color: #d63638;"><?php _e('Remove', 'pocket-showroom'); ?></button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="ps-form-group">
-                                <label><?php _e('Opacity', 'pocket-showroom'); ?> (<span
-                                        id="ps-opacity-val"><?php echo $opacity; ?></span>%)</label>
-                                <input type="range" name="ps_watermark_opacity" id="ps_watermark_opacity" min="0" max="100"
-                                    value="<?php echo esc_attr($opacity); ?>" style="width: 100%;">
-                            </div>
-
-                            <div class="ps-form-group">
-                                <label><?php _e('Size', 'pocket-showroom'); ?> (<span
-                                        id="ps-size-val"><?php echo $size; ?></span>%)</label>
-                                <input type="range" name="ps_watermark_size" id="ps_watermark_size" min="5" max="100"
-                                    value="<?php echo esc_attr($size); ?>" style="width: 100%;">
-                            </div>
-                        </div>
-
-                        <!-- Col 2: Visual Preview -->
-                        <div class="ps-col-preview">
-                            <h3><?php _e('Visual Preview', 'pocket-showroom'); ?></h3>
-                            <div class="ps-canvas-wrapper"
-                                style="border-radius: 8px; overflow: hidden; border: 1px solid #ddd;">
-                                <div id="ps-preview-canvas"
-                                    style="background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 50%, #c8c8c8 100%); height: 65px; position: relative;">
-                                    <div id="ps-watermark-layer">
-                                        <span class="ps-wm-text"></span>
-                                        <img src="" class="ps-wm-image" style="display:none;">
-                                    </div>
-                                </div>
-                                <p class="description"
-                                    style="padding: 10px; background: #f9f9f9; margin: 0; font-size: 12px; color: #888; border-top: 1px solid #eee;">
-                                    <?php _e('This is a simulation. Actual result depends on uploaded image resolution.', 'pocket-showroom'); ?>
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Col 3: Position & Rotation & SAVE -->
-                        <div class="ps-col-colors">
-                            <h3 style="visibility:hidden">Pos</h3>
-
-                            <div class="ps-form-group">
-                                <label><?php _e('Position', 'pocket-showroom'); ?></label>
-                                <div class="ps-position-grid">
-                                    <?php
-                                    $positions = array(
-                                        'tl' => 'Top Left',
-                                        'tc' => 'Top Center',
-                                        'tr' => 'Top Right',
-                                        'ml' => 'Middle Left',
-                                        'c' => 'Center',
-                                        'mr' => 'Middle Right',
-                                        'bl' => 'Bottom Left',
-                                        'bc' => 'Bottom Center',
-                                        'br' => 'Bottom Right'
-                                    );
-                                    foreach ($positions as $key => $label) {
-                                        $checked = ($position === $key) ? 'checked' : '';
-                                        echo '<label title="' . $label . '"><input type="radio" name="ps_watermark_position" value="' . $key . '" ' . $checked . '><span></span></label>';
-                                    }
-                                    ?>
-                                </div>
-                            </div>
-
-                            <div class="ps-form-group">
-                                <label><?php _e('Rotation', 'pocket-showroom'); ?></label>
-                                <select name="ps_watermark_rotation" id="ps_watermark_rotation" class="ps-input">
-                                    <option value="0" <?php selected('0', $rotation); ?>>
-                                        <?php _e('None (0°)', 'pocket-showroom'); ?>
-                                    </option>
-                                    <option value="90" <?php selected('90', $rotation); ?>>
-                                        <?php _e('90° Vertical', 'pocket-showroom'); ?>
-                                    </option>
-                                    <option value="-90" <?php selected('-90', $rotation); ?>>
-                                        <?php _e('-90° Vertical', 'pocket-showroom'); ?>
-                                    </option>
-                                    <option value="45" <?php selected('45', $rotation); ?>>
-                                        <?php _e('45° Diagonal', 'pocket-showroom'); ?>
-                                    </option>
-                                    <option value="-45" <?php selected('-45', $rotation); ?>>
-                                        <?php _e('-45° Diagonal', 'pocket-showroom'); ?>
-                                    </option>
-                                </select>
-                            </div>
-
-                            <!-- Move Submit Button Here -->
-                            <div class="ps-form-group" style="margin-top: 30px;">
-                                <?php submit_button(__('Save Changes', 'pocket-showroom'), 'primary ps-btn ps-btn-primary', 'submit', false); ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </form>
+        </form>
         </div>
         <?php
     }

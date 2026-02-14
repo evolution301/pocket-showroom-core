@@ -5,6 +5,7 @@
  * Enables automatic updates forWordPress plugins hosted on GitHub.
  * 
  * @package Pocket Showroom Core
+ * @version 2.0.0
  */
 
 if (!defined('ABSPATH')) {

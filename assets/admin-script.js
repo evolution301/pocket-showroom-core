@@ -4,10 +4,13 @@ jQuery(document).ready(function ($) {
     // --- Tab Switching Logic ---
     $('.nav-tab-wrapper a').click(function (e) {
         e.preventDefault();
+        // AUDIT3-9: 验证 href 是合法的 ID 选择器
+        var href = $(this).attr('href');
+        if (!href || href.charAt(0) !== '#') return;
         $('.nav-tab-wrapper a').removeClass('nav-tab-active');
         $(this).addClass('nav-tab-active');
         $('.ps-tab-content').hide();
-        $($(this).attr('href')).show();
+        $(href).show();
     });
 
     // --- Gallery Manager (Existing) ---
@@ -25,7 +28,11 @@ jQuery(document).ready(function ($) {
             selection.map(function (attachment) {
                 attachment = attachment.toJSON();
                 ids.push(attachment.id);
-                var template = '<div class="ps-gallery-item" data-id="' + attachment.id + '"><img src="' + attachment.sizes.thumbnail.url + '"><span class="remove">×</span></div>';
+                // Fix RISK-12: thumbnail 可能不存在，使用 fallback
+                var thumbUrl = (attachment.sizes && attachment.sizes.thumbnail)
+                    ? attachment.sizes.thumbnail.url
+                    : attachment.url; // fallback to full url
+                var template = '<div class="ps-gallery-item" data-id="' + attachment.id + '"><img src="' + thumbUrl + '"><span class="remove">×</span></div>';
                 $('#ps-add-images').before(template);
             });
             updateGalleryIds();
@@ -38,12 +45,17 @@ jQuery(document).ready(function ($) {
         updateGalleryIds();
     });
 
+    // Fix RISK-11: Sortable 加异常保护
     if ($.fn.sortable) {
-        $('.ps-gallery-grid').sortable({
-            items: '.ps-gallery-item',
-            cursor: 'move',
-            update: function () { updateGalleryIds(); }
-        });
+        try {
+            $('.ps-gallery-grid').sortable({
+                items: '.ps-gallery-item',
+                cursor: 'move',
+                update: function () { updateGalleryIds(); }
+            });
+        } catch (e) {
+            console.warn('Pocket Showroom: sortable init failed', e);
+        }
     }
 
     function updateGalleryIds() {
@@ -61,15 +73,41 @@ jQuery(document).ready(function ($) {
             <div class="ps-size-row" style="display:flex; gap:10px; margin-bottom:10px;">
                 <input type="text" class="ps-input" name="_ps_size_variants[${index}][label]" placeholder="Variant Name" style="flex:1;">
                 <input type="text" class="ps-input" name="_ps_size_variants[${index}][value]" placeholder="Dimensions" style="flex:2;">
+                <span class="dashicons dashicons-move ps-sort-handle" style="cursor:move; color:#ccc; align-self:center;"></span>
                 <button type="button" class="ps-remove-btn" style="color:red; background:none; border:none; cursor:pointer;">×</button>
             </div>
         `;
         $('#ps-size-variants').append(html);
+        updateSizeVariantIndices(); // Update indices after add
     });
 
+    // Sortable for Size Variants
+    if ($.fn.sortable) {
+        $('#ps-size-variants').sortable({
+            handle: '.ps-sort-handle',
+            cursor: 'move',
+            update: function () {
+                updateSizeVariantIndices();
+            }
+        });
+    }
+
+    function updateSizeVariantIndices() {
+        $('#ps-size-variants .ps-size-row').each(function (index) {
+            $(this).find('input[name*="[label]"]').attr('name', '_ps_size_variants[' + index + '][label]');
+            $(this).find('input[name*="[value]"]').attr('name', '_ps_size_variants[' + index + '][value]');
+        });
+    }
+
+
+
+    // Remove Row (Size or Spec)
     // Remove Row (Size or Spec)
     $(document).on('click', '.ps-remove-btn', function () {
-        $(this).closest('.ps-spec-row, .ps-size-row').remove();
+        var $parent = $(this).closest('.ps-spec-row, .ps-size-row');
+        var isSizeRow = $parent.hasClass('ps-size-row');
+        $parent.remove();
+        if (isSizeRow) updateSizeVariantIndices();
     });
 
     // --- Dynamic Specifications (v6.0) ---
@@ -79,11 +117,21 @@ jQuery(document).ready(function ($) {
             <div class="ps-spec-row">
                 <input type="text" name="_ps_dynamic_specs[key][]" class="ps-spec-key" placeholder="Field Name" value="">
                 <input type="text" name="_ps_dynamic_specs[val][]" class="ps-spec-val" placeholder="Value" value="">
+                <span class="dashicons dashicons-move ps-sort-handle" style="cursor:move; color:#ccc; align-self:center;"></span>
                 <button type="button" class="ps-remove-btn">×</button>
             </div>
         `;
         $('#ps-dynamic-specs').append(template);
     });
+
+    // Sortable for Dynamic Specs
+    if ($.fn.sortable) {
+        $('#ps-dynamic-specs').sortable({
+            handle: '.ps-sort-handle',
+            cursor: 'move',
+            // No index update needed for specs as they use array[] syntax
+        });
+    }
 
     // 已在第 71 行统一绑定 .ps-remove-btn，此处不再重复绑定
 
@@ -94,7 +142,108 @@ jQuery(document).ready(function ($) {
     });
 
 
-    // --- ADVANCED DIVI-CLONE COLOR PICKER LOGIC ---
+    // ===== ADVANCED DIVI-CLONE COLOR PICKER LOGIC =====
+    // Fix BUG-9/10: 将 document 级事件移到 .each() 外部，集中管理
+
+    // 集中管理所有颜色选择器的拖拽状态
+    var activePickerState = null; // { handleSat, handleHue, handleAlpha, isDraggingSat, isDraggingHue, isDraggingAlpha }
+
+    // 统一的 document 级事件（只绑定一次）
+    function onDocMouseMove(e) {
+        if (!activePickerState) return;
+        if (activePickerState.isDraggingSat) activePickerState.handleSat(e);
+        if (activePickerState.isDraggingHue) activePickerState.handleHue(e);
+        if (activePickerState.isDraggingAlpha) activePickerState.handleAlpha(e);
+    }
+
+    function onDocMouseUp() {
+        if (!activePickerState) return;
+        activePickerState.isDraggingSat = false;
+        activePickerState.isDraggingHue = false;
+        activePickerState.isDraggingAlpha = false;
+    }
+
+    // Fix IMPROVE-14: 触摸设备坐标提取
+    function getEventCoords(e) {
+        if (e.type && e.type.indexOf('touch') !== -1) {
+            var touch = e.originalEvent ? e.originalEvent.touches[0] || e.originalEvent.changedTouches[0] : e.touches[0] || e.changedTouches[0];
+            return { pageX: touch.pageX, pageY: touch.pageY };
+        }
+        return { pageX: e.pageX, pageY: e.pageY };
+    }
+
+    // 只在 document 上绑定一次 (Fix BUG-9)
+    $(document).on('mousemove touchmove', onDocMouseMove);
+    $(document).on('mouseup touchend', onDocMouseUp);
+
+    // Fix BUG-10: 点击外部关闭 — 只绑定一次
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('.ps-divi-picker-container').length) {
+            $('.ps-divi-picker-wrapper').removeClass('active');
+        }
+    });
+
+    // 公共工具函数（提取到 .each 外部避免重复创建）
+    function componentToHex(c) {
+        var hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+    }
+
+    function rgbToHex(r, g, b) {
+        return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+    }
+
+    function hexToRgb(hex) {
+        // AUDIT2-7: 支持 3 位简写 (#fff → #ffffff)
+        hex = (hex || '').replace(/^#/, '');
+        if (hex.length === 3) {
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        }
+        var result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+
+    function hsvToRgb(h, s, v) {
+        s /= 100; v /= 100;
+        var r, g, b, i, f, p, q, t;
+        i = Math.floor(h * 6);
+        f = h * 6 - i;
+        p = v * (1 - s);
+        q = v * (1 - f * s);
+        t = v * (1 - (1 - f) * s);
+        switch (i % 6) {
+            case 0: r = v; g = t; b = p; break;
+            case 1: r = q; g = v; b = p; break;
+            case 2: r = p; g = v; b = t; break;
+            case 3: r = p; g = q; b = v; break;
+            case 4: r = t; g = p; b = v; break;
+            case 5: r = v; g = p; b = q; break;
+        }
+        return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+    }
+
+    function rgbToHsv(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        var max = Math.max(r, g, b), min = Math.min(r, g, b);
+        var h, s, v = max;
+        var d = max - min;
+        s = max == 0 ? 0 : d / max;
+        if (max == min) h = 0;
+        else {
+            switch (max) {
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+        }
+        return { h: h, s: s * 100, v: v * 100 };
+    }
+
     $('.ps-divi-picker').each(function () {
         var $container = $(this);
         var inputId = $container.attr('id').replace('ps-picker-', 'ps_banner_') + '_color';
@@ -149,9 +298,8 @@ jQuery(document).ready(function ($) {
         `;
         $container.html(html);
 
-        // State
+        // State — 每个 picker 实例独立的状态
         var h = 0, s = 100, v = 100, a = 1;
-        var isDraggingSat = false, isDraggingHue = false, isDraggingAlpha = false;
 
         // Elements
         var $wrapper = $container.find('.ps-divi-picker-wrapper');
@@ -174,79 +322,17 @@ jQuery(document).ready(function ($) {
             $wrapper.toggleClass('active');
         });
 
-        // Close when clicking outside
-        $(document).on('click', function (e) {
-            if (!$(e.target).closest('.ps-divi-picker-container').length) {
-                $wrapper.removeClass('active');
-            }
-        });
-
+        // 阻止 picker 内部点击冒泡（防止被 document click 关闭）
         $wrapper.on('click', function (e) {
             e.stopPropagation();
         });
-
-        // Utils
-        function componentToHex(c) {
-            var hex = c.toString(16);
-            return hex.length == 1 ? "0" + hex : hex;
-        }
-
-        function rgbToHex(r, g, b) {
-            return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-        }
-
-        function hexToRgb(hex) {
-            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : null;
-        }
-
-        function hsvToRgb(h, s, v) {
-            s /= 100; v /= 100;
-            var r, g, b, i, f, p, q, t;
-            i = Math.floor(h * 6);
-            f = h * 6 - i;
-            p = v * (1 - s);
-            q = v * (1 - f * s);
-            t = v * (1 - (1 - f) * s);
-            switch (i % 6) {
-                case 0: r = v; g = t; b = p; break;
-                case 1: r = q; g = v; b = p; break;
-                case 2: r = p; g = v; b = t; break;
-                case 3: r = p; g = q; b = v; break;
-                case 4: r = t; g = p; b = v; break;
-                case 5: r = v; g = p; b = q; break;
-            }
-            return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
-        }
-
-        function rgbToHsv(r, g, b) {
-            r /= 255; g /= 255; b /= 255;
-            var max = Math.max(r, g, b), min = Math.min(r, g, b);
-            var h, s, v = max;
-            var d = max - min;
-            s = max == 0 ? 0 : d / max;
-            if (max == min) h = 0;
-            else {
-                switch (max) {
-                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                    case g: h = (b - r) / d + 2; break;
-                    case b: h = (r - g) / d + 4; break;
-                }
-                h /= 6;
-            }
-            return { h: h, s: s * 100, v: v * 100 };
-        }
 
         function updateUI(skipInputUpdate) {
             var rgb = hsvToRgb(h, s, v);
             var rgbaStr = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + a.toFixed(2) + ')';
 
             // Update Hidden Input
-            $hiddenInput.val(rgbaStr).trigger('change'); // Trigger change for live preview listener
+            $hiddenInput.val(rgbaStr).trigger('change');
 
             // Update Trigger
             $triggerInner.css('background-color', rgbaStr);
@@ -262,7 +348,7 @@ jQuery(document).ready(function ($) {
             $hueHandle.css('top', (h * 100) + '%');
 
             // Update Alpha Handle & Gradient
-            $alphaHandle.css('top', (100 - (a * 100)) + '%'); // 1 at top, 0 at bottom
+            $alphaHandle.css('top', (100 - (a * 100)) + '%');
             $alphaGradient.css('background', 'linear-gradient(to bottom, rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ', 1) 0%, rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ', 0) 100%)');
 
             // Update Hex/Input
@@ -274,7 +360,7 @@ jQuery(document).ready(function ($) {
                 }
             }
 
-            // Special: Update Live Preview directly here if needed, or rely on change event
+            // Live Preview
             if (inputId === 'ps_banner_overlay_color') {
                 $('#ps-banner-overlay-layer').css('background-color', rgbaStr);
             } else if (inputId === 'ps_primary_color') {
@@ -288,77 +374,87 @@ jQuery(document).ready(function ($) {
             }
         }
 
-        // Init from saved value
+        // Fix RISK-13: 初始化支持 HEX 和 RGBA 两种格式
         var initVal = $hiddenInput.val();
-        if (initVal && initVal.indexOf('rgba') !== -1) {
-            var parts = initVal.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-            if (parts) {
-                var r = parseInt(parts[1]), g = parseInt(parts[2]), b = parseInt(parts[3]);
-                a = parts[4] ? parseFloat(parts[4]) : 1;
-                var hsv = rgbToHsv(r, g, b);
-                h = hsv.h; s = hsv.s; v = hsv.v;
+        if (initVal) {
+            if (initVal.indexOf('rgba') !== -1 || initVal.indexOf('rgb') !== -1) {
+                // RGBA 格式
+                var parts = initVal.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                if (parts) {
+                    var r = parseInt(parts[1]), g = parseInt(parts[2]), b = parseInt(parts[3]);
+                    a = parts[4] ? parseFloat(parts[4]) : 1;
+                    var hsv = rgbToHsv(r, g, b);
+                    h = hsv.h; s = hsv.s; v = hsv.v;
+                }
+            } else if (initVal.indexOf('#') !== -1) {
+                // HEX 格式 (Fix RISK-13)
+                var rgb = hexToRgb(initVal);
+                if (rgb) {
+                    var hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+                    h = hsv.h; s = hsv.s; v = hsv.v;
+                    a = 1;
+                }
             }
         }
         updateUI();
 
         // --- Interactions ---
+        // 本实例的拖拽处理器（通过闭包捕获本实例的 h/s/v/a 和 DOM 元素）
+        var pickerState = {
+            isDraggingSat: false,
+            isDraggingHue: false,
+            isDraggingAlpha: false,
+            handleSat: function (e) {
+                var coords = getEventCoords(e);
+                var offset = $sat.offset();
+                var x = coords.pageX - offset.left;
+                var y = coords.pageY - offset.top;
+                var w = $sat.width();
+                var hH = $sat.height();
+                s = Math.max(0, Math.min(100, (x / w) * 100));
+                v = Math.max(0, Math.min(100, 100 - (y / hH) * 100));
+                updateUI();
+            },
+            handleHue: function (e) {
+                var coords = getEventCoords(e);
+                var offset = $hueTrack.offset();
+                var y = coords.pageY - offset.top;
+                var hH = $hueTrack.height();
+                h = Math.max(0, Math.min(1, y / hH));
+                updateUI();
+            },
+            handleAlpha: function (e) {
+                var coords = getEventCoords(e);
+                var offset = $alphaTrack.offset();
+                var y = coords.pageY - offset.top;
+                var hH = $alphaTrack.height();
+                a = 1 - Math.max(0, Math.min(1, y / hH));
+                updateUI();
+            }
+        };
 
-        // Saturation Area
-        $sat.on('mousedown', function (e) {
-            isDraggingSat = true;
-            handleSat(e);
+        // Saturation Area — Fix IMPROVE-14: 添加 touchstart
+        $sat.on('mousedown touchstart', function (e) {
+            e.preventDefault();
+            pickerState.isDraggingSat = true;
+            activePickerState = pickerState;
+            pickerState.handleSat(e);
         });
-
-        function handleSat(e) {
-            var offset = $sat.offset();
-            var x = e.pageX - offset.left;
-            var y = e.pageY - offset.top;
-            var w = $sat.width();
-            var hH = $sat.height();
-
-            s = Math.max(0, Math.min(100, (x / w) * 100));
-            v = Math.max(0, Math.min(100, 100 - (y / hH) * 100));
-            updateUI();
-        }
 
         // Hue Slider
-        $hueTrack.on('mousedown', function (e) {
-            isDraggingHue = true;
-            handleHue(e);
+        $hueTrack.on('mousedown touchstart', function (e) {
+            e.preventDefault();
+            pickerState.isDraggingHue = true;
+            activePickerState = pickerState;
+            pickerState.handleHue(e);
         });
-
-        function handleHue(e) {
-            var offset = $hueTrack.offset();
-            var y = e.pageY - offset.top;
-            var hH = $hueTrack.height();
-            h = Math.max(0, Math.min(1, y / hH));
-            updateUI();
-        }
 
         // Alpha Slider
-        $alphaTrack.on('mousedown', function (e) {
-            isDraggingAlpha = true;
-            handleAlpha(e);
-        });
-
-        function handleAlpha(e) {
-            var offset = $alphaTrack.offset();
-            var y = e.pageY - offset.top;
-            var hH = $alphaTrack.height();
-            a = 1 - Math.max(0, Math.min(1, y / hH));
-            updateUI();
-        }
-
-        $(document).on('mousemove', function (e) {
-            if (isDraggingSat) handleSat(e);
-            if (isDraggingHue) handleHue(e);
-            if (isDraggingAlpha) handleAlpha(e);
-        });
-
-        $(document).on('mouseup', function () {
-            isDraggingSat = false;
-            isDraggingHue = false;
-            isDraggingAlpha = false;
+        $alphaTrack.on('mousedown touchstart', function (e) {
+            e.preventDefault();
+            pickerState.isDraggingAlpha = true;
+            activePickerState = pickerState;
+            pickerState.handleAlpha(e);
         });
 
         // Palette Click
@@ -368,8 +464,6 @@ jQuery(document).ready(function ($) {
             var b = $(this).data('b');
             var hsv = rgbToHsv(r, g, b);
             h = hsv.h; s = hsv.s; v = hsv.v;
-            // Keep current alpha or reset? Usually keep unless specific
-            // Let's reset alpha to 1 for swatches for clarity
             a = 1;
             updateUI();
         });
@@ -382,8 +476,8 @@ jQuery(document).ready(function ($) {
             if (rgb) {
                 var hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
                 h = hsv.h; s = hsv.s; v = hsv.v;
-                a = 1; // Hex usually implies full opacity unless 8-digit, but let's stick to 6-digit for now
-                updateUI(true); // Skip updating this input to avoid cursor jump
+                a = 1;
+                updateUI(true);
                 return;
             }
             // Try RGBA
@@ -408,7 +502,8 @@ jQuery(document).ready(function ($) {
 
     $('#ps_banner_desc').on('input', function () {
         var val = $(this).val();
-        $('#ps-preview-banner-desc').html(val ? val : 'Banner description goes here.');
+        // AUDIT3-10: 使用 .text() 而非 .html() 防止 XSS
+        $('#ps-preview-banner-desc').text(val ? val : 'Banner description goes here.');
     });
 
     // Banner Image Preview Update
@@ -513,10 +608,7 @@ jQuery(document).ready(function ($) {
         // Opacity
         $('#ps-watermark-layer').css('opacity', opacity / 100);
 
-        // Rotation
-        $('#ps-watermark-layer').css('transform', 'rotate(' + rotation + 'deg)');
-
-        // Position Logic
+        // Position Logic (AUDIT3-11: 移除上方冗余的 transform 设置，统一在此处处理)
         var layer = $('#ps-watermark-layer');
         var top = 'auto', bottom = 'auto', left = 'auto', right = 'auto', transform = 'rotate(' + rotation + 'deg)';
 
@@ -538,10 +630,6 @@ jQuery(document).ready(function ($) {
     }
 
     // Bind Events
-    // Note: We use a more specific selector to avoid conflict with color picker inputs if needed, 
-    // but the color picker inputs are hidden or specific classes. 
-    // However, the global 'input' selector might be too broad if we have many inputs.
-    // Let's restrict it to the watermark fields.
     $('#ps_watermark_text, #ps_watermark_opacity, #ps_watermark_size, input[name="ps_watermark_type"], input[name="ps_watermark_position"], #ps_watermark_rotation').on('change input', updatePreview);
 
     // Initial Run

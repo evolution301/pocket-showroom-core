@@ -1,5 +1,11 @@
 jQuery(document).ready(function ($) {
 
+    // ===== 全局安全检查 (Fix RISK-3) =====
+    if (typeof ps_ajax === 'undefined') {
+        console.warn('Pocket Showroom: ps_ajax not defined, gallery script aborted.');
+        return;
+    }
+
     // ===== UTILITIES =====
 
     /**
@@ -23,17 +29,30 @@ jQuery(document).ready(function ($) {
         };
     }
 
+    /**
+     * 统一关闭产品模态框 (Fix BUG-1)
+     * 所有关闭模态框的操作都通过此函数，确保 body class 一定被移除
+     */
+    function closeProductModal() {
+        $('#ps-modal').fadeOut(200);
+        $('body').removeClass('ps-modal-open');
+    }
+
+    // ===== PRODUCT MODAL =====
+
     // Open Modal
     $(document).on('click', '.ps-card', function (e) {
         e.preventDefault();
         var postId = $(this).data('id');
 
         $('#ps-modal').fadeIn(200);
+        $('body').addClass('ps-modal-open');
         $('#ps-modal-body').html('<div class="ps-loader">' + psI18n('modal_loading', 'Loading...') + '</div>');
 
         $.ajax({
             url: ps_ajax.url,
             type: 'POST',
+            timeout: 15000, // Fix RISK-4: 15秒超时
             data: {
                 action: 'ps_get_product_modal',
                 post_id: postId,
@@ -47,22 +66,28 @@ jQuery(document).ready(function ($) {
                     $('#ps-modal-body').html('<p>' + psI18n('modal_error', 'Error loading details.') + '</p>');
                 }
             },
-            error: function () {
-                $('#ps-modal-body').html('<p>' + psI18n('network_error', 'Network error, please try again.') + '</p>');
+            error: function (xhr, status) {
+                var msg = (status === 'timeout')
+                    ? psI18n('timeout_error', 'Request timed out, please try again.')
+                    : psI18n('network_error', 'Network error, please try again.');
+                $('#ps-modal-body').html('<p>' + msg + '</p>');
             }
         });
     });
 
-    // Close Modal
-    $('.ps-close').on('click', function () {
-        $('#ps-modal').fadeOut(200);
+    // Close Modal — 统一使用 closeProductModal (Fix BUG-1)
+    // AUDIT2-6: 使用事件委托，因为 .ps-close 是 AJAX 动态加载到 modal 里的
+    $(document).on('click', '.ps-close', function () {
+        closeProductModal();
     });
 
     $(window).on('click', function (event) {
-        if (event.target.id == 'ps-modal') {
-            $('#ps-modal').fadeOut(200);
+        if (event.target.id === 'ps-modal') { // AUDIT3-5: 严格等于
+            closeProductModal();
         }
     });
+
+    // ===== SEARCH & FILTER =====
 
     // Simple Search (Client Side) — debounced (Fix F1)
     $('#ps-search').on('keyup', debounce(function () {
@@ -105,9 +130,9 @@ jQuery(document).ready(function ($) {
     $('#ps-load-more-btn').on('click', function () {
         var $wrap = $('#ps-load-more-wrap');
         var $btn = $(this);
-        var currentPage = parseInt($wrap.data('page'), 10);
-        var maxPages = parseInt($wrap.data('max'), 10);
-        var perPage = parseInt($wrap.data('per-page'), 10);
+        var currentPage = parseInt($wrap.data('page'), 10) || 1;  // AUDIT3-6: NaN 保护
+        var maxPages = parseInt($wrap.data('max'), 10) || 1;       // AUDIT3-6: NaN 保护
+        var perPage = parseInt($wrap.data('per-page'), 10) || 12;  // AUDIT3-6: NaN 保护
         var nextPage = currentPage + 1;
 
         // 防止重复点击
@@ -117,6 +142,7 @@ jQuery(document).ready(function ($) {
         $.ajax({
             url: ps_ajax.url,
             type: 'POST',
+            timeout: 15000, // Fix RISK-5: 15秒超时
             data: {
                 action: 'ps_load_more',
                 page: nextPage,
@@ -151,28 +177,8 @@ jQuery(document).ready(function ($) {
     var currentShareData = { title: '', desc: '', url: '', img: '' };
 
     /**
-     * Hide header, footer, sidebar elements
-     */
-    function psHideLayoutElements() {
-        $('header, footer, .site-header, .site-footer, #masthead, #colophon, .sidebar, #secondary, .widget-area, .elementor-location-header, .elementor-location-footer, nav.main-navigation, .top-bar, .site-info, .footer-widgets').each(function () {
-            $(this).attr('data-ps-was-visible', $(this).css('display'));
-            $(this).hide();
-        });
-    }
-
-    /**
-     * Restore header, footer, sidebar elements
-     */
-    function psShowLayoutElements() {
-        $('[data-ps-was-visible]').each(function () {
-            var prev = $(this).attr('data-ps-was-visible');
-            $(this).css('display', prev || '');
-            $(this).removeAttr('data-ps-was-visible');
-        });
-    }
-
-    /**
      * Open Share Sheet with provided data
+     * Fix IMPROVE-8: 使用 CSS class 控制布局隐藏，而非 JS DOM 操作
      */
     function openShareSheet(title, desc, url, img) {
         currentShareData = { title: title, desc: desc, url: url, img: img };
@@ -186,12 +192,11 @@ jQuery(document).ready(function ($) {
             $('#ps-share-preview-img').hide();
         }
 
-        // Hide header & footer
-        psHideLayoutElements();
+        // 使用 CSS class 隐藏页面布局元素 (Fix IMPROVE-8)
+        $('body').addClass('ps-share-open');
 
         // Show overlay
         $('#ps-share-sheet-overlay').addClass('active');
-        $('body').css('overflow', 'hidden');
     }
 
     /**
@@ -199,10 +204,9 @@ jQuery(document).ready(function ($) {
      */
     function closeShareSheet() {
         $('#ps-share-sheet-overlay').removeClass('active');
-        $('body').css('overflow', '');
 
-        // Restore header & footer
-        psShowLayoutElements();
+        // 移除 CSS class 恢复页面布局 (Fix IMPROVE-8)
+        $('body').removeClass('ps-share-open');
     }
 
     /**
@@ -271,15 +275,15 @@ jQuery(document).ready(function ($) {
         showToast(psI18n('link_copied', 'Link copied!'));
     });
 
-    // -- QR Modal Close --
+    // -- QR Modal Close -- (AUDIT2-3: 改用 CSS class 管理 overflow)
     $('#ps-qr-close').on('click', function () {
         $('#ps-qr-overlay').removeClass('active');
-        $('body').css('overflow', '');
+        $('body').removeClass('ps-modal-open');
     });
     $(document).on('click', '#ps-qr-overlay', function (e) {
         if (e.target === this) {
             $(this).removeClass('active');
-            $('body').css('overflow', '');
+            $('body').removeClass('ps-modal-open');
         }
     });
 
@@ -290,18 +294,18 @@ jQuery(document).ready(function ($) {
         showToast(psI18n('link_copied', 'Link copied!'));
     });
 
-    // ===== KEYBOARD ACCESSIBILITY (Fix F5) =====
+    // ===== KEYBOARD ACCESSIBILITY (Fix F5 + Fix BUG-1) =====
     $(document).on('keydown', function (e) {
         if (e.key === 'Escape' || e.keyCode === 27) {
-            // Close product modal
+            // Close product modal — 统一使用 closeProductModal
             if ($('#ps-modal').is(':visible')) {
-                $('#ps-modal').fadeOut(200);
+                closeProductModal();
                 return;
             }
-            // Close QR overlay
+            // Close QR overlay (AUDIT2-3)
             if ($('#ps-qr-overlay').hasClass('active')) {
                 $('#ps-qr-overlay').removeClass('active');
-                $('body').css('overflow', '');
+                $('body').removeClass('ps-modal-open');
                 return;
             }
             // Close share sheet
@@ -327,9 +331,12 @@ jQuery(document).ready(function ($) {
     }
 
     function psFallbackCopy(text) {
-        var $temp = $('<input>');
+        // AUDIT3-7: 使用 textarea 而非 input，iOS Safari 对 input.select() 支持不佳
+        var $temp = $('<textarea>');
+        $temp.css({ position: 'fixed', opacity: 0, left: '-9999px' });
         $('body').append($temp);
-        $temp.val(text).select();
+        $temp.val(text);
+        $temp[0].select();
         try { document.execCommand('copy'); } catch (e) { /* noop */ }
         $temp.remove();
     }
@@ -347,24 +354,42 @@ function psShareWhatsApp(title, url) {
 
 /**
  * Global function: Open WeChat QR Modal (called from modal and share sheet)
+ * Fix IMPROVE-7: 不再使用 replaceWith 破坏 DOM，改用 hide + 错误提示
  */
 function psOpenWeChatQR(url) {
     // Use QR Server API to generate QR code image
     var qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url);
 
     var $img = jQuery('#ps-qr-image');
-    // Fix F4: handle QR API failure
+
+    // AUDIT2-4: 每次从 DOM 重新查询错误提示元素，避免闭包缓存问题
+    var $existingError = jQuery('#ps-qr-error');
+
+    // 重置状态：显示图片，隐藏错误
+    $img.show();
+    if ($existingError.length) {
+        $existingError.hide();
+    }
+
+    // Fix IMPROVE-7: 使用 hide + 错误提示而非 replaceWith
     $img.off('error').on('error', function () {
-        jQuery(this).replaceWith(
-            '<p style="color:#999; font-size:13px; padding:20px;">' +
-            ((typeof ps_ajax !== 'undefined' && ps_ajax.i18n && ps_ajax.i18n.qr_error)
+        jQuery(this).hide();
+        // AUDIT2-4: 在 error 回调内重新查询 DOM
+        var $errEl = jQuery('#ps-qr-error');
+        if (!$errEl.length) {
+            // 首次创建错误提示
+            var errText = (typeof ps_ajax !== 'undefined' && ps_ajax.i18n && ps_ajax.i18n.qr_error)
                 ? ps_ajax.i18n.qr_error
-                : 'QR code failed to load. Please copy the link below.') +
-            '</p>'
-        );
+                : 'QR code failed to load. Please copy the link below.';
+            jQuery('<p id="ps-qr-error" style="color:#999; font-size:13px; padding:20px;">' + errText + '</p>')
+                .insertAfter(jQuery(this));
+        } else {
+            $errEl.show();
+        }
     });
     $img.attr('src', qrApiUrl);
     jQuery('#ps-qr-url-input').val(url);
     jQuery('#ps-qr-overlay').addClass('active');
-    jQuery('body').css('overflow', 'hidden');
+    // AUDIT2-3: 使用 CSS class 管理 body overflow
+    jQuery('body').addClass('ps-modal-open');
 }

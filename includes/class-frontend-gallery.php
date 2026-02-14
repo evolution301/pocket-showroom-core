@@ -47,6 +47,7 @@ class PS_Frontend_Gallery
                 'modal_loading' => __('Loading...', 'pocket-showroom'),
                 'modal_error' => __('Error loading details.', 'pocket-showroom'),
                 'network_error' => __('Network error, please try again.', 'pocket-showroom'),
+                'timeout_error' => __('Request timed out, please try again.', 'pocket-showroom'),
                 'untitled' => __('Untitled', 'pocket-showroom'),
                 'link_copied' => __('Link copied!', 'pocket-showroom'),
                 'qr_error' => __('QR code failed to load. Please copy the link below.', 'pocket-showroom'),
@@ -94,7 +95,8 @@ class PS_Frontend_Gallery
                 <button class="ps-share-btn" data-share-title="<?php the_title_attribute(); ?>"
                     data-share-desc="<?php echo esc_attr($model); ?>"
                     data-share-url="<?php echo esc_url(add_query_arg('pshare', '1', get_permalink())); ?>"
-                    data-share-img="<?php echo esc_url($thumb_url); ?>" onclick="event.stopPropagation();">
+                    data-share-img="<?php echo esc_url($thumb_url); ?>"
+                    title="<?php esc_attr_e('Share', 'pocket-showroom'); ?>">
                     <svg viewBox="0 0 24 24">
                         <path
                             d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z" />
@@ -187,12 +189,21 @@ class PS_Frontend_Gallery
         ?>
         <?php
         // Fix #26: CSS 变量改用 wp_add_inline_style 注入，避免内联 <style> 标签
+        $card_ratio = get_option('ps_card_aspect_ratio', '3/4');
+        // 安全校验：只允许合法的比例值
+        $allowed_ratios = array('1/1', '3/4', '4/3', '16/9', '9/16', 'auto');
+        if (!in_array($card_ratio, $allowed_ratios, true)) {
+            $card_ratio = '3/4';
+        }
+        $ratio_css = ($card_ratio === 'auto') ? 'auto' : $card_ratio;
+
         $inline_css = sprintf(
-            '.ps-gallery-container, .ps-modal { --ps-primary-color: %s; --ps-button-text-color: %s; --ps-title-color: %s; --ps-desc-color: %s; }',
+            '.ps-gallery-container, .ps-modal { --ps-primary-color: %s; --ps-button-text-color: %s; --ps-title-color: %s; --ps-desc-color: %s; } .ps-card-image { --ps-card-ratio: %s; }',
             esc_attr($primary_color),
             esc_attr($button_text_color),
             esc_attr($banner_title_color),
-            esc_attr($banner_desc_color)
+            esc_attr($banner_desc_color),
+            esc_attr($ratio_css)
         );
         wp_add_inline_style('ps-gallery-css', $inline_css);
         ?>
@@ -538,6 +549,7 @@ class PS_Frontend_Gallery
 
     /**
      * Fix #27: 使用 body class 限定 CSS 作用域，避免全局选择器冲突
+     * 兼容 Top 20+ WordPress 主题的 header / footer / sidebar 选择器
      */
     public function maybe_hide_layout_elements()
     {
@@ -545,6 +557,7 @@ class PS_Frontend_Gallery
             ?>
             <script>document.body.classList.add('ps-share-mode');</script>
             <style>
+                /* --- 通用 HTML5 / 常见 class --- */
                 body.ps-share-mode header,
                 body.ps-share-mode footer,
                 body.ps-share-mode .site-header,
@@ -554,8 +567,60 @@ class PS_Frontend_Gallery
                 body.ps-share-mode .sidebar,
                 body.ps-share-mode #secondary,
                 body.ps-share-mode .widget-area,
+                body.ps-share-mode nav.main-navigation,
+                /* --- Elementor / Hello Elementor --- */
                 body.ps-share-mode .elementor-location-header,
-                body.ps-share-mode .elementor-location-footer {
+                body.ps-share-mode .elementor-location-footer,
+                body.ps-share-mode [data-elementor-type="header"],
+                body.ps-share-mode [data-elementor-type="footer"],
+                /* --- Divi --- */
+                body.ps-share-mode #main-header,
+                body.ps-share-mode #main-footer,
+                body.ps-share-mode #top-header,
+                body.ps-share-mode .et-l--header,
+                body.ps-share-mode .et-l--footer,
+                body.ps-share-mode #et-footer-nav,
+                /* --- Avada --- */
+                body.ps-share-mode .fusion-header-wrapper,
+                body.ps-share-mode .fusion-footer,
+                body.ps-share-mode .fusion-footer-widget-area,
+                body.ps-share-mode .fusion-sliding-bar-wrapper,
+                /* --- Astra --- */
+                body.ps-share-mode .ast-above-header,
+                body.ps-share-mode .ast-below-header,
+                body.ps-share-mode .main-header-bar-wrap,
+                body.ps-share-mode .ast-footer-overlay,
+                body.ps-share-mode .site-below-footer-wrap,
+                body.ps-share-mode .ast-above-footer,
+                /* --- OceanWP --- */
+                body.ps-share-mode #site-header,
+                body.ps-share-mode #site-navigation-wrap,
+                body.ps-share-mode .footer-widgets,
+                body.ps-share-mode #footer-bottom,
+                /* --- GeneratePress --- */
+                body.ps-share-mode .site-info,
+                /* --- Neve --- */
+                body.ps-share-mode .hfg_header,
+                body.ps-share-mode .hfg_footer,
+                body.ps-share-mode .nv-header,
+                /* --- Kadence --- */
+                body.ps-share-mode .site-header-row,
+                body.ps-share-mode .site-footer-wrap,
+                /* --- Blocksy --- */
+                body.ps-share-mode header[data-id="type-1"],
+                body.ps-share-mode footer.ct-footer,
+                /* --- BeTheme --- */
+                body.ps-share-mode #Header_wrapper,
+                body.ps-share-mode #Top_bar,
+                body.ps-share-mode #Footer,
+                /* --- Sydney --- */
+                body.ps-share-mode .header-wrap,
+                /* --- Enfold --- */
+                body.ps-share-mode #header,
+                body.ps-share-mode #socket,
+                body.ps-share-mode .avia-footer,
+                /* --- WordPress admin bar --- */
+                body.ps-share-mode #wpadminbar {
                     display: none !important;
                 }
 

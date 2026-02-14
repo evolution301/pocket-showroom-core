@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Pocket Showroom Core 1.1.1\n"
+"Project-Id-Version: Pocket Showroom Core 2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/Evolution301/pocket-showroom-core\n"
 "POT-Creation-Date: 2026-02-14 12:00+0800\n"
 "MIME-Version: 1.0\n"

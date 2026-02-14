@@ -51,7 +51,8 @@ class PS_CSV_Importer
             <div class="ps-header">
                 <div class="ps-title-section">
                     <h1 class="wp-heading-inline" style="font-size: 24px; font-weight: 600;">
-                        <?php _e('Data Tools', 'pocket-showroom'); ?></h1>
+                        <?php _e('Data Tools', 'pocket-showroom'); ?>
+                    </h1>
                 </div>
             </div>
 
@@ -322,9 +323,12 @@ class PS_CSV_Importer
                             }
                         }
 
-                        // Handle Category — 使用替换模式（false），避免追加重复分类
+                        // Handle Category (Multi-support)
                         if ($category) {
-                            wp_set_object_terms($post_id, $category, 'ps_category', false);
+                            // Split by comma, trim whitespace
+                            $categories = array_map('trim', explode(',', $category));
+                            // true = append, false = replace. Use false to sync exactly with CSV.
+                            wp_set_object_terms($post_id, $categories, 'ps_category', false);
                         }
 
                         // Handle Images: 第一张设为封面，全部存入 Gallery

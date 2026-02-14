@@ -2,8 +2,8 @@
 /*
 Plugin Name: Pocket Showroom Core
 Description: A modern B2B product catalog with CSV import, multi-image gallery, and interactive frontend.
-Version: 2.0.0
-Author: evolution301
+Version: 2.0.1
+Author: Evolution301
 Text Domain: pocket-showroom
 */
 
@@ -12,13 +12,15 @@ if (!defined('ABSPATH')) {
 }
 
 // Define Constants
-define('PS_CORE_VERSION', '2.0.0');
+define('PS_CORE_VERSION', '2.0.1');
 define('PS_CORE_PATH', plugin_dir_path(__FILE__));
 define('PS_CORE_URL', plugin_dir_url(__FILE__));
 
 // GitHub Updater Configuration
 define('PS_GITHUB_USER', 'evolution301');
 define('PS_GITHUB_REPO', 'pocket-showroom-core');
+
+
 
 // Include Classes
 require_once PS_CORE_PATH . 'includes/class-cpt-registry.php';
@@ -30,6 +32,7 @@ require_once PS_CORE_PATH . 'includes/class-settings.php';
 require_once PS_CORE_PATH . 'includes/class-image-watermarker.php';
 require_once PS_CORE_PATH . 'includes/class-rest-api.php';
 require_once PS_CORE_PATH . 'includes/class-plugin-updater.php';
+
 
 // Initialize Classes
 function ps_core_init_plugin()
@@ -57,10 +60,12 @@ function ps_core_init_updater()
 }
 add_action('admin_init', 'ps_core_init_updater');
 
+
+
 // Add Settings & Add New Item links next to Deactivate on Plugins page
 function ps_core_action_links($links)
 {
-    $settings_link = '<a href="' . admin_url('edit.php?post_type=ps_item&page=ps-settings') . '">Settings</a>';
+    $settings_link = '<a href="' . admin_url('admin.php?page=pocket-showroom-settings') . '">Settings</a>';
     $add_new_link = '<a href="' . admin_url('post-new.php?post_type=ps_item') . '">Add New Item</a>';
     array_unshift($links, $settings_link, $add_new_link);
     return $links;

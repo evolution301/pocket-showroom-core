@@ -35,7 +35,7 @@ A modern B2B product catalog WordPress plugin designed for furniture exporters, 
 
 ### Method 1: Download from GitHub (Recommended)
 
-1. Download the latest release: [pocket-showroom-core-v2.0.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v2.0.0/pocket-showroom-core.zip)
+1. Download the latest release: [pocket-showroom-core-v2.0.1.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v2.0.1/pocket-showroom-core.zip)
 2. Go to **WordPress Admin** → **Plugins** → **Add New** → **Upload Plugin**
 3. Upload the ZIP file and click **Install Now**
 4. Activate the plugin
@@ -186,6 +186,18 @@ Configure image watermark:
 
 ## Changelog
 
+### v2.0.1 (2026-02-15)
+- **Frontend Optimization**:
+    - Fixed modal closing issue (ESC/Background click)
+    - Added 15s timeout for all AJAX requests
+    - Improved QR code error handling and Share Sheet UI
+- **Admin Enhancement**:
+    - Refactored Color Picker with Touch Support
+    - Added Drag & Drop sorting for Size Variants and Dynamic Specs
+    - Added "Auto Sort by Size" feature
+- **Fix**: Removed global namespace collision risks
+- **Core Update**: Synced with latest feature set (BB)
+
 ### v1.1.3 (2026-02-14)
 - Fix: Added safe file loading for all class files to prevent fatal errors
 - Improvement: Better error handling with admin notices for missing files
@@ -258,7 +270,7 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 
 ### 方法一：从 GitHub 下载（推荐）
 
-1. 下载最新版本：[pocket-showroom-core-v2.0.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v2.0.0/pocket-showroom-core.zip)
+1. 下载最新版本：[pocket-showroom-core-v2.0.1.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v2.0.1/pocket-showroom-core.zip)
 2. 进入 **WordPress 后台** → **插件** → **安装插件** → **上传插件**
 3. 上传 ZIP 文件，点击 **现在安装**
 4. 激活插件
@@ -408,6 +420,18 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 - 位置
 
 ## 更新日志
+
+### v2.0.1 (2026-02-15)
+- **前端优化**:
+    - 修复模态框关闭问题 (ESC/背景点击)
+    - 为所有 AJAX 请求添加 15秒超时
+    - 改进二维码错误处理和分享面板 UI
+- **后台增强**:
+    - 重构颜色选择器，支持触摸操作
+    - 添加尺寸变体和动态规格的拖拽排序
+    - 添加 "按尺寸自动排序" 功能
+- **修复**: 移除全局命名空间冲突风险
+- **核心更新**: 同步最新功能集 (BB)
 
 ### v1.1.3 (2026-02-14)
 - 修复：为所有类文件添加安全加载机制，防止致命错误

@@ -300,6 +300,8 @@ class PS_Meta_Fields
                                                 name="_ps_size_variants[<?php echo $index; ?>][value]"
                                                 value="<?php echo esc_attr($variant['value']); ?>" placeholder="Dimensions"
                                                 style="flex:2;">
+                                            <span class="dashicons dashicons-move ps-sort-handle"
+                                                style="cursor:move; color:#ccc; align-self:center;"></span>
                                             <button type="button" class="ps-remove-btn"
                                                 style="color:red; background:none; border:none; cursor:pointer;">×</button>
                                         </div>
@@ -319,6 +321,8 @@ class PS_Meta_Fields
                                             placeholder="Field Name" value="<?php echo esc_attr($spec['key']); ?>">
                                         <input type="text" name="_ps_dynamic_specs[val][]" class="ps-spec-val" placeholder="Value"
                                             value="<?php echo esc_attr($spec['val']); ?>">
+                                        <span class="dashicons dashicons-move ps-sort-handle"
+                                            style="cursor:move; color:#ccc; align-self:center;"></span>
                                         <button type="button" class="ps-remove-btn">×</button>
                                     </div>
                                 <?php endforeach; ?>
