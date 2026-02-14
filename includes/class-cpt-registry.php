@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class PS_Core_CPT_Registry
+class PS_CPT_Registry
 {
 
     private static $instance = null;

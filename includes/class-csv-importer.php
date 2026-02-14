@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class PS_Core_CSV_Importer
+class PS_CSV_Importer
 {
 
     private static $instance = null;
@@ -28,7 +28,7 @@ class PS_Core_CSV_Importer
     public function enqueue_assets($hook)
     {
         if (strpos($hook, 'ps-import') !== false) {
-            wp_enqueue_style('ps-admin-style', PS_V2_URL . 'assets/admin-style.css', array(), PS_V2_VERSION);
+            wp_enqueue_style('ps-admin-style', PS_CORE_URL . 'assets/admin-style.css', array(), PS_CORE_VERSION);
         }
     }
 
@@ -51,8 +51,7 @@ class PS_Core_CSV_Importer
             <div class="ps-header">
                 <div class="ps-title-section">
                     <h1 class="wp-heading-inline" style="font-size: 24px; font-weight: 600;">
-                        <?php _e('Data Tools', 'pocket-showroom'); ?>
-                    </h1>
+                        <?php _e('Data Tools', 'pocket-showroom'); ?></h1>
                 </div>
             </div>
 
@@ -79,7 +78,7 @@ class PS_Core_CSV_Importer
                     </form>
 
                     <div class="ps-card-footer">
-                        <a href="<?php echo PS_V2_URL . 'assets/sample-import.csv'; ?>" download class="ps-text-link">
+                        <a href="<?php echo PS_CORE_URL . 'assets/sample-import.csv'; ?>" download class="ps-text-link">
                             <span class="dashicons dashicons-download"></span>
                             <?php _e('Download Sample Template', 'pocket-showroom'); ?>
                         </a>
@@ -323,12 +322,9 @@ class PS_Core_CSV_Importer
                             }
                         }
 
-                        // Handle Category (Multi-support)
+                        // Handle Category — 使用替换模式（false），避免追加重复分类
                         if ($category) {
-                            // Split by comma, trim whitespace
-                            $categories = array_map('trim', explode(',', $category));
-                            // true = append, false = replace. Use false to sync exactly with CSV.
-                            wp_set_object_terms($post_id, $categories, 'ps_category', false);
+                            wp_set_object_terms($post_id, $category, 'ps_category', false);
                         }
 
                         // Handle Images: 第一张设为封面，全部存入 Gallery
@@ -410,169 +406,50 @@ class PS_Core_CSV_Importer
         return !empty($posts) ? $posts[0] : false;
     }
 
-    /**
-     * Upload image from URL with enhanced SSRF protection
-     * 
-     * @param string $url The image URL
-     * @param int $post_id The parent post ID
-     * @param bool $is_featured Whether to set as featured image
-     * @return int|false Attachment ID or false on failure
-     */
     private function upload_image_from_url($url, $post_id, $is_featured = false)
     {
-        // 1. 基础 URL 验证
-        if (!filter_var($url, FILTER_VALIDATE_URL)) {
-            error_log("Pocket Showroom: Invalid URL format - {$url}");
+        if (!filter_var($url, FILTER_VALIDATE_URL))
+            return false;
+
+        // SSRF 防护: 仅允许 HTTP/HTTPS 协议
+        $scheme = wp_parse_url($url, PHP_URL_SCHEME);
+        if (!in_array(strtolower($scheme), array('http', 'https'), true)) {
             return false;
         }
 
-        // 2. 解析 URL 组件
-        $parsed = wp_parse_url($url);
-        if (!$parsed || !isset($parsed['scheme']) || !isset($parsed['host'])) {
-            error_log("Pocket Showroom: Failed to parse URL - {$url}");
+        // SSRF 防护: 阻止私有 IP 和 localhost
+        $host = wp_parse_url($url, PHP_URL_HOST);
+        if (!$host) {
+            return false;
+        }
+        $host_lower = strtolower($host);
+        $blocked = array('localhost', '127.0.0.1', '0.0.0.0', '::1');
+        if (in_array($host_lower, $blocked, true)) {
+            return false;
+        }
+        // 阻止私有 IP 段: 10.x, 172.16-31.x, 192.168.x, 169.254.x
+        $ip = gethostbyname($host);
+        if ($ip && !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
             return false;
         }
 
-        // 3. 仅允许 HTTP/HTTPS 协议
-        $scheme = strtolower($parsed['scheme']);
-        if (!in_array($scheme, array('http', 'https'), true)) {
-            error_log("Pocket Showroom: Blocked non-HTTP(s) scheme - {$scheme}");
-            return false;
-        }
-
-        // 4. SSRF 防护: 阻止已知危险主机名
-        $host_lower = strtolower($parsed['host']);
-        $blocked_hosts = array(
-            'localhost',
-            '127.0.0.1',
-            '0.0.0.0',
-            '::1',
-            'localhost.localdomain',
-            'ip6-localhost',
-            'ip6-loopback',
-        );
-        if (in_array($host_lower, $blocked_hosts, true)) {
-            error_log("Pocket Showroom: Blocked hostname - {$host_lower}");
-            return false;
-        }
-
-        // 5. SSRF 防护: 阻止 IP 地址直接访问（包括 IP 格式的 host）
-        // 检查 host 是否为 IP 地址格式
-        if (filter_var($host_lower, FILTER_VALIDATE_IP)) {
-            // 检查是否为私有/保留 IP
-            if (!filter_var($host_lower, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                error_log("Pocket Showroom: Blocked private/reserved IP - {$host_lower}");
-                return false;
-            }
-            // 完全禁止 IP 地址形式（要求使用域名）
-            error_log("Pocket Showroom: IP address not allowed, use domain name - {$host_lower}");
-            return false;
-        }
-
-        // 6. SSRF 防护: DNS 解析后检查实际 IP
-        $resolved_ip = gethostbyname($parsed['host']);
-        if ($resolved_ip && $resolved_ip !== $parsed['host']) {
-            // 检查解析后的 IP 是否为私有/保留地址
-            if (!filter_var($resolved_ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                error_log("Pocket Showroom: DNS resolved to private/reserved IP - {$resolved_ip}");
-                return false;
-            }
-            // 额外检查: 阻止云元数据 IP (AWS/GCP/Azure)
-            $metadata_ips = array('169.254.169.254');
-            if (in_array($resolved_ip, $metadata_ips, true)) {
-                error_log("Pocket Showroom: Blocked cloud metadata IP - {$resolved_ip}");
-                return false;
-            }
-        }
-
-        // 7. 使用 WordPress 安全 HTTP API
         require_once(ABSPATH . 'wp-admin/includes/image.php');
         require_once(ABSPATH . 'wp-admin/includes/file.php');
         require_once(ABSPATH . 'wp-admin/includes/media.php');
 
-        // 使用 wp_safe_remote_get 代替 download_url（内置 SSRF 防护）
-        $response = wp_safe_remote_get($url, array(
-            'timeout' => 30,
-            'redirection' => 0, // 禁止重定向，防止绕过
-            'sslverify' => true,
-            'user-agent' => 'Pocket-Showroom-Importer/' . PS_V2_VERSION,
-        ));
-
-        if (is_wp_error($response)) {
-            error_log("Pocket Showroom: HTTP request failed - " . $response->get_error_message());
+        $tmp = download_url($url);
+        if (is_wp_error($tmp))
             return false;
-        }
-
-        $response_code = wp_remote_retrieve_response_code($response);
-        if ($response_code !== 200) {
-            error_log("Pocket Showroom: HTTP error {$response_code} for URL - {$url}");
-            return false;
-        }
-
-        // 8. 验证内容类型为图片
-        $content_type = wp_remote_retrieve_header($response, 'content-type');
-        $allowed_types = array('image/jpeg', 'image/png', 'image/gif', 'image/webp');
-        $is_valid_image = false;
-        foreach ($allowed_types as $type) {
-            if (strpos(strtolower($content_type), $type) !== false) {
-                $is_valid_image = true;
-                break;
-            }
-        }
-        if (!$is_valid_image) {
-            error_log("Pocket Showroom: Invalid content type - {$content_type}");
-            return false;
-        }
-
-        // 9. 保存临时文件
-        $body = wp_remote_retrieve_body($response);
-        if (empty($body)) {
-            error_log("Pocket Showroom: Empty response body");
-            return false;
-        }
-
-        // 生成安全的文件名
-        $extension = 'jpg';
-        if (strpos($content_type, 'png') !== false)
-            $extension = 'png';
-        elseif (strpos($content_type, 'gif') !== false)
-            $extension = 'gif';
-        elseif (strpos($content_type, 'webp') !== false)
-            $extension = 'webp';
-
-        $filename = 'ps-import-' . sanitize_file_name(substr(md5($url . time()), 0, 12)) . '.' . $extension;
-        $tmp = wp_tempnam($filename);
-
-        if (!$tmp) {
-            error_log("Pocket Showroom: Failed to create temp file");
-            return false;
-        }
-
-        if (file_put_contents($tmp, $body) === false) {
-            @unlink($tmp);
-            error_log("Pocket Showroom: Failed to write temp file");
-            return false;
-        }
-
-        // 10. 文件大小限制 (最大 10MB)
-        $file_size = filesize($tmp);
-        if ($file_size === false || $file_size > 10 * 1024 * 1024) {
-            @unlink($tmp);
-            error_log("Pocket Showroom: File too large or unreadable");
-            return false;
-        }
 
         $file_array = array(
-            'name' => $filename,
-            'tmp_name' => $tmp,
-            'type' => $content_type,
+            'name' => basename($url),
+            'tmp_name' => $tmp
         );
 
         $id = media_handle_sideload($file_array, $post_id);
 
         if (is_wp_error($id)) {
             @unlink($file_array['tmp_name']);
-            error_log("Pocket Showroom: media_handle_sideload failed - " . $id->get_error_message());
             return false;
         }
 

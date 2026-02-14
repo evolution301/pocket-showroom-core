@@ -269,18 +269,15 @@
 
 .ps-card-image {
     position: relative;
-    aspect-ratio: var(--ps-card-ratio, 3/4);
-    background: #f5f5f5;
+    height: 200px;
+    background: #f9f9f9;
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .ps-card-image img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
 }
 
 .ps-card-overlay {
@@ -296,7 +293,7 @@
     opacity: 0;
     transition: opacity 0.3s;
     pointer-events: none;
-    z-index: 5;
+    /* Allow clicks to pass through to image */
 }
 
 .ps-card:hover .ps-card-overlay {
@@ -372,7 +369,7 @@
 .ps-modal {
     display: none;
     position: fixed;
-    z-index: 999999;
+    z-index: 9999;
     left: 0;
     top: 0;
     width: 100%;
@@ -381,174 +378,6 @@
     background-color: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(2px);
 }
-
-/*
- * 弹窗打开时隐藏主题的 header / footer / admin bar
- * 
- * 注意: 这里使用 !important 是必要的，因为需要覆盖各种 WordPress 主题的样式。
- * 不同主题使用不同的选择器特异性和内联样式，没有 !important 无法确保跨主题兼容性。
- * 
- * 兼容 Top 20+ WordPress 主题：
- * - HTML5 通用: header, footer
- * - 通用 class: .site-header, .site-footer, #masthead, #colophon
- * - Astra: .ast-above-header, .ast-below-header, .main-header-bar-wrap
- * - Elementor / Hello: .elementor-location-header/footer, [data-elementor-type]
- * - Divi: #main-header, #main-footer, #top-header, .et-l--header/footer, #et-footer-nav
- * - Avada: .fusion-header-wrapper, .fusion-footer, .fusion-footer-widget-area
- * - OceanWP: #site-header, #sidr, .footer-widgets, #footer-bottom
- * - GeneratePress: .site-header, .main-navigation, .site-footer
- * - Neve: .hfg_header, .hfg_footer
- * - Kadence: .site-header-row, .site-footer-wrap
- * - Blocksy: header[data-id="type-1"], footer.ct-footer
- * - BeTheme: #Header_wrapper, #Top_bar, #Footer
- * - Sydney: .header-wrap, .site-footer
- * - Flavor/flavor Builder: #flavor-header, #flavor-footer
- * - Enfold / flavor: #header, #socket, .avia-footer
- * - Developer themes: .nv-header, .starter-header
- * - WordPress admin bar
- */
-body.ps-modal-open,
-body.ps-share-open {
-    overflow: hidden;
-}
-
-/* --- 通用 HTML5 / 常见 class --- */
-body.ps-modal-open>header,
-body.ps-modal-open>footer,
-body.ps-modal-open>.site-header,
-body.ps-modal-open>.site-footer,
-body.ps-modal-open>#masthead,
-body.ps-modal-open>#colophon,
-body.ps-modal-open>#page>header,
-body.ps-modal-open>#page>.site-header,
-/* --- Elementor / Hello Elementor --- */
-body.ps-modal-open .elementor-location-header,
-body.ps-modal-open .elementor-location-footer,
-body.ps-modal-open [data-elementor-type="header"],
-body.ps-modal-open [data-elementor-type="footer"],
-/* --- Divi --- */
-body.ps-modal-open #main-header,
-body.ps-modal-open #main-footer,
-body.ps-modal-open #top-header,
-body.ps-modal-open .et-l--header,
-body.ps-modal-open .et-l--footer,
-body.ps-modal-open #et-footer-nav,
-/* --- Avada --- */
-body.ps-modal-open .fusion-header-wrapper,
-body.ps-modal-open .fusion-footer,
-body.ps-modal-open .fusion-footer-widget-area,
-body.ps-modal-open .fusion-sliding-bar-wrapper,
-/* --- Astra --- */
-body.ps-modal-open .ast-above-header,
-body.ps-modal-open .ast-below-header,
-body.ps-modal-open .main-header-bar-wrap,
-body.ps-modal-open .ast-footer-overlay,
-body.ps-modal-open .site-below-footer-wrap,
-body.ps-modal-open .ast-above-footer,
-/* --- OceanWP --- */
-body.ps-modal-open #site-header,
-body.ps-modal-open #site-navigation-wrap,
-body.ps-modal-open .footer-widgets,
-body.ps-modal-open #footer-bottom,
-/* --- GeneratePress --- */
-body.ps-modal-open .main-navigation,
-body.ps-modal-open .site-info,
-/* --- Neve --- */
-body.ps-modal-open .hfg_header,
-body.ps-modal-open .hfg_footer,
-body.ps-modal-open .nv-header,
-/* --- Kadence --- */
-body.ps-modal-open .site-header-row,
-body.ps-modal-open .site-footer-wrap,
-/* --- Blocksy --- */
-body.ps-modal-open header[data-id="type-1"],
-body.ps-modal-open footer.ct-footer,
-/* --- BeTheme --- */
-body.ps-modal-open #Header_wrapper,
-body.ps-modal-open #Top_bar,
-body.ps-modal-open #Footer,
-/* --- Sydney --- */
-body.ps-modal-open .header-wrap,
-/* --- flavor / flavor-builder --- */
-body.ps-modal-open #flavor-header,
-body.ps-modal-open #flavor-footer,
-/* --- flavor (flavor) --- */
-body.ps-modal-open #header,
-body.ps-modal-open #socket,
-body.ps-modal-open .avia-footer,
-/* --- WordPress admin bar --- */
-body.ps-modal-open #wpadminbar,
-
-/* ===== 以下是 ps-share-open 的同步规则 ===== */
-/* --- 通用 HTML5 / 常见 class --- */
-body.ps-share-open>header,
-body.ps-share-open>footer,
-body.ps-share-open>.site-header,
-body.ps-share-open>.site-footer,
-body.ps-share-open>#masthead,
-body.ps-share-open>#colophon,
-body.ps-share-open>#page>header,
-body.ps-share-open>#page>.site-header,
-/* --- Elementor / Hello Elementor --- */
-body.ps-share-open .elementor-location-header,
-body.ps-share-open .elementor-location-footer,
-body.ps-share-open [data-elementor-type="header"],
-body.ps-share-open [data-elementor-type="footer"],
-/* --- Divi --- */
-body.ps-share-open #main-header,
-body.ps-share-open #main-footer,
-body.ps-share-open #top-header,
-body.ps-share-open .et-l--header,
-body.ps-share-open .et-l--footer,
-body.ps-share-open #et-footer-nav,
-/* --- Avada --- */
-body.ps-share-open .fusion-header-wrapper,
-body.ps-share-open .fusion-footer,
-body.ps-share-open .fusion-footer-widget-area,
-body.ps-share-open .fusion-sliding-bar-wrapper,
-/* --- Astra --- */
-body.ps-share-open .ast-above-header,
-body.ps-share-open .ast-below-header,
-body.ps-share-open .main-header-bar-wrap,
-body.ps-share-open .ast-footer-overlay,
-body.ps-share-open .site-below-footer-wrap,
-body.ps-share-open .ast-above-footer,
-/* --- OceanWP --- */
-body.ps-share-open #site-header,
-body.ps-share-open #site-navigation-wrap,
-body.ps-share-open .footer-widgets,
-body.ps-share-open #footer-bottom,
-/* --- GeneratePress --- */
-body.ps-share-open .main-navigation,
-body.ps-share-open .site-info,
-/* --- Neve --- */
-body.ps-share-open .hfg_header,
-body.ps-share-open .hfg_footer,
-body.ps-share-open .nv-header,
-/* --- Kadence --- */
-body.ps-share-open .site-header-row,
-body.ps-share-open .site-footer-wrap,
-/* --- Blocksy --- */
-body.ps-share-open header[data-id="type-1"],
-body.ps-share-open footer.ct-footer,
-/* --- BeTheme --- */
-body.ps-share-open #Header_wrapper,
-body.ps-share-open #Top_bar,
-body.ps-share-open #Footer,
-/* --- Sydney --- */
-body.ps-share-open .header-wrap,
-/* --- flavor / flavor-builder --- */
-body.ps-share-open #flavor-header,
-body.ps-share-open #flavor-footer,
-/* --- flavor (flavor) --- */
-body.ps-share-open #header,
-body.ps-share-open #socket,
-body.ps-share-open .avia-footer,
-/* --- WordPress admin bar --- */
-body.ps-share-open #wpadminbar {
-    display: none !important;
-}
-
 
 .ps-modal-content {
     background-color: #fefefe;
@@ -727,7 +556,7 @@ body.ps-share-open #wpadminbar {
     opacity: 0;
     transform: scale(0.8);
     transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-    z-index: 10;
+    z-index: 6;
     pointer-events: auto;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
@@ -846,7 +675,7 @@ body.ps-share-open #wpadminbar {
     background: rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
-    z-index: 10000000;
+    z-index: 99999;
     animation: psFadeIn 0.2s ease;
 }
 
@@ -864,7 +693,7 @@ body.ps-share-open #wpadminbar {
     background: #fff;
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    z-index: 10000001;
+    z-index: 100000;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
     opacity: 0;
@@ -1034,7 +863,7 @@ body.ps-share-open #wpadminbar {
     border-radius: 30px;
     font-size: 14px;
     font-weight: 500;
-    z-index: 10000002;
+    z-index: 999999;
     opacity: 0;
     transition: all 0.3s ease;
     pointer-events: none;
@@ -1056,7 +885,7 @@ body.ps-share-open #wpadminbar {
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    z-index: 10000001;
+    z-index: 100001;
     animation: psFadeIn 0.2s ease;
 }
 

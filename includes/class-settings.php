@@ -2,7 +2,7 @@
 if (!defined('ABSPATH'))
     exit;
 
-class PS_Core_Settings
+class PS_Settings
 {
 
     private static $instance = null;
@@ -29,8 +29,8 @@ class PS_Core_Settings
         }
 
         wp_enqueue_media();
-        wp_enqueue_style('ps-admin-style', PS_V2_URL . 'assets/admin-style.css', array(), PS_V2_VERSION);
-        wp_enqueue_script('ps-admin-script', PS_V2_URL . 'assets/admin-script.js', array('jquery'), PS_V2_VERSION, true);
+        wp_enqueue_style('ps-admin-style', PS_CORE_URL . 'assets/admin-style.css', array(), PS_CORE_VERSION);
+        wp_enqueue_script('ps-admin-script', PS_CORE_URL . 'assets/admin-script.js', array('jquery'), PS_CORE_VERSION, true);
     }
 
     public function add_settings_page()
@@ -67,9 +67,6 @@ class PS_Core_Settings
         register_setting('ps_settings_group', 'ps_button_text_color');
         register_setting('ps_settings_group', 'ps_banner_title_color');
         register_setting('ps_settings_group', 'ps_banner_desc_color');
-
-        // Card Display Settings
-        register_setting('ps_settings_group', 'ps_card_aspect_ratio');
     }
 
     public function render_settings_page()
@@ -90,9 +87,7 @@ class PS_Core_Settings
             'primary_color' => 'rgba(0, 124, 186, 1)', // Default Blue
             'button_text_color' => '#ffffff', // Default White
             'banner_title_color' => '#ffffff',
-            'banner_desc_color' => 'rgba(255, 255, 255, 0.95)',
-            // Card display
-            'card_aspect_ratio' => '3/4',
+            'banner_desc_color' => 'rgba(255, 255, 255, 0.95)'
         );
 
         $type = get_option('ps_watermark_type', $defaults['type']);
@@ -211,7 +206,7 @@ class PS_Core_Settings
                         </div>
 
                         <!-- Text Settings -->
-                        <div class="ps-banner-settings-col" style="flex: 1;">
+                        <div class="ps-banner-settings-col" style="flex: 1.5;">
                             <h3><?php _e('Text Content', 'pocket-showroom'); ?></h3>
                             <div class="ps-form-group">
                                 <label><?php _e('Banner Title (H1)', 'pocket-showroom'); ?></label>
@@ -236,39 +231,6 @@ class PS_Core_Settings
                                         value="<?php echo esc_attr(get_option('ps_banner_button_url', '')); ?>"
                                         class="large-text ps-input" placeholder="https://..." />
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Product Card Display -->
-                        <div class="ps-banner-settings-col" style="flex: 0.8;">
-                            <h3><?php _e('Product Card Display', 'pocket-showroom'); ?></h3>
-                            <div class="ps-form-group">
-                                <label><?php _e('Image Aspect Ratio', 'pocket-showroom'); ?></label>
-                                <select name="ps_card_aspect_ratio" id="ps_card_aspect_ratio" class="ps-input"
-                                    style="width: 100%;">
-                                    <?php
-                                    $card_ratio = get_option('ps_card_aspect_ratio', $defaults['card_aspect_ratio']);
-                                    $ratio_options = array(
-                                        '1/1' => __('1:1 — Square', 'pocket-showroom'),
-                                        '3/4' => __('3:4 — Portrait (Recommended)', 'pocket-showroom'),
-                                        '4/3' => __('4:3 — Landscape', 'pocket-showroom'),
-                                        '16/9' => __('16:9 — Widescreen', 'pocket-showroom'),
-                                        '9/16' => __('9:16 — Tall Portrait', 'pocket-showroom'),
-                                        'auto' => __('Auto — Original Ratio', 'pocket-showroom'),
-                                    );
-                                    foreach ($ratio_options as $value => $label) {
-                                        printf(
-                                            '<option value="%s" %s>%s</option>',
-                                            esc_attr($value),
-                                            selected($card_ratio, $value, false),
-                                            esc_html($label)
-                                        );
-                                    }
-                                    ?>
-                                </select>
-                                <p class="description" style="margin-top: 8px; color: #888;">
-                                    <?php _e('Controls how product images are displayed in the gallery grid. Images will always be fully visible (no cropping).', 'pocket-showroom'); ?>
-                                </p>
                             </div>
                         </div>
 
@@ -316,7 +278,7 @@ class PS_Core_Settings
                         <div class="ps-canvas-wrapper"
                             style="background:#fff; border:none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; overflow:hidden;">
                             <div id="ps-live-preview-container"
-                                style="position:relative; width:100%; height:300px; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; <?php echo $banner_image_url ? 'background-image:url(' . esc_url($banner_image_url) . ');' : 'background-image:url(' . PS_V2_URL . 'assets/placeholder-furniture.jpg);'; ?>">
+                                style="position:relative; width:100%; height:300px; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; <?php echo $banner_image_url ? 'background-image:url(' . esc_url($banner_image_url) . ');' : 'background-image:url(' . PS_CORE_URL . 'assets/placeholder-furniture.jpg);'; ?>">
                                 <div id="ps-banner-overlay-layer"
                                     style="position:absolute; top:0; left:0; right:0; bottom:0; background-color: <?php echo esc_attr($banner_overlay_color); ?>;">
                                 </div>
@@ -372,10 +334,8 @@ class PS_Core_Settings
                             <div class="ps-form-group">
                                 <label><?php _e('Watermark Type', 'pocket-showroom'); ?></label>
                                 <div class="ps-radio-group">
-                                    <label><input type="radio" name="ps_watermark_type" value="text" <?php checked('text', $type); ?>>
-                                        <?php _e('Text', 'pocket-showroom'); ?></label>
-                                    <label><input type="radio" name="ps_watermark_type" value="image" <?php checked('image', $type); ?>>
-                                        <?php _e('Image', 'pocket-showroom'); ?></label>
+                                    <label><input type="radio" name="ps_watermark_type" value="text" <?php checked('text', $type); ?>> <?php _e('Text', 'pocket-showroom'); ?></label>
+                                    <label><input type="radio" name="ps_watermark_type" value="image" <?php checked('image', $type); ?>> <?php _e('Image', 'pocket-showroom'); ?></label>
                                 </div>
                             </div>
 

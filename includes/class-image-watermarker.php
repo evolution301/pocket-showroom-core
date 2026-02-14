@@ -2,7 +2,7 @@
 if (!defined('ABSPATH'))
     exit;
 
-class PS_Core_Image_Watermarker
+class PS_Image_Watermarker
 {
 
     private static $instance = null;
@@ -193,15 +193,11 @@ class PS_Core_Image_Watermarker
 
         // --- Apply Rotation ---
         if ($rotation != 0 && $wm_layer) {
-            $rotated = @imagerotate($wm_layer, $rotation, imagecolorallocatealpha($wm_layer, 0, 0, 0, 127));
+            $rotated = imagerotate($wm_layer, $rotation, imagecolorallocatealpha($wm_layer, 0, 0, 0, 127));
             if ($rotated) {
                 imagedestroy($wm_layer);
                 $wm_layer = $rotated;
                 imagesavealpha($wm_layer, true);
-            } else {
-                // 旋转失败时记录日志，但不中断流程（使用未旋转的水印）
-                error_log("Pocket Showroom: Image watermark rotation failed (angle: {$rotation})");
-                // 注意: $wm_layer 仍然有效，继续使用未旋转的版本
             }
         }
 

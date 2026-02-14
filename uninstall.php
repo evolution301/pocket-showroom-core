@@ -58,62 +58,34 @@ delete_transient('ps_last_updated_date');
  * ========================================
  * 3. 删除自定义文章类型的所有文章及其 Meta
  * ========================================
- * 
- * Fix M-4: 分批处理避免内存耗尽
  */
-$batch_size = 100;
-$offset = 0;
-$total_deleted = 0;
+$ps_posts = get_posts(array(
+    'post_type' => 'ps_item',
+    'post_status' => 'any',
+    'numberposts' => -1,
+    'fields' => 'ids',
+));
 
-do {
-    $ps_posts = get_posts(array(
-        'post_type' => 'ps_item',
-        'post_status' => 'any',
-        'numberposts' => $batch_size,
-        'offset' => $offset,
-        'fields' => 'ids',
-        'orderby' => 'ID',
-        'order' => 'ASC',
-    ));
-
-    if (empty($ps_posts)) {
-        break;
-    }
-
-    foreach ($ps_posts as $post_id) {
-        // 删除所有关联的 post meta
-        $meta_keys = get_post_custom_keys($post_id);
-        if ($meta_keys) {
-            foreach ($meta_keys as $meta_key) {
-                // 只删除插件的 _ps_ 前缀 meta，避免误伤
-                if (strpos($meta_key, '_ps_') === 0) {
-                    delete_post_meta($post_id, $meta_key);
-                }
+foreach ($ps_posts as $post_id) {
+    // 删除所有关联的 post meta
+    $meta_keys = get_post_custom_keys($post_id);
+    if ($meta_keys) {
+        foreach ($meta_keys as $meta_key) {
+            // 只删除插件的 _ps_ 前缀 meta，避免误伤
+            if (strpos($meta_key, '_ps_') === 0) {
+                delete_post_meta($post_id, $meta_key);
             }
         }
-
-        // 删除附件（缩略图等）
-        $attachments = get_attached_media('', $post_id);
-        foreach ($attachments as $attachment) {
-            wp_delete_attachment($attachment->ID, true);
-        }
-
-        // 彻底删除文章（跳过回收站）
-        wp_delete_post($post_id, true);
-        $total_deleted++;
     }
 
-    // 清理 WordPress 对象缓存，释放内存
-    wp_cache_flush();
-    
-    // 移动到下一批
-    $offset += $batch_size;
-    
-} while (count($ps_posts) === $batch_size);
+    // 删除附件（缩略图等）
+    $attachments = get_attached_media('', $post_id);
+    foreach ($attachments as $attachment) {
+        wp_delete_attachment($attachment->ID, true);
+    }
 
-// 记录删除数量（仅调试时）
-if (defined('WP_DEBUG') && WP_DEBUG) {
-    error_log("Pocket Showroom: Uninstall deleted {$total_deleted} posts");
+    // 彻底删除文章（跳过回收站）
+    wp_delete_post($post_id, true);
 }
 
 /**

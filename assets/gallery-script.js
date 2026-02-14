@@ -1,11 +1,5 @@
 jQuery(document).ready(function ($) {
 
-    // ===== 全局安全检查 (Fix RISK-3) =====
-    if (typeof ps_ajax === 'undefined') {
-        console.warn('Pocket Showroom: ps_ajax not defined, gallery script aborted.');
-        return;
-    }
-
     // ===== UTILITIES =====
 
     /**
@@ -29,30 +23,17 @@ jQuery(document).ready(function ($) {
         };
     }
 
-    /**
-     * 统一关闭产品模态框 (Fix BUG-1)
-     * 所有关闭模态框的操作都通过此函数，确保 body class 一定被移除
-     */
-    function closeProductModal() {
-        $('#ps-modal').fadeOut(200);
-        $('body').removeClass('ps-modal-open');
-    }
-
-    // ===== PRODUCT MODAL =====
-
     // Open Modal
     $(document).on('click', '.ps-card', function (e) {
         e.preventDefault();
         var postId = $(this).data('id');
 
         $('#ps-modal').fadeIn(200);
-        $('body').addClass('ps-modal-open');
         $('#ps-modal-body').html('<div class="ps-loader">' + psI18n('modal_loading', 'Loading...') + '</div>');
 
         $.ajax({
             url: ps_ajax.url,
             type: 'POST',
-            timeout: 15000, // Fix RISK-4: 15秒超时
             data: {
                 action: 'ps_get_product_modal',
                 post_id: postId,
@@ -66,145 +47,42 @@ jQuery(document).ready(function ($) {
                     $('#ps-modal-body').html('<p>' + psI18n('modal_error', 'Error loading details.') + '</p>');
                 }
             },
-            error: function (xhr, status) {
-                var msg = (status === 'timeout')
-                    ? psI18n('timeout_error', 'Request timed out, please try again.')
-                    : psI18n('network_error', 'Network error, please try again.');
-                $('#ps-modal-body').html('<p>' + msg + '</p>');
+            error: function () {
+                $('#ps-modal-body').html('<p>' + psI18n('network_error', 'Network error, please try again.') + '</p>');
             }
         });
     });
 
-    // Close Modal — 统一使用 closeProductModal (Fix BUG-1)
-    // AUDIT2-6: 使用事件委托，因为 .ps-close 是 AJAX 动态加载到 modal 里的
-    $(document).on('click', '.ps-close', function () {
-        closeProductModal();
+    // Close Modal
+    $('.ps-close').on('click', function () {
+        $('#ps-modal').fadeOut(200);
     });
 
     $(window).on('click', function (event) {
-        if (event.target.id === 'ps-modal') { // AUDIT3-5: 严格等于
-            closeProductModal();
+        if (event.target.id == 'ps-modal') {
+            $('#ps-modal').fadeOut(200);
         }
     });
 
-    // ===== SEARCH & FILTER =====
-
-    /**
-     * Fix M-3: 智能搜索 - 根据产品数量决定使用客户端还是服务器端搜索
-     * 产品数量 > 阈值(50) 时使用 AJAX 搜索，否则使用客户端搜索
-     */
-    var totalProducts = (typeof ps_ajax !== 'undefined' && ps_ajax.total_products) ? ps_ajax.total_products : 0;
-    var ajaxSearchThreshold = (typeof ps_ajax !== 'undefined' && ps_ajax.ajax_search_threshold) ? ps_ajax.ajax_search_threshold : 50;
-    var useAjaxSearch = totalProducts > ajaxSearchThreshold;
-    var searchRequest = null; // 用于取消正在进行的搜索请求
-    var currentCategory = 'all'; // 当前选中的分类
-
-    // 搜索函数 - 智能选择搜索方式
-    function performSearch(value) {
-        // 如果使用 AJAX 搜索且搜索词长度 >= 2
-        if (useAjaxSearch && value.length >= 2) {
-            // 取消之前的请求
-            if (searchRequest) {
-                searchRequest.abort();
-            }
-
-            // 显示加载状态
-            var $grid = $('.ps-gallery-grid');
-            var loadingHtml = '<div class="ps-searching" style="text-align:center; padding:40px; color:#888;">' 
-                + psI18n('searching', 'Searching...') + '</div>';
-            
-            // 如果没有结果容器，添加一个
-            if ($grid.find('.ps-card').length === 0) {
-                $grid.html(loadingHtml);
-            } else {
-                $grid.append(loadingHtml);
-            }
-
-            searchRequest = $.ajax({
-                url: ps_ajax.url,
-                type: 'POST',
-                timeout: 15000,
-                data: {
-                    action: 'ps_search_products',
-                    search: value,
-                    category: currentCategory,
-                    nonce: ps_ajax.nonce
-                },
-                success: function (response) {
-                    $('.ps-searching').remove();
-                    if (response.success && response.data.html) {
-                        $grid.html(response.data.html);
-                        // 更新 Load More 按钮状态（搜索结果通常不需要分页）
-                        $('#ps-load-more-wrap').hide();
-                    } else {
-                        $grid.html('<p class="ps-no-results" style="text-align:center; padding:40px; color:#888;">' 
-                            + psI18n('no_results', 'No products found.') + '</p>');
-                    }
-                },
-                error: function (xhr, status) {
-                    $('.ps-searching').remove();
-                    if (status !== 'abort') {
-                        // 回退到客户端搜索
-                        clientSideSearch(value);
-                    }
-                }
-            });
-        } else if (!useAjaxSearch || value.length < 2) {
-            // 客户端搜索
-            if (searchRequest) {
-                searchRequest.abort();
-                searchRequest = null;
-            }
-            clientSideSearch(value);
-        }
-
-        // 如果搜索框清空，显示所有产品
-        if (value.length === 0) {
-            if (searchRequest) {
-                searchRequest.abort();
-                searchRequest = null;
-            }
-            $('.ps-searching').remove();
-            // 重新加载页面内容或显示所有产品
-            if (useAjaxSearch) {
-                // 触发分类过滤来恢复所有产品
-                $('.ps-filter-btn[data-cat="all"]').click();
-            }
-            $('#ps-load-more-wrap').show();
-        }
-    }
-
-    // 客户端搜索（原有逻辑）
-    function clientSideSearch(value) {
+    // Simple Search (Client Side) — debounced (Fix F1)
+    $('#ps-search').on('keyup', debounce(function () {
+        var value = $(this).val().toLowerCase();
         $(".ps-gallery-grid .ps-card").each(function () {
             $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
         });
         if (value.length > 0) {
             $('.ps-filter-btn').removeClass('active');
         }
-    }
-
-    // 绑定搜索事件 - 使用 debounce
-    $('#ps-search').on('keyup', debounce(function () {
-        var value = $(this).val().toLowerCase().trim();
-        performSearch(value);
     }, 300));
 
-    // Category Filter (Client Side) - 更新当前分类
+    // Category Filter (Client Side)
     $('.ps-filter-btn').on('click', function () {
         var cat = $(this).data('cat');
         $('.ps-filter-btn').removeClass('active');
         $(this).addClass('active');
-        currentCategory = cat;
 
         // Clear search
         $('#ps-search').val('');
-
-        // 取消正在进行的搜索
-        if (searchRequest) {
-            searchRequest.abort();
-            searchRequest = null;
-        }
 
         if (cat === 'all') {
             $('.ps-card').show();
@@ -218,12 +96,6 @@ jQuery(document).ready(function ($) {
                 }
             });
         }
-
-        // 如果使用 AJAX 搜索，重新加载产品
-        if (useAjaxSearch) {
-            // 显示 Load More 按钮
-            $('#ps-load-more-wrap').show();
-        }
     });
 
     // ===== LOAD MORE (Fix #10 + Fix #20 i18n) =====
@@ -233,9 +105,9 @@ jQuery(document).ready(function ($) {
     $('#ps-load-more-btn').on('click', function () {
         var $wrap = $('#ps-load-more-wrap');
         var $btn = $(this);
-        var currentPage = parseInt($wrap.data('page'), 10) || 1;  // AUDIT3-6: NaN 保护
-        var maxPages = parseInt($wrap.data('max'), 10) || 1;       // AUDIT3-6: NaN 保护
-        var perPage = parseInt($wrap.data('per-page'), 10) || 12;  // AUDIT3-6: NaN 保护
+        var currentPage = parseInt($wrap.data('page'), 10);
+        var maxPages = parseInt($wrap.data('max'), 10);
+        var perPage = parseInt($wrap.data('per-page'), 10);
         var nextPage = currentPage + 1;
 
         // 防止重复点击
@@ -245,7 +117,6 @@ jQuery(document).ready(function ($) {
         $.ajax({
             url: ps_ajax.url,
             type: 'POST',
-            timeout: 15000, // Fix RISK-5: 15秒超时
             data: {
                 action: 'ps_load_more',
                 page: nextPage,
@@ -280,8 +151,28 @@ jQuery(document).ready(function ($) {
     var currentShareData = { title: '', desc: '', url: '', img: '' };
 
     /**
+     * Hide header, footer, sidebar elements
+     */
+    function psHideLayoutElements() {
+        $('header, footer, .site-header, .site-footer, #masthead, #colophon, .sidebar, #secondary, .widget-area, .elementor-location-header, .elementor-location-footer, nav.main-navigation, .top-bar, .site-info, .footer-widgets').each(function () {
+            $(this).attr('data-ps-was-visible', $(this).css('display'));
+            $(this).hide();
+        });
+    }
+
+    /**
+     * Restore header, footer, sidebar elements
+     */
+    function psShowLayoutElements() {
+        $('[data-ps-was-visible]').each(function () {
+            var prev = $(this).attr('data-ps-was-visible');
+            $(this).css('display', prev || '');
+            $(this).removeAttr('data-ps-was-visible');
+        });
+    }
+
+    /**
      * Open Share Sheet with provided data
-     * Fix IMPROVE-8: 使用 CSS class 控制布局隐藏，而非 JS DOM 操作
      */
     function openShareSheet(title, desc, url, img) {
         currentShareData = { title: title, desc: desc, url: url, img: img };
@@ -295,11 +186,12 @@ jQuery(document).ready(function ($) {
             $('#ps-share-preview-img').hide();
         }
 
-        // 使用 CSS class 隐藏页面布局元素 (Fix IMPROVE-8)
-        $('body').addClass('ps-share-open');
+        // Hide header & footer
+        psHideLayoutElements();
 
         // Show overlay
         $('#ps-share-sheet-overlay').addClass('active');
+        $('body').css('overflow', 'hidden');
     }
 
     /**
@@ -307,9 +199,10 @@ jQuery(document).ready(function ($) {
      */
     function closeShareSheet() {
         $('#ps-share-sheet-overlay').removeClass('active');
+        $('body').css('overflow', '');
 
-        // 移除 CSS class 恢复页面布局 (Fix IMPROVE-8)
-        $('body').removeClass('ps-share-open');
+        // Restore header & footer
+        psShowLayoutElements();
     }
 
     /**
@@ -378,15 +271,15 @@ jQuery(document).ready(function ($) {
         showToast(psI18n('link_copied', 'Link copied!'));
     });
 
-    // -- QR Modal Close -- (AUDIT2-3: 改用 CSS class 管理 overflow)
+    // -- QR Modal Close --
     $('#ps-qr-close').on('click', function () {
         $('#ps-qr-overlay').removeClass('active');
-        $('body').removeClass('ps-modal-open');
+        $('body').css('overflow', '');
     });
     $(document).on('click', '#ps-qr-overlay', function (e) {
         if (e.target === this) {
             $(this).removeClass('active');
-            $('body').removeClass('ps-modal-open');
+            $('body').css('overflow', '');
         }
     });
 
@@ -397,18 +290,18 @@ jQuery(document).ready(function ($) {
         showToast(psI18n('link_copied', 'Link copied!'));
     });
 
-    // ===== KEYBOARD ACCESSIBILITY (Fix F5 + Fix BUG-1) =====
+    // ===== KEYBOARD ACCESSIBILITY (Fix F5) =====
     $(document).on('keydown', function (e) {
         if (e.key === 'Escape' || e.keyCode === 27) {
-            // Close product modal — 统一使用 closeProductModal
+            // Close product modal
             if ($('#ps-modal').is(':visible')) {
-                closeProductModal();
+                $('#ps-modal').fadeOut(200);
                 return;
             }
-            // Close QR overlay (AUDIT2-3)
+            // Close QR overlay
             if ($('#ps-qr-overlay').hasClass('active')) {
                 $('#ps-qr-overlay').removeClass('active');
-                $('body').removeClass('ps-modal-open');
+                $('body').css('overflow', '');
                 return;
             }
             // Close share sheet
@@ -434,12 +327,9 @@ jQuery(document).ready(function ($) {
     }
 
     function psFallbackCopy(text) {
-        // AUDIT3-7: 使用 textarea 而非 input，iOS Safari 对 input.select() 支持不佳
-        var $temp = $('<textarea>');
-        $temp.css({ position: 'fixed', opacity: 0, left: '-9999px' });
+        var $temp = $('<input>');
         $('body').append($temp);
-        $temp.val(text);
-        $temp[0].select();
+        $temp.val(text).select();
         try { document.execCommand('copy'); } catch (e) { /* noop */ }
         $temp.remove();
     }
@@ -447,105 +337,34 @@ jQuery(document).ready(function ($) {
 });
 
 /**
- * Pocket Showroom Gallery Namespace
- * 将全局函数封装到命名空间中，避免全局污染
- * 
- * Fix M-2: 使用命名空间封装全局函数
- */
-window.PS_Gallery = {
-    /**
-     * Share to WhatsApp
-     * @param {string} title - Product title
-     * @param {string} url - Share URL
-     */
-    shareWhatsApp: function (title, url) {
-        var text = title + '\n' + url;
-        var waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
-        window.open(waUrl, '_blank');
-    },
-
-    /**
-     * Open WeChat QR Modal
-     * @param {string} url - URL to encode in QR code
-     */
-    openWeChatQR: function (url) {
-        var qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url);
-
-        var $img = jQuery('#ps-qr-image');
-        var $existingError = jQuery('#ps-qr-error');
-
-        // 重置状态：显示图片，隐藏错误
-        $img.show();
-        if ($existingError.length) {
-            $existingError.hide();
-        }
-
-        $img.off('error').on('error', function () {
-            jQuery(this).hide();
-            var $errEl = jQuery('#ps-qr-error');
-            if (!$errEl.length) {
-                var errText = (typeof ps_ajax !== 'undefined' && ps_ajax.i18n && ps_ajax.i18n.qr_error)
-                    ? ps_ajax.i18n.qr_error
-                    : 'QR code failed to load. Please copy the link below.';
-                jQuery('<p id="ps-qr-error" style="color:#999; font-size:13px; padding:20px;">' + errText + '</p>')
-                    .insertAfter(jQuery(this));
-            } else {
-                $errEl.show();
-            }
-        });
-        $img.attr('src', qrApiUrl);
-        jQuery('#ps-qr-url-input').val(url);
-        jQuery('#ps-qr-overlay').addClass('active');
-        jQuery('body').addClass('ps-modal-open');
-    },
-
-    /**
-     * Copy text to clipboard
-     * @param {string} text - Text to copy
-     */
-    copyToClipboard: function (text) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).catch(function () {
-                window.PS_Gallery._fallbackCopy(text);
-            });
-        } else {
-            window.PS_Gallery._fallbackCopy(text);
-        }
-    },
-
-    /**
-     * Fallback copy method for older browsers
-     * @private
-     */
-    _fallbackCopy: function (text) {
-        var $temp = jQuery('<textarea>');
-        $temp.css({ position: 'fixed', opacity: 0, left: '-9999px' });
-        jQuery('body').append($temp);
-        $temp.val(text);
-        $temp[0].select();
-        try { document.execCommand('copy'); } catch (e) { /* noop */ }
-        $temp.remove();
-    }
-};
-
-/**
- * 向后兼容：保留旧的全局函数名（已废弃，建议使用 PS_Gallery.xxx）
- * @deprecated Use window.PS_Gallery.shareWhatsApp instead
+ * Global function: Share to WhatsApp (called from modal)
  */
 function psShareWhatsApp(title, url) {
-    window.PS_Gallery.shareWhatsApp(title, url);
+    var text = title + '\n' + url;
+    var waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
+    window.open(waUrl, '_blank');
 }
 
 /**
- * @deprecated Use window.PS_Gallery.openWeChatQR instead
+ * Global function: Open WeChat QR Modal (called from modal and share sheet)
  */
 function psOpenWeChatQR(url) {
-    window.PS_Gallery.openWeChatQR(url);
-}
+    // Use QR Server API to generate QR code image
+    var qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url);
 
-/**
- * @deprecated Use window.PS_Gallery.copyToClipboard instead
- */
-function psCopyToClipboard(text) {
-    window.PS_Gallery.copyToClipboard(text);
+    var $img = jQuery('#ps-qr-image');
+    // Fix F4: handle QR API failure
+    $img.off('error').on('error', function () {
+        jQuery(this).replaceWith(
+            '<p style="color:#999; font-size:13px; padding:20px;">' +
+            ((typeof ps_ajax !== 'undefined' && ps_ajax.i18n && ps_ajax.i18n.qr_error)
+                ? ps_ajax.i18n.qr_error
+                : 'QR code failed to load. Please copy the link below.') +
+            '</p>'
+        );
+    });
+    $img.attr('src', qrApiUrl);
+    jQuery('#ps-qr-url-input').val(url);
+    jQuery('#ps-qr-overlay').addClass('active');
+    jQuery('body').css('overflow', 'hidden');
 }

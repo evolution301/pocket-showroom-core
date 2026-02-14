@@ -19,22 +19,12 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class PS_Core_REST_API
+class PS_REST_API
 {
     /**
      * API namespace
      */
     const API_NAMESPACE = 'ps/v1';
-
-    /**
-     * Rate limit: requests per minute per IP
-     */
-    const RATE_LIMIT_PER_MINUTE = 120;
-
-    /**
-     * Rate limit: burst allowance (additional requests)
-     */
-    const RATE_LIMIT_BURST = 30;
 
     private static $instance = null;
 
@@ -49,67 +39,6 @@ class PS_Core_REST_API
     private function __construct()
     {
         add_action('rest_api_init', array($this, 'register_routes'));
-    }
-
-    /**
-     * Check rate limit for current IP
-     * Returns true if allowed, WP_Error if rate limited
-     */
-    private function check_rate_limit()
-    {
-        $ip = $this->get_client_ip();
-        if (!$ip) {
-            return true; // 无法获取 IP 时允许通过
-        }
-
-        $transient_key = 'ps_api_rate_' . md5($ip);
-        $current_count = (int) get_transient($transient_key);
-
-        if ($current_count >= self::RATE_LIMIT_PER_MINUTE + self::RATE_LIMIT_BURST) {
-            return new WP_Error(
-                'rate_limit_exceeded',
-                __('Too many requests. Please try again later.', 'pocket-showroom'),
-                array('status' => 429, 'retry_after' => 60)
-            );
-        }
-
-        // Increment counter
-        set_transient($transient_key, $current_count + 1, MINUTE_IN_SECONDS);
-        return true;
-    }
-
-    /**
-     * Get client IP address (with proxy support)
-     */
-    private function get_client_ip()
-    {
-        $ip = '';
-
-        // 按优先级检查各种可能的 IP 来源
-        $headers = array(
-            'HTTP_CF_CONNECTING_IP',     // Cloudflare
-            'HTTP_X_FORWARDED_FOR',     // 通用代理
-            'HTTP_X_REAL_IP',           // Nginx
-            'HTTP_CLIENT_IP',           // 通用
-            'REMOTE_ADDR',              // 直连
-        );
-
-        foreach ($headers as $header) {
-            if (!empty($_SERVER[$header])) {
-                $ip = $_SERVER[$header];
-                // X-Forwarded-For 可能包含多个 IP，取第一个
-                if (strpos($ip, ',') !== false) {
-                    $ips = explode(',', $ip);
-                    $ip = trim($ips[0]);
-                }
-                // 验证 IP 格式
-                if (filter_var($ip, FILTER_VALIDATE_IP)) {
-                    return $ip;
-                }
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -193,7 +122,7 @@ class PS_Core_REST_API
         return new WP_REST_Response(array(
             'status' => 'ok',
             'plugin' => 'pocket-showroom',
-            'version' => defined('PS_V2_VERSION') ? PS_V2_VERSION : 'unknown',
+            'version' => defined('PS_CORE_VERSION') ? PS_CORE_VERSION : 'unknown',
             'site' => get_bloginfo('name'),
         ), 200);
     }
@@ -216,12 +145,6 @@ class PS_Core_REST_API
      */
     public function get_products($request)
     {
-        // 速率限制检查
-        $rate_check = $this->check_rate_limit();
-        if (is_wp_error($rate_check)) {
-            return $rate_check;
-        }
-
         $page = max(1, $request->get_param('page'));
         $per_page = min(50, max(1, $request->get_param('per_page')));
         $category = $request->get_param('category');
@@ -280,12 +203,6 @@ class PS_Core_REST_API
      */
     public function get_product($request)
     {
-        // 速率限制检查
-        $rate_check = $this->check_rate_limit();
-        if (is_wp_error($rate_check)) {
-            return $rate_check;
-        }
-
         $post_id = (int) $request->get_param('id');
         $post = get_post($post_id);
 
@@ -309,12 +226,6 @@ class PS_Core_REST_API
      */
     public function get_categories()
     {
-        // 速率限制检查
-        $rate_check = $this->check_rate_limit();
-        if (is_wp_error($rate_check)) {
-            return $rate_check;
-        }
-
         $terms = get_terms(array(
             'taxonomy' => 'ps_category',
             'hide_empty' => false,
@@ -351,12 +262,6 @@ class PS_Core_REST_API
      */
     public function get_banner()
     {
-        // 速率限制检查
-        $rate_check = $this->check_rate_limit();
-        if (is_wp_error($rate_check)) {
-            return $rate_check;
-        }
-
         $banner_image_id = get_option('ps_banner_image_id');
         $banner_bg = '';
         if ($banner_image_id) {
