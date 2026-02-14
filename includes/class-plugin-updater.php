@@ -178,7 +178,7 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
                 return false;
             }
 
-            $release = json_decode(wp_remote_retrieve_response_body($response));
+            $release = json_decode(wp_remote_retrieve_body($response));
 
             if (!$release || !isset($release->tag_name)) {
                 return false;
