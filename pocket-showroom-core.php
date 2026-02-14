@@ -2,7 +2,7 @@
 /*
 Plugin Name: Pocket Showroom Core
 Description: A modern B2B product catalog with CSV import, multi-image gallery, and interactive frontend.
-Version: 1.1.8
+Version: 1.1.9
 Author: evolution301
 Text Domain: pocket-showroom
 */
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define Constants
-define('PS_CORE_VERSION', '1.1.8');
+define('PS_CORE_VERSION', '1.1.9');
 define('PS_CORE_PATH', plugin_dir_path(__FILE__));
 define('PS_CORE_URL', plugin_dir_url(__FILE__));
 
@@ -46,7 +46,7 @@ add_action('plugins_loaded', 'ps_core_init_plugin');
 // Add Settings & Add New Item links next to Deactivate on Plugins page
 function ps_core_action_links($links)
 {
-    $settings_link = '<a href="' . admin_url('admin.php?page=pocket-showroom-settings') . '">Settings</a>';
+    $settings_link = '<a href="' . admin_url('edit.php?post_type=ps_item&page=ps-settings') . '">Settings</a>';
     $add_new_link = '<a href="' . admin_url('post-new.php?post_type=ps_item') . '">Add New Item</a>';
     array_unshift($links, $settings_link, $add_new_link);
     return $links;
