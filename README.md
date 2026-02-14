@@ -21,7 +21,8 @@ A modern B2B product catalog WordPress plugin designed for furniture exporters, 
 - **AJAX-powered Details** - View product details in a sleek modal without page refresh
 - **Fully Responsive** - Perfect display on mobile, tablet, and desktop devices
 - **Auto-Update Support** - Receive automatic updates directly from GitHub Releases
-- **REST API** - Built-in API endpoints for mobile app integration
+- **WeChat Mini Program Support** - Built-in REST API optimized for WeChat Mini Program integration, allowing you to build a native mobile showroom experience
+- **REST API** - Complete API endpoints for mobile app and third-party integration
 - **SEO Optimized** - Clean code structure and Open Graph meta tags
 
 ## Requirements
@@ -109,17 +110,47 @@ Or use in PHP template:
 | `ps_category` | Category slug |
 | `post_content` | Product description |
 
-## REST API
+## REST API & WeChat Mini Program
 
-The plugin provides REST API endpoints for mobile app integration:
+The plugin provides REST API endpoints for **WeChat Mini Program** and mobile app integration:
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/wp-json/ps/v1/products` | GET | Get product list |
-| `/wp-json/ps/v1/products/{id}` | GET | Get single product |
+| `/wp-json/ps/v1/products` | GET | Get product list (paginated, filterable) |
+| `/wp-json/ps/v1/products/{id}` | GET | Get single product detail |
 | `/wp-json/ps/v1/categories` | GET | Get all categories |
 | `/wp-json/ps/v1/banner` | GET | Get banner configuration |
 | `/wp-json/ps/v1/ping` | GET | Health check |
+
+### WeChat Mini Program Integration
+
+This plugin is designed to work seamlessly with WeChat Mini Programs. The REST API provides:
+
+- **Product Data** - All product fields including model, material, size variants, MOQ, lead time
+- **Image Gallery** - Multiple product images with URLs
+- **Category Navigation** - Category hierarchy for filtering
+- **Banner Configuration** - Dynamic banner settings from WordPress admin
+- **Rate Limiting** - Built-in protection (120 requests/minute per IP)
+
+Example API response for a product:
+
+```json
+{
+  "id": 123,
+  "title": "Modern Sofa",
+  "model": "SF-2024-001",
+  "price": "$599",
+  "material": "Leather",
+  "moq": "10 pcs",
+  "leadTime": "30 days",
+  "gallery": ["https://example.com/img1.jpg", "https://example.com/img2.jpg"],
+  "sizeVariants": [
+    {"size": "2-seater", "price": "$599"},
+    {"size": "3-seater", "price": "$799"}
+  ],
+  "categories": [{"id": 1, "name": "Living Room", "slug": "living-room"}]
+}
+```
 
 ## Auto-Updates
 
@@ -204,7 +235,8 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 - **AJAX 详情展示** - 在精美弹窗中查看产品详情，无需刷新页面
 - **完全响应式** - 在手机、平板和桌面设备上完美显示
 - **自动更新支持** - 直接从 GitHub Releases 接收自动更新
-- **REST API** - 内置 API 接口，支持移动应用集成
+- **微信小程序支持** - 内置 REST API，专为微信小程序优化，可构建原生移动展厅体验
+- **REST API** - 完整的 API 接口，支持移动应用和第三方集成
 - **SEO 优化** - 清晰的代码结构和 Open Graph 元标签
 
 ## 系统要求
@@ -291,6 +323,48 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 | `_ps_list_price` | 价格 |
 | `ps_category` | 分类别名 |
 | `post_content` | 产品描述 |
+
+## REST API 与微信小程序
+
+插件提供专为**微信小程序**和移动应用集成设计的 REST API 接口：
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/wp-json/ps/v1/products` | GET | 获取产品列表（支持分页、筛选） |
+| `/wp-json/ps/v1/products/{id}` | GET | 获取单个产品详情 |
+| `/wp-json/ps/v1/categories` | GET | 获取所有分类 |
+| `/wp-json/ps/v1/banner` | GET | 获取横幅配置 |
+| `/wp-json/ps/v1/ping` | GET | 健康检查 |
+
+### 微信小程序集成
+
+本插件专为微信小程序无缝集成而设计。REST API 提供：
+
+- **完整产品数据** - 包括型号、材质、尺寸变体、起订量、交货期等所有字段
+- **多图画廊** - 多张产品图片 URL
+- **分类导航** - 分类层级结构，支持筛选
+- **横幅配置** - 从 WordPress 后台动态获取横幅设置
+- **请求限流** - 内置保护机制（每 IP 每分钟 120 次请求）
+
+产品 API 返回示例：
+
+```json
+{
+  "id": 123,
+  "title": "现代沙发",
+  "model": "SF-2024-001",
+  "price": "$599",
+  "material": "真皮",
+  "moq": "10 件",
+  "leadTime": "30 天",
+  "gallery": ["https://example.com/img1.jpg", "https://example.com/img2.jpg"],
+  "sizeVariants": [
+    {"size": "双人位", "price": "$599"},
+    {"size": "三人位", "price": "$799"}
+  ],
+  "categories": [{"id": 1, "name": "客厅", "slug": "living-room"}]
+}
+```
 
 ## 自动更新
 
