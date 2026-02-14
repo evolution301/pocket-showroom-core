@@ -51,25 +51,24 @@ git tag $Version
 Write-Host "[3/6] 推送到 GitHub..." -ForegroundColor Yellow
 git push origin master --tags
 
-# Step 4: Create ZIP (with proper folder structure and version number)
+# Step 4: Create ZIP (NO outer folder - files directly in zip root, like WordPress expects)
 Write-Host "[4/6] 创建 ZIP 包..." -ForegroundColor Yellow
 $parentDir = Split-Path -Parent $PWD
 $zipPath = Join-Path $parentDir "pocket-showroom-core-$Version.zip"
 $tempDir = Join-Path $parentDir "temp-package-$Version"
-$pluginDir = Join-Path $tempDir "pocket-showroom-core"
 
-# 创建正确的目录结构
-New-Item -ItemType Directory -Force -Path $pluginDir | Out-Null
+# 创建临时目录
+New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
 
-# 复制文件（排除不需要的）
-Get-ChildItem -Path $PWD -Exclude @('.git','temp-package*') | Copy-Item -Destination $pluginDir -Recurse -Force
+# 复制文件（排除不需要的）- 直接复制到临时目录，不要子文件夹
+Get-ChildItem -Path $PWD -Exclude @('.git','temp-package*') | Copy-Item -Destination $tempDir -Recurse -Force
 
 # 删除不需要发布的文件
-Remove-Item -Force (Join-Path $pluginDir 'release.ps1') -ErrorAction SilentlyContinue
-Remove-Item -Force (Join-Path $pluginDir 'RELEASE_GUIDE.md') -ErrorAction SilentlyContinue
+Remove-Item -Force (Join-Path $tempDir 'release.ps1') -ErrorAction SilentlyContinue
+Remove-Item -Force (Join-Path $tempDir 'RELEASE_GUIDE.md') -ErrorAction SilentlyContinue
 
-# 压缩（包含外层 pocket-showroom-core 文件夹）
-Compress-Archive -Path $pluginDir -DestinationPath $zipPath -Force
+# 压缩（直接压缩临时目录内的文件，不包含外层文件夹）
+Compress-Archive -Path "$tempDir\*" -DestinationPath $zipPath -Force
 
 # 清理临时目录
 Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
