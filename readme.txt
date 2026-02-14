@@ -4,7 +4,7 @@ Tags: b2b, catalog, product showroom, csv import, gallery, furniture, wholesale
 Requires at least: 5.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.2.3
+Stable tag: 1.2.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,6 +53,10 @@ Simply add the shortcode `[pocket_showroom]` to any page or post.
 4. CSV import interface
 
 == Changelog ==
+
+= 1.2.5 =
+* Fix: Addressed GitHub Auto-Updater caching issues and workflow structure.
+* Note: Please ensure you create a GitHub Release for this version to trigger updates.
 
 = 1.2.3 =
 * Fix: Fatal Error - Fixed undefined function call typo (wp_remote_retrieve_body).
