@@ -1,10 +1,70 @@
 jQuery(document).ready(function ($) {
     var mediaUploader;
 
+    // ===== Q-2: 统一事件委托模式 =====
+    // 将多个添加按钮的点击事件整合为统一的事件委托
+    var addActionHandlers = {
+        'ps-add-images': function (e) {
+            e.preventDefault();
+            if (mediaUploader) { mediaUploader.open(); return; }
+            mediaUploader = wp.media.frames.file_frame = wp.media({
+                title: 'Select Product Images',
+                button: { text: 'Add to Gallery' },
+                multiple: true
+            });
+            mediaUploader.on('select', function () {
+                var selection = mediaUploader.state().get('selection');
+                var ids = [];
+                selection.map(function (attachment) {
+                    attachment = attachment.toJSON();
+                    ids.push(attachment.id);
+                    var thumbUrl = (attachment.sizes && attachment.sizes.thumbnail)
+                        ? attachment.sizes.thumbnail.url
+                        : attachment.url;
+                    var template = '<div class="ps-gallery-item" data-id="' + attachment.id + '"><img src="' + thumbUrl + '"><span class="remove">×</span></div>';
+                    $('#ps-add-images').before(template);
+                });
+                updateGalleryIds();
+            });
+            mediaUploader.open();
+        },
+        'ps-add-size': function (e) {
+            e.preventDefault();
+            var index = $('#ps-size-variants .ps-size-row').length;
+            var html = `
+                <div class="ps-size-row" style="display:flex; gap:10px; margin-bottom:10px;">
+                    <input type="text" class="ps-input" name="_ps_size_variants[${index}][label]" placeholder="Variant Name" style="flex:1;">
+                    <input type="text" class="ps-input" name="_ps_size_variants[${index}][value]" placeholder="Dimensions" style="flex:2;">
+                    <span class="dashicons dashicons-move ps-sort-handle" style="cursor:move; color:#ccc; align-self:center;"></span>
+                    <button type="button" class="ps-remove-btn" style="color:red; background:none; border:none; cursor:pointer;">×</button>
+                </div>
+            `;
+            $('#ps-size-variants').append(html);
+            updateSizeVariantIndices();
+        },
+        'ps-add-spec': function (e) {
+            e.preventDefault();
+            var template = `
+                <div class="ps-spec-row">
+                    <input type="text" name="_ps_dynamic_specs[key][]" class="ps-spec-key" placeholder="Field Name" value="">
+                    <input type="text" name="_ps_dynamic_specs[val][]" class="ps-spec-val" placeholder="Value" value="">
+                    <span class="dashicons dashicons-move ps-sort-handle" style="cursor:move; color:#ccc; align-self:center;"></span>
+                    <button type="button" class="ps-remove-btn">×</button>
+                </div>
+            `;
+            $('#ps-dynamic-specs').append(template);
+        }
+    };
+
+    // 统一绑定所有添加按钮
+    $(document).on('click', '#ps-add-images, #ps-add-size, #ps-add-spec', function (e) {
+        var handler = addActionHandlers[this.id];
+        if (handler) handler.call(this, e);
+    });
+
     // --- Tab Switching Logic ---
     $('.nav-tab-wrapper a').click(function (e) {
         e.preventDefault();
-        // AUDIT3-9: 验证 href 是合法的 ID 选择器
         var href = $(this).attr('href');
         if (!href || href.charAt(0) !== '#') return;
         $('.nav-tab-wrapper a').removeClass('nav-tab-active');
@@ -13,33 +73,8 @@ jQuery(document).ready(function ($) {
         $(href).show();
     });
 
-    // --- Gallery Manager (Existing) ---
-    $('#ps-add-images').on('click', function (e) {
-        e.preventDefault();
-        if (mediaUploader) { mediaUploader.open(); return; }
-        mediaUploader = wp.media.frames.file_frame = wp.media({
-            title: 'Select Product Images',
-            button: { text: 'Add to Gallery' },
-            multiple: true
-        });
-        mediaUploader.on('select', function () {
-            var selection = mediaUploader.state().get('selection');
-            var ids = [];
-            selection.map(function (attachment) {
-                attachment = attachment.toJSON();
-                ids.push(attachment.id);
-                // Fix RISK-12: thumbnail 可能不存在，使用 fallback
-                var thumbUrl = (attachment.sizes && attachment.sizes.thumbnail)
-                    ? attachment.sizes.thumbnail.url
-                    : attachment.url; // fallback to full url
-                var template = '<div class="ps-gallery-item" data-id="' + attachment.id + '"><img src="' + thumbUrl + '"><span class="remove">×</span></div>';
-                $('#ps-add-images').before(template);
-            });
-            updateGalleryIds();
-        });
-        mediaUploader.open();
-    });
-
+    // --- Gallery Manager (简化版，逻辑已移至 addActionHandlers) ---
+    // 移除画廊项的事件委托
     $(document).on('click', '.ps-gallery-item .remove', function () {
         $(this).parent('.ps-gallery-item').remove();
         updateGalleryIds();
@@ -64,23 +99,7 @@ jQuery(document).ready(function ($) {
         $('#_ps_gallery_images').val(ids.join(','));
     }
 
-    // --- Size Variants Manager (Existing) ---
-    // Add Size Variant
-    $('#ps-add-size').on('click', function (e) {
-        e.preventDefault();
-        var index = $('#ps-size-variants .ps-size-row').length;
-        var html = `
-            <div class="ps-size-row" style="display:flex; gap:10px; margin-bottom:10px;">
-                <input type="text" class="ps-input" name="_ps_size_variants[${index}][label]" placeholder="Variant Name" style="flex:1;">
-                <input type="text" class="ps-input" name="_ps_size_variants[${index}][value]" placeholder="Dimensions" style="flex:2;">
-                <span class="dashicons dashicons-move ps-sort-handle" style="cursor:move; color:#ccc; align-self:center;"></span>
-                <button type="button" class="ps-remove-btn" style="color:red; background:none; border:none; cursor:pointer;">×</button>
-            </div>
-        `;
-        $('#ps-size-variants').append(html);
-        updateSizeVariantIndices(); // Update indices after add
-    });
-
+    // --- Size Variants Manager (简化版，添加逻辑已移至 addActionHandlers) ---
     // Sortable for Size Variants
     if ($.fn.sortable) {
         $('#ps-size-variants').sortable({
@@ -99,10 +118,7 @@ jQuery(document).ready(function ($) {
         });
     }
 
-
-
-    // Remove Row (Size or Spec)
-    // Remove Row (Size or Spec)
+    // Remove Row (Size or Spec) - 统一事件委托
     $(document).on('click', '.ps-remove-btn', function () {
         var $parent = $(this).closest('.ps-spec-row, .ps-size-row');
         var isSizeRow = $parent.hasClass('ps-size-row');
@@ -110,30 +126,14 @@ jQuery(document).ready(function ($) {
         if (isSizeRow) updateSizeVariantIndices();
     });
 
-    // --- Dynamic Specifications (v6.0) ---
-    $('#ps-add-spec').on('click', function (e) {
-        e.preventDefault();
-        var template = `
-            <div class="ps-spec-row">
-                <input type="text" name="_ps_dynamic_specs[key][]" class="ps-spec-key" placeholder="Field Name" value="">
-                <input type="text" name="_ps_dynamic_specs[val][]" class="ps-spec-val" placeholder="Value" value="">
-                <span class="dashicons dashicons-move ps-sort-handle" style="cursor:move; color:#ccc; align-self:center;"></span>
-                <button type="button" class="ps-remove-btn">×</button>
-            </div>
-        `;
-        $('#ps-dynamic-specs').append(template);
-    });
-
+    // --- Dynamic Specifications (简化版，添加逻辑已移至 addActionHandlers) ---
     // Sortable for Dynamic Specs
     if ($.fn.sortable) {
         $('#ps-dynamic-specs').sortable({
             handle: '.ps-sort-handle',
             cursor: 'move',
-            // No index update needed for specs as they use array[] syntax
         });
     }
-
-    // 已在第 71 行统一绑定 .ps-remove-btn，此处不再重复绑定
 
     // Banner Button Text Live Preview
     $('#ps_banner_button_text').on('input', function () {

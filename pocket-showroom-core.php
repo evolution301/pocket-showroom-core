@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Pocket Showroom Core
-Plugin URI: https://github.com/Evolution301/pocket-showroom-core
+Plugin URI: https://github.com/evolution301/pocket-showroom-core
 Description: A modern B2B product catalog with CSV import, multi-image gallery, and interactive frontend.
 Version: 1.1.1
-Author: Evolution301
-Author URI: https://github.com/Evolution301
+Author: evolution301
+Author URI: https://github.com/evolution301
 Text Domain: pocket-showroom
 Requires at least: 5.0
 Requires PHP: 7.4
@@ -23,8 +23,11 @@ define('PS_CORE_PATH', plugin_dir_path(__FILE__));
 define('PS_CORE_URL', plugin_dir_url(__FILE__));
 
 // GitHub Updater Configuration - Replace with your GitHub username
-define('PS_GITHUB_USER', 'Evolution301');
+define('PS_GITHUB_USER', 'evolution301');
 define('PS_GITHUB_REPO', 'pocket-showroom-core');
+
+// Include Trait (Q-1: 可复用的单例模式)
+require_once PS_CORE_PATH . 'includes/trait-singleton.php';
 
 // Include Classes
 require_once PS_CORE_PATH . 'includes/class-cpt-registry.php';

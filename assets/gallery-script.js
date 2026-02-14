@@ -89,25 +89,122 @@ jQuery(document).ready(function ($) {
 
     // ===== SEARCH & FILTER =====
 
-    // Simple Search (Client Side) — debounced (Fix F1)
-    $('#ps-search').on('keyup', debounce(function () {
-        var value = $(this).val().toLowerCase();
+    /**
+     * Fix M-3: 智能搜索 - 根据产品数量决定使用客户端还是服务器端搜索
+     * 产品数量 > 阈值(50) 时使用 AJAX 搜索，否则使用客户端搜索
+     */
+    var totalProducts = (typeof ps_ajax !== 'undefined' && ps_ajax.total_products) ? ps_ajax.total_products : 0;
+    var ajaxSearchThreshold = (typeof ps_ajax !== 'undefined' && ps_ajax.ajax_search_threshold) ? ps_ajax.ajax_search_threshold : 50;
+    var useAjaxSearch = totalProducts > ajaxSearchThreshold;
+    var searchRequest = null; // 用于取消正在进行的搜索请求
+    var currentCategory = 'all'; // 当前选中的分类
+
+    // 搜索函数 - 智能选择搜索方式
+    function performSearch(value) {
+        // 如果使用 AJAX 搜索且搜索词长度 >= 2
+        if (useAjaxSearch && value.length >= 2) {
+            // 取消之前的请求
+            if (searchRequest) {
+                searchRequest.abort();
+            }
+
+            // 显示加载状态
+            var $grid = $('.ps-gallery-grid');
+            var loadingHtml = '<div class="ps-searching" style="text-align:center; padding:40px; color:#888;">' 
+                + psI18n('searching', 'Searching...') + '</div>';
+            
+            // 如果没有结果容器，添加一个
+            if ($grid.find('.ps-card').length === 0) {
+                $grid.html(loadingHtml);
+            } else {
+                $grid.append(loadingHtml);
+            }
+
+            searchRequest = $.ajax({
+                url: ps_ajax.url,
+                type: 'POST',
+                timeout: 15000,
+                data: {
+                    action: 'ps_search_products',
+                    search: value,
+                    category: currentCategory,
+                    nonce: ps_ajax.nonce
+                },
+                success: function (response) {
+                    $('.ps-searching').remove();
+                    if (response.success && response.data.html) {
+                        $grid.html(response.data.html);
+                        // 更新 Load More 按钮状态（搜索结果通常不需要分页）
+                        $('#ps-load-more-wrap').hide();
+                    } else {
+                        $grid.html('<p class="ps-no-results" style="text-align:center; padding:40px; color:#888;">' 
+                            + psI18n('no_results', 'No products found.') + '</p>');
+                    }
+                },
+                error: function (xhr, status) {
+                    $('.ps-searching').remove();
+                    if (status !== 'abort') {
+                        // 回退到客户端搜索
+                        clientSideSearch(value);
+                    }
+                }
+            });
+        } else if (!useAjaxSearch || value.length < 2) {
+            // 客户端搜索
+            if (searchRequest) {
+                searchRequest.abort();
+                searchRequest = null;
+            }
+            clientSideSearch(value);
+        }
+
+        // 如果搜索框清空，显示所有产品
+        if (value.length === 0) {
+            if (searchRequest) {
+                searchRequest.abort();
+                searchRequest = null;
+            }
+            $('.ps-searching').remove();
+            // 重新加载页面内容或显示所有产品
+            if (useAjaxSearch) {
+                // 触发分类过滤来恢复所有产品
+                $('.ps-filter-btn[data-cat="all"]').click();
+            }
+            $('#ps-load-more-wrap').show();
+        }
+    }
+
+    // 客户端搜索（原有逻辑）
+    function clientSideSearch(value) {
         $(".ps-gallery-grid .ps-card").each(function () {
             $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
         });
         if (value.length > 0) {
             $('.ps-filter-btn').removeClass('active');
         }
+    }
+
+    // 绑定搜索事件 - 使用 debounce
+    $('#ps-search').on('keyup', debounce(function () {
+        var value = $(this).val().toLowerCase().trim();
+        performSearch(value);
     }, 300));
 
-    // Category Filter (Client Side)
+    // Category Filter (Client Side) - 更新当前分类
     $('.ps-filter-btn').on('click', function () {
         var cat = $(this).data('cat');
         $('.ps-filter-btn').removeClass('active');
         $(this).addClass('active');
+        currentCategory = cat;
 
         // Clear search
         $('#ps-search').val('');
+
+        // 取消正在进行的搜索
+        if (searchRequest) {
+            searchRequest.abort();
+            searchRequest = null;
+        }
 
         if (cat === 'all') {
             $('.ps-card').show();
@@ -120,6 +217,12 @@ jQuery(document).ready(function ($) {
                     $(this).show();
                 }
             });
+        }
+
+        // 如果使用 AJAX 搜索，重新加载产品
+        if (useAjaxSearch) {
+            // 显示 Load More 按钮
+            $('#ps-load-more-wrap').show();
         }
     });
 

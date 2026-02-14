@@ -566,6 +566,62 @@ class PS_Frontend_Gallery
     }
 
     /**
+     * Fix M-3: AJAX Search handler — 产品数量超过阈值时使用服务器端搜索
+     */
+    public function ajax_search_products()
+    {
+        check_ajax_referer('ps_gallery_nonce', 'nonce');
+
+        $search = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
+        $category = isset($_POST['category']) ? sanitize_text_field($_POST['category']) : '';
+
+        $args = array(
+            'post_type' => 'ps_item',
+            'posts_per_page' => 100, // 限制搜索结果数量
+            'post_status' => 'publish',
+            'orderby' => 'date',
+            'order' => 'DESC',
+        );
+
+        // 搜索条件
+        if (!empty($search)) {
+            $args['s'] = $search;
+        }
+
+        // 分类过滤
+        if (!empty($category) && $category !== 'all') {
+            $args['tax_query'] = array(
+                array(
+                    'taxonomy' => 'ps_category',
+                    'field' => 'slug',
+                    'terms' => $category,
+                ),
+            );
+        }
+
+        $query = new WP_Query($args);
+        $watermark_text = get_option('ps_watermark_text', 'Pocket Showroom');
+
+        ob_start();
+        if ($query->have_posts()) {
+            while ($query->have_posts()) {
+                $query->the_post();
+                $this->render_card_html($watermark_text);
+            }
+        } else {
+            echo '<p class="ps-no-results" style="text-align:center; padding:40px; color:#888;">' 
+                . esc_html__('No products found.', 'pocket-showroom') . '</p>';
+        }
+        wp_reset_postdata();
+        $html = ob_get_clean();
+
+        wp_send_json_success(array(
+            'html' => $html,
+            'total' => (int) $query->found_posts,
+        ));
+    }
+
+    /**
      * Fix #27: 使用 body class 限定 CSS 作用域，避免全局选择器冲突
      * 兼容 Top 20+ WordPress 主题的 header / footer / sidebar 选择器
      */
