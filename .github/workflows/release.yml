@@ -41,7 +41,7 @@ jobs:
             3. Activate the plugin
             
             ### Changelog
-            See [readme.txt](https://github.com/evolution301/pocket-showroom-core/blob/master/readme.txt) for details.
+            See [readme.txt](https://github.com/evolution301/pocket-showroom-core/blob/main/readme.txt) for details.
           draft: false
           prerelease: false
         env:
