@@ -16,6 +16,10 @@ define('PS_CORE_VERSION', '1.2.0');
 define('PS_CORE_PATH', plugin_dir_path(__FILE__));
 define('PS_CORE_URL', plugin_dir_url(__FILE__));
 
+// GitHub Updater Configuration
+define('PS_GITHUB_USER', 'evolution301');
+define('PS_GITHUB_REPO', 'pocket-showroom-core');
+
 // Include Classes
 require_once PS_CORE_PATH . 'includes/class-cpt-registry.php';
 require_once PS_CORE_PATH . 'includes/class-meta-fields.php';
@@ -25,6 +29,7 @@ require_once PS_CORE_PATH . 'includes/class-frontend-gallery.php';
 require_once PS_CORE_PATH . 'includes/class-settings.php';
 require_once PS_CORE_PATH . 'includes/class-image-watermarker.php';
 require_once PS_CORE_PATH . 'includes/class-rest-api.php';
+require_once PS_CORE_PATH . 'includes/class-plugin-updater.php';
 
 // Initialize Classes
 function ps_core_init_plugin()
@@ -42,6 +47,15 @@ function ps_core_init_plugin()
     PS_REST_API::get_instance();
 }
 add_action('plugins_loaded', 'ps_core_init_plugin');
+
+// Initialize GitHub Updater
+function ps_core_init_updater()
+{
+    if (class_exists('PS_Plugin_Updater')) {
+        new PS_Plugin_Updater(PS_GITHUB_USER, PS_GITHUB_REPO, __FILE__);
+    }
+}
+add_action('admin_init', 'ps_core_init_updater');
 
 // Add Settings & Add New Item links next to Deactivate on Plugins page
 function ps_core_action_links($links)
