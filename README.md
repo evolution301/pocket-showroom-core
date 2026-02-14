@@ -35,7 +35,7 @@ A modern B2B product catalog WordPress plugin designed for furniture exporters, 
 
 ### Method 1: Download from GitHub (Recommended)
 
-1. Download the latest release: [pocket-showroom-core-v1.1.2.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/1.1.2/pocket-showroom-core.zip)
+1. Download the latest release: [pocket-showroom-core-v1.1.3.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/1.1.3/pocket-showroom-core.zip)
 2. Go to **WordPress Admin** → **Plugins** → **Add New** → **Upload Plugin**
 3. Upload the ZIP file and click **Install Now**
 4. Activate the plugin
@@ -186,6 +186,11 @@ Configure image watermark:
 
 ## Changelog
 
+### v1.1.3 (2026-02-14)
+- Fix: Added safe file loading for all class files to prevent fatal errors
+- Improvement: Better error handling with admin notices for missing files
+- Improvement: Class existence checks before initialization
+
 ### v1.1.2 (2026-02-14)
 - Fix: Critical error due to missing file dependencies
 - Improvement: Enhanced error handling for cloud connectivity
@@ -253,7 +258,7 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 
 ### 方法一：从 GitHub 下载（推荐）
 
-1. 下载最新版本：[pocket-showroom-core-v1.1.2.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/1.1.2/pocket-showroom-core.zip)
+1. 下载最新版本：[pocket-showroom-core-v1.1.3.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/1.1.3/pocket-showroom-core.zip)
 2. 进入 **WordPress 后台** → **插件** → **安装插件** → **上传插件**
 3. 上传 ZIP 文件，点击 **现在安装**
 4. 激活插件
@@ -403,6 +408,11 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 - 位置
 
 ## 更新日志
+
+### v1.1.3 (2026-02-14)
+- 修复：为所有类文件添加安全加载机制，防止致命错误
+- 改进：更好的错误处理，缺失文件时显示后台提示
+- 改进：初始化前检查类是否存在
 
 ### v1.1.2 (2026-02-14)
 - 修复：文件依赖缺失导致的严重错误
