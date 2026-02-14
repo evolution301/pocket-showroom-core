@@ -3,7 +3,7 @@
 Plugin Name: Pocket Showroom Core
 Plugin URI: https://github.com/evolution301/pocket-showroom-core
 Description: A modern B2B product catalog with CSV import, multi-image gallery, and interactive frontend.
-Version: 1.1.1
+Version: 1.1.2
 Author: evolution301
 Author URI: https://github.com/evolution301
 Text Domain: pocket-showroom
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define Constants
-define('PS_CORE_VERSION', '1.1.1');
+define('PS_CORE_VERSION', '1.1.2');
 define('PS_CORE_PATH', plugin_dir_path(__FILE__));
 define('PS_CORE_URL', plugin_dir_url(__FILE__));
 
@@ -27,7 +27,9 @@ define('PS_GITHUB_USER', 'evolution301');
 define('PS_GITHUB_REPO', 'pocket-showroom-core');
 
 // Include Trait (Q-1: 可复用的单例模式)
-require_once PS_CORE_PATH . 'includes/trait-singleton.php';
+if (file_exists(PS_CORE_PATH . 'includes/trait-singleton.php')) {
+    require_once PS_CORE_PATH . 'includes/trait-singleton.php';
+}
 
 // Include Classes
 require_once PS_CORE_PATH . 'includes/class-cpt-registry.php';
@@ -38,7 +40,11 @@ require_once PS_CORE_PATH . 'includes/class-frontend-gallery.php';
 require_once PS_CORE_PATH . 'includes/class-settings.php';
 require_once PS_CORE_PATH . 'includes/class-image-watermarker.php';
 require_once PS_CORE_PATH . 'includes/class-rest-api.php';
-require_once PS_CORE_PATH . 'includes/class-plugin-updater.php';
+
+// Include Updater
+if (file_exists(PS_CORE_PATH . 'includes/class-plugin-updater.php')) {
+    require_once PS_CORE_PATH . 'includes/class-plugin-updater.php';
+}
 
 // Initialize Classes
 function ps_core_init_plugin()
@@ -60,7 +66,9 @@ add_action('plugins_loaded', 'ps_core_init_plugin');
 // Initialize GitHub Updater
 function ps_core_init_updater()
 {
-    new PS_Plugin_Updater(PS_GITHUB_USER, PS_GITHUB_REPO, __FILE__);
+    if (class_exists('PS_Plugin_Updater')) {
+        new PS_Plugin_Updater(PS_GITHUB_USER, PS_GITHUB_REPO, __FILE__);
+    }
 }
 add_action('admin_init', 'ps_core_init_updater');
 
