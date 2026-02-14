@@ -35,7 +35,7 @@ A modern B2B product catalog WordPress plugin designed for furniture exporters, 
 
 ### Method 1: Download from GitHub (Recommended)
 
-1. Download the latest release: [pocket-showroom-core-v2.0.1.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v2.0.1/pocket-showroom-core.zip)
+1. Download the latest release: [pocket-showroom-core-v2.0.2.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v2.0.2/pocket-showroom-core.zip)
 2. Go to **WordPress Admin** → **Plugins** → **Add New** → **Upload Plugin**
 3. Upload the ZIP file and click **Install Now**
 4. Activate the plugin
@@ -186,6 +186,9 @@ Configure image watermark:
 
 ## Changelog
 
+### v2.0.2 (2026-02-15)
+- **Fix**: Resolved "Settings page access denied" error by correcting the admin menu link URL.
+
 ### v2.0.1 (2026-02-15)
 - **Frontend Optimization**:
     - Fixed modal closing issue (ESC/Background click)
@@ -270,7 +273,7 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 
 ### 方法一：从 GitHub 下载（推荐）
 
-1. 下载最新版本：[pocket-showroom-core-v2.0.1.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v2.0.1/pocket-showroom-core.zip)
+1. 下载最新版本：[pocket-showroom-core-v2.0.2.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v2.0.2/pocket-showroom-core.zip)
 2. 进入 **WordPress 后台** → **插件** → **安装插件** → **上传插件**
 3. 上传 ZIP 文件，点击 **现在安装**
 4. 激活插件
@@ -420,6 +423,9 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 - 位置
 
 ## 更新日志
+
+### v2.0.2 (2026-02-15)
+- **修复**: 修正后台设置链接错误导致的 "权限不足" 问题。
 
 ### v2.0.1 (2026-02-15)
 - **前端优化**:
