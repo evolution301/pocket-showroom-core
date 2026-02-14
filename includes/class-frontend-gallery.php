@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class PS_Frontend_Gallery
+class PS_Core_Frontend_Gallery
 {
 
     private static $instance = null;
@@ -36,8 +36,8 @@ class PS_Frontend_Gallery
 
     public function enqueue_assets()
     {
-        wp_register_style('ps-gallery-css', PS_CORE_URL . 'assets/gallery-style.css', array(), PS_CORE_VERSION);
-        wp_register_script('ps-gallery-js', PS_CORE_URL . 'assets/gallery-script.js', array('jquery'), PS_CORE_VERSION, true);
+        wp_register_style('ps-gallery-css', PS_V2_URL . 'assets/gallery-style.css', array(), PS_V2_VERSION);
+        wp_register_script('ps-gallery-js', PS_V2_URL . 'assets/gallery-script.js', array('jquery'), PS_V2_VERSION, true);
 
         // 获取产品总数，用于决定是否使用 AJAX 搜索
         $count_posts = wp_count_posts('ps_item');
@@ -609,7 +609,7 @@ class PS_Frontend_Gallery
                 $this->render_card_html($watermark_text);
             }
         } else {
-            echo '<p class="ps-no-results" style="text-align:center; padding:40px; color:#888;">' 
+            echo '<p class="ps-no-results" style="text-align:center; padding:40px; color:#888;">'
                 . esc_html__('No products found.', 'pocket-showroom') . '</p>';
         }
         wp_reset_postdata();
@@ -723,7 +723,7 @@ class PS_Frontend_Gallery
     private function get_client_ip()
     {
         $ip = '';
-        
+
         $headers = array(
             'HTTP_CF_CONNECTING_IP',     // Cloudflare
             'HTTP_X_FORWARDED_FOR',     // 通用代理

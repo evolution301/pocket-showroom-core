@@ -11,7 +11,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class PS_Plugin_Updater {
+class PS_Core_Plugin_Updater
+{
     /**
      * GitHub repository owner (username or organization)
      * @var string
@@ -55,11 +56,12 @@ class PS_Plugin_Updater {
      * @param string $github_repoGitHub repository name
      * @param string $plugin_file Full path to the main plugin file
      */
-    public function __construct($github_user, $github_repo, $plugin_file) {
+    public function __construct($github_user, $github_repo, $plugin_file)
+    {
         $this->github_user = $github_user;
         $this->github_repo = $github_repo;
         $this->plugin_basename = plugin_basename($plugin_file);
-        $this->current_version = PS_CORE_VERSION;
+        $this->current_version = PS_V2_VERSION;
         $this->cache_key = 'ps_github_updater_' . md5($this->github_user . '/' . $this->github_repo);
 
         // Hook into WordPress update system
@@ -78,7 +80,8 @@ class PS_Plugin_Updater {
      * @param array $links Existing plugin action links
      * @return array Modified links
      */
-    public function add_check_update_link($links) {
+    public function add_check_update_link($links)
+    {
         $check_link = '<a href="' . wp_nonce_url(admin_url('plugins.php?ps_check_update=1'), 'ps_check_update') . '">Check for Updates</a>';
         array_push($links, $check_link);
         return $links;
@@ -87,7 +90,8 @@ class PS_Plugin_Updater {
     /**
      * Handle manual update check trigger.
      */
-    public function manual_check_trigger() {
+    public function manual_check_trigger()
+    {
         if (!isset($_GET['ps_check_update']) || !current_user_can('update_plugins')) {
             return;
         }
@@ -109,7 +113,8 @@ class PS_Plugin_Updater {
      * @param object $transient WordPress update transient
      * @return object Modified transient
      */
-    public function check_for_update($transient) {
+    public function check_for_update($transient)
+    {
         if (empty($transient)) {
             return $transient;
         }
@@ -131,8 +136,8 @@ class PS_Plugin_Updater {
                 'tested' => $remote_info->tested ?? '6.4',
                 'requires_php' => $remote_info->requires_php ?? '7.4',
                 'icons' => array(
-                    '1x' => PS_CORE_URL . 'assets/icon-128x128.png',
-                    '2x' => PS_CORE_URL . 'assets/icon-256x256.png',
+                    '1x' => PS_V2_URL . 'assets/icon-128x128.png',
+                    '2x' => PS_V2_URL . 'assets/icon-256x256.png',
                 ),
             );
 
@@ -147,7 +152,8 @@ class PS_Plugin_Updater {
      *
      * @return object|false Version info object or false on failure
      */
-    private function get_remote_info() {
+    private function get_remote_info()
+    {
         // Try to get from cache first
         $cached = get_site_transient($this->cache_key);
         if ($cached !== false) {
@@ -183,8 +189,10 @@ class PS_Plugin_Updater {
         $download_url = '';
         if (!empty($release->assets)) {
             foreach ($release->assets as $asset) {
-                if (strpos($asset->name, '.zip') !== false && 
-                    strpos($asset->name, 'pocket-showroom-core') !== false) {
+                if (
+                    strpos($asset->name, '.zip') !== false &&
+                    strpos($asset->name, 'pocket-showroom-core') !== false
+                ) {
                     $download_url = $asset->browser_download_url;
                     break;
                 }
@@ -220,7 +228,8 @@ class PS_Plugin_Updater {
      * @param object $args Extra arguments
      * @return object|false Plugin info object
      */
-    public function plugin_popup($result, $action, $args) {
+    public function plugin_popup($result, $action, $args)
+    {
         if ($action !== 'plugin_information') {
             return $result;
         }
@@ -262,7 +271,8 @@ class PS_Plugin_Updater {
      * @param array $result Installation result data
      * @return array Modified result
      */
-    public function after_install($result, $hook_extra, $result_data) {
+    public function after_install($result, $hook_extra, $result_data)
+    {
         // Check if this is our plugin
         if (!isset($hook_extra['plugin']) || $hook_extra['plugin'] !== $this->plugin_basename) {
             return $result;

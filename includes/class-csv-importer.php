@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class PS_CSV_Importer
+class PS_Core_CSV_Importer
 {
 
     private static $instance = null;
@@ -28,7 +28,7 @@ class PS_CSV_Importer
     public function enqueue_assets($hook)
     {
         if (strpos($hook, 'ps-import') !== false) {
-            wp_enqueue_style('ps-admin-style', PS_CORE_URL . 'assets/admin-style.css', array(), PS_CORE_VERSION);
+            wp_enqueue_style('ps-admin-style', PS_V2_URL . 'assets/admin-style.css', array(), PS_V2_VERSION);
         }
     }
 
@@ -79,7 +79,7 @@ class PS_CSV_Importer
                     </form>
 
                     <div class="ps-card-footer">
-                        <a href="<?php echo PS_CORE_URL . 'assets/sample-import.csv'; ?>" download class="ps-text-link">
+                        <a href="<?php echo PS_V2_URL . 'assets/sample-import.csv'; ?>" download class="ps-text-link">
                             <span class="dashicons dashicons-download"></span>
                             <?php _e('Download Sample Template', 'pocket-showroom'); ?>
                         </a>
@@ -443,9 +443,9 @@ class PS_CSV_Importer
         // 4. SSRF 防护: 阻止已知危险主机名
         $host_lower = strtolower($parsed['host']);
         $blocked_hosts = array(
-            'localhost', 
-            '127.0.0.1', 
-            '0.0.0.0', 
+            'localhost',
+            '127.0.0.1',
+            '0.0.0.0',
             '::1',
             'localhost.localdomain',
             'ip6-localhost',
@@ -495,7 +495,7 @@ class PS_CSV_Importer
             'timeout' => 30,
             'redirection' => 0, // 禁止重定向，防止绕过
             'sslverify' => true,
-            'user-agent' => 'Pocket-Showroom-Importer/' . PS_CORE_VERSION,
+            'user-agent' => 'Pocket-Showroom-Importer/' . PS_V2_VERSION,
         ));
 
         if (is_wp_error($response)) {
@@ -533,9 +533,12 @@ class PS_CSV_Importer
 
         // 生成安全的文件名
         $extension = 'jpg';
-        if (strpos($content_type, 'png') !== false) $extension = 'png';
-        elseif (strpos($content_type, 'gif') !== false) $extension = 'gif';
-        elseif (strpos($content_type, 'webp') !== false) $extension = 'webp';
+        if (strpos($content_type, 'png') !== false)
+            $extension = 'png';
+        elseif (strpos($content_type, 'gif') !== false)
+            $extension = 'gif';
+        elseif (strpos($content_type, 'webp') !== false)
+            $extension = 'webp';
 
         $filename = 'ps-import-' . sanitize_file_name(substr(md5($url . time()), 0, 12)) . '.' . $extension;
         $tmp = wp_tempnam($filename);

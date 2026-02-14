@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class PS_REST_API
+class PS_Core_REST_API
 {
     /**
      * API namespace
@@ -64,7 +64,7 @@ class PS_REST_API
 
         $transient_key = 'ps_api_rate_' . md5($ip);
         $current_count = (int) get_transient($transient_key);
-        
+
         if ($current_count >= self::RATE_LIMIT_PER_MINUTE + self::RATE_LIMIT_BURST) {
             return new WP_Error(
                 'rate_limit_exceeded',
@@ -84,7 +84,7 @@ class PS_REST_API
     private function get_client_ip()
     {
         $ip = '';
-        
+
         // 按优先级检查各种可能的 IP 来源
         $headers = array(
             'HTTP_CF_CONNECTING_IP',     // Cloudflare
@@ -193,7 +193,7 @@ class PS_REST_API
         return new WP_REST_Response(array(
             'status' => 'ok',
             'plugin' => 'pocket-showroom',
-            'version' => defined('PS_CORE_VERSION') ? PS_CORE_VERSION : 'unknown',
+            'version' => defined('PS_V2_VERSION') ? PS_V2_VERSION : 'unknown',
             'site' => get_bloginfo('name'),
         ), 200);
     }

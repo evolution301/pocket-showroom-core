@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class PS_Social_Share
+class PS_Core_Social_Share
 {
 
     private static $instance = null;

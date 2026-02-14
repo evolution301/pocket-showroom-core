@@ -2,7 +2,7 @@
 if (!defined('ABSPATH'))
     exit;
 
-class PS_Image_Watermarker
+class PS_Core_Image_Watermarker
 {
 
     private static $instance = null;

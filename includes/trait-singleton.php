@@ -6,7 +6,7 @@
  * 
  * 使用方法:
  *   class My_Class {
- *       use PS_Singleton;
+ *       use PS_Core_Singleton;
  *       
  *       // 类的其余代码...
  *   }
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-trait PS_Singleton
+trait PS_Core_Singleton
 {
     /**
      * 单例实例

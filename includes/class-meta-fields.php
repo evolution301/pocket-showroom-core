@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class PS_Meta_Fields
+class PS_Core_Meta_Fields
 {
 
     private static $instance = null;
@@ -44,8 +44,8 @@ class PS_Meta_Fields
             return;
 
         wp_enqueue_media();
-        wp_enqueue_style('ps-admin-css', PS_CORE_URL . 'assets/admin-style.css', array(), PS_CORE_VERSION);
-        wp_enqueue_script('ps-admin-js', PS_CORE_URL . 'assets/admin-script.js', array('jquery', 'jquery-ui-sortable'), PS_CORE_VERSION, true);
+        wp_enqueue_style('ps-admin-css', PS_V2_URL . 'assets/admin-style.css', array(), PS_V2_VERSION);
+        wp_enqueue_script('ps-admin-js', PS_V2_URL . 'assets/admin-script.js', array('jquery', 'jquery-ui-sortable'), PS_V2_VERSION, true);
     }
 
     public function remove_standard_meta_boxes()
@@ -433,15 +433,15 @@ class PS_Meta_Fields
             return;
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
             return;
-        
+
         // 验证 post type（防止其他 CPT 误触发）
         if (get_post_type($post_id) !== 'ps_item')
             return;
-        
+
         // 权限检查
         if (!current_user_can('edit_post', $post_id))
             return;
-        
+
         // 额外安全日志（仅在调试模式下）
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log("Pocket Showroom: Saving meta for post {$post_id}");
