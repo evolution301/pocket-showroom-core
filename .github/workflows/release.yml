@@ -1,0 +1,48 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create ZIP package
+        run: |
+          cd ${{ github.workspace }}
+          zip -r pocket-showroom-core-${{ steps.get_version.outputs.VERSION }}.zip \
+            pocket-showroom-core.php \
+            uninstall.php \
+            readme.txt \
+            includes/ \
+            assets/ \
+            -x "*.git*" "*.DS_Store" "*Thumbs.db"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: pocket-showroom-core-${{ steps.get_version.outputs.VERSION }}.zip
+          body: |
+            ## Pocket Showroom Core ${{ steps.get_version.outputs.VERSION }}
+            
+            ### Installation
+            1. Download the ZIP file below
+            2. Upload to WordPress via Plugins → Add New → Upload Plugin
+            3. Activate the plugin
+            
+            ### Changelog
+            See [readme.txt](https://github.com/Evolution301/pocket-showroom-core/blob/main/readme.txt) for details.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

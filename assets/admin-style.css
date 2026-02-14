@@ -1,0 +1,922 @@
+/* --- MODERN EDITOR STYLES (CUSTOM UI) --- */
+.ps-modern-ui {
+    --ps-primary: #2271b1;
+    --ps-bg: #fff;
+    --ps-border: #dcdcde;
+    --ps-text: #1d2327;
+    --ps-text-soft: #646970;
+    --ps-radius: 8px;
+    --ps-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-top: -20px;
+    /* Pull up to hide WP gap */
+}
+
+.ps-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: #fff;
+    padding: 15px 25px;
+    border-radius: var(--ps-radius);
+    box-shadow: var(--ps-shadow);
+}
+
+.ps-title-input {
+    border: none !important;
+    font-size: 24px !important;
+    font-weight: 600 !important;
+    width: 100%;
+    outline: none !important;
+    background: transparent !important;
+    color: #1d2327 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.ps-title-input::placeholder {
+    color: #ccc;
+}
+
+.ps-title-input:focus {
+    box-shadow: none !important;
+}
+
+.ps-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.ps-btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ps-btn-primary {
+    background: var(--ps-primary);
+    color: #fff;
+    border-color: var(--ps-primary);
+}
+
+.ps-btn-primary:hover {
+    background: #135e96;
+    color: #fff;
+}
+
+.ps-btn-secondary {
+    background: #f6f7f7;
+    color: var(--ps-primary);
+    border-color: var(--ps-primary);
+}
+
+.ps-btn-secondary:hover {
+    background: #f0f0f1;
+    color: #135e96;
+}
+
+.ps-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    /* Main vs Sidebar (Fixed width sidebar) */
+    gap: 25px;
+}
+
+/* Cards */
+.ps-card {
+    background: #fff;
+    border-radius: var(--ps-radius);
+    box-shadow: var(--ps-shadow);
+    margin-bottom: 25px;
+    overflow: hidden;
+    border: 1px solid #eee;
+}
+
+.ps-card-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fcfcfc;
+}
+
+.ps-card-header h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.ps-card-body {
+    padding: 20px;
+}
+
+/* Gallery */
+.ps-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
+}
+
+.ps-gallery-item {
+    aspect-ratio: 1;
+    background: #f0f0f0;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    cursor: move;
+}
+
+.ps-gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ps-gallery-item .remove {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 18px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.ps-gallery-add {
+    aspect-ratio: 1;
+    border: 2px dashed #ccc;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #888;
+    transition: all 0.2s;
+}
+
+.ps-gallery-add:hover {
+    border-color: var(--ps-primary);
+    color: var(--ps-primary);
+    background: #f8fbff;
+}
+
+/* Item Specifications: 2-column grid layout */
+.ps-specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 20px;
+    /* No vertical gap (ps-form-row already has margin-bottom), 20px horizontal gap */
+}
+
+@media (max-width: 782px) {
+    .ps-specs-grid {
+        grid-template-columns: 1fr;
+        /* Stack on small screens */
+    }
+}
+
+/* Form Fields */
+.ps-form-row {
+    margin-bottom: 15px;
+}
+
+.ps-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #646970;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ps-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.ps-input:focus {
+    border-color: var(--ps-primary);
+    outline: none;
+    box-shadow: 0 0 0 1px var(--ps-primary);
+}
+
+/* Dynamic Specs */
+.ps-spec-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+.ps-spec-key {
+    flex: 1;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    border-bottom: 1px dashed #ccc;
+    padding: 5px;
+    font-size: 13px;
+}
+
+.ps-spec-val {
+    flex: 1.5;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 13px;
+}
+
+.ps-remove-btn {
+    color: #d63638;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 5px;
+}
+
+.ps-notice-tip {
+    background: #e5f5fa;
+    color: #0085ba;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Color Picker Helpers (Keep existing if needed) */
+.ps-divi-picker-container {
+    position: relative;
+    display: inline-block;
+}
+
+.ps-divi-trigger {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #ddd, 0 2px 5px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    background: #ccc;
+    position: relative;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+    .ps-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ps-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .ps-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* --- SETTINGS PAGE CONTAINER --- */
+/* --- SETTINGS PAGE CONTAINER --- */
+#ps-settings-form,
+#ps-tab-watermark,
+#ps-tab-banner,
+#ps-tab-shortcodes {
+    max-width: 85vw;
+    margin: 30px auto;
+    /* Center the container */
+    padding: 0 20px;
+    /* Breathing room on sides */
+    box-sizing: border-box;
+}
+
+/* --- SETTINGS PAGE 3-COLUMN LAYOUT --- */
+.ps-settings-layout-3col {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+
+    /* Card Style for Watermark Tab */
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ps-col-inputs {
+    flex: 0 0 260px;
+}
+
+.ps-col-preview {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Wrapper for the Colors Row to span full width below if needed or just be flexible */
+.ps-col-colors-wrapper {
+    flex: 1 1 100%;
+    margin-top: 20px;
+}
+
+/* --- BANNER TAB: Top-Bottom Layout --- */
+.ps-banner-settings-row {
+    display: flex;
+    gap: 40px;
+    /* Increased gap for better breathing room */
+    align-items: flex-start;
+    margin-bottom: 30px;
+
+    /* "Gather" settings in a nice card */
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ps-banner-settings-col {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.ps-banner-preview-row {
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Colors Row Layout */
+.ps-colors-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.ps-color-item {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.ps-color-item label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    text-align: center;
+}
+
+/* Third column for position/rotation/save controls */
+.ps-col-colors {
+    flex: 0 0 200px;
+}
+
+/* Common Settings Components */
+.ps-form-group {
+    margin-bottom: 20px;
+}
+
+.ps-form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.ps-canvas-wrapper {
+    border: 1px solid #ccc;
+    padding: 10px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+#ps-preview-canvas {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 66.66%;
+    overflow: hidden;
+    background: #f0f0f0;
+}
+
+#ps-preview-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#ps-watermark-layer {
+    position: absolute;
+    transform-origin: center center;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.ps-wm-text {
+    font-family: sans-serif;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Switch */
+.ps-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 24px;
+}
+
+.ps-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.ps-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.ps-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.ps-slider {
+    background-color: #007cba;
+}
+
+input:checked+.ps-slider:before {
+    transform: translateX(16px);
+}
+
+/* Position Grid */
+.ps-position-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 40px);
+    gap: 5px;
+}
+
+.ps-position-grid label {
+    display: block;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    margin: 0 !important;
+}
+
+.ps-position-grid input {
+    display: none;
+}
+
+.ps-position-grid span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: #eee;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+}
+
+.ps-position-grid input:checked+span {
+    background: #007cba;
+    border-color: #005a87;
+}
+
+/* --- DIVI-LIKE COLOR PICKER --- */
+/* Adjust positioning for row layout */
+.ps-divi-picker-container {
+    position: relative;
+    display: inline-block;
+    z-index: 100;
+}
+
+.ps-divi-trigger {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 1px #ddd, 0 4px 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    position: relative;
+    background: #eee;
+    transition: transform 0.2s;
+}
+
+.ps-divi-trigger:hover {
+    transform: scale(1.05);
+}
+
+.ps-divi-trigger-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+}
+
+.ps-divi-picker-wrapper {
+    /* Center the picker below the trigger */
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: 260px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    display: none;
+    border: 1px solid #eee;
+    z-index: 999;
+}
+
+.ps-divi-picker-wrapper.active {
+    display: block;
+    animation: psPopUp 0.2s ease-out;
+}
+
+@keyframes psPopUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Arrow pointing UP to trigger */
+.ps-divi-picker-wrapper:after {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    right: auto;
+    margin-left: -6px;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    transform: rotate(45deg);
+    border-top: 1px solid #eee;
+    border-left: 1px solid #eee;
+    border-right: none;
+}
+
+.ps-divi-palette {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.ps-divi-swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.1s;
+}
+
+.ps-divi-swatch:hover {
+    transform: scale(1.2);
+}
+
+.ps-divi-controls {
+    display: flex;
+    gap: 12px;
+    height: 150px;
+    margin-bottom: 15px;
+}
+
+.ps-divi-saturation {
+    flex: 1;
+    position: relative;
+    background: red;
+    background-image: linear-gradient(to right, #fff, rgba(255, 255, 255, 0)), linear-gradient(to top, #000, rgba(0, 0, 0, 0));
+    border-radius: 6px;
+    cursor: crosshair;
+    overflow: hidden;
+}
+
+.ps-divi-cursor {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    margin: -6px 0 0 -6px;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+.ps-divi-sliders-col {
+    width: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ps-divi-slider-track {
+    flex: 1;
+    position: relative;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.ps-divi-hue-track {
+    background: linear-gradient(to bottom, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+}
+
+.ps-divi-alpha-track {
+    background: #fff url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAH0lEQVQYV2N89+7dfwYkYObMmf+YYUacinkinI4GAC8sZAnP2eVnAAAAAElFTkSuQmCC') repeat;
+}
+
+.ps-divi-alpha-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 15px;
+}
+
+.ps-divi-slider-handle {
+    position: absolute;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    background: #fff;
+    border-radius: 50%;
+    margin-left: -12px;
+    margin-top: -12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    border: 1px solid #eee;
+}
+
+/* SIDE-BY-SIDE SLIDERS (Requested Fix) */
+.ps-divi-sliders-col {
+    width: auto;
+    /* Allow auto width */
+    flex: 0 0 40px;
+    /* Fixed width column for sliders */
+    display: flex;
+    flex-direction: row;
+    /* Horizontal */
+    gap: 10px;
+}
+
+.ps-divi-slider-track {
+    width: 15px;
+    /* Narrow vertical sliders */
+    flex: 1;
+    /* Stretch height is not applicable here as we want fixed height, so we use flex-basis in parent usually, but here sliders are vertical */
+    height: 100%;
+}
+
+/* Wait, the sliders are vertical tracks, so we want them side-by-side vertically? 
+   No, the previous CSS was flex-direction: column (stacked).
+   The user wants "Side by side" like in the screenshot (Hue and Alpha tracks next to each other vertically).
+   Let's check the structure:
+   .ps-divi-controls (flex row)
+      .ps-divi-saturation (flex 1)
+      .ps-divi-sliders-col (flex column)
+         .ps-divi-hue-track
+         .ps-divi-alpha-track
+   
+   To make them "side by side" (two columns next to saturation), we need to keep flex-direction: column for vertical stacking?
+   Wait, the user says "debugging bars should be side by side... now two rows small pitiful".
+   The screenshot shows Hue and Alpha tracks are vertical bars, placed NEXT to each other.
+   
+   So:
+   Saturation | Hue | Alpha
+   
+   Currently:
+   Saturation | [Hue]
+                [Alpha] (Stacked vertically)
+                
+   We want:
+   Saturation | [Hue] [Alpha] (Side by side)
+*/
+
+.ps-divi-sliders-col {
+    width: auto;
+    display: flex;
+    flex-direction: row;
+    /* Side by Side */
+    gap: 8px;
+}
+
+.ps-divi-slider-track {
+    width: 14px;
+    /* Fixed width for tracks */
+    flex: 0 0 14px;
+    height: 100%;
+    /* Full height of container */
+    position: relative;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.ps-divi-input-area {
+    margin-bottom: 12px;
+}
+
+.ps-divi-input-area input {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    text-align: left;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: monospace;
+    background: #f0f0f1;
+}
+
+/* --- TOOLS PAGE (Import/Export) --- */
+.ps-tools-container {
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.ps-tool-card {
+    background: #fff;
+    border-radius: var(--ps-radius);
+    padding: 40px;
+    flex: 1;
+    min-width: 300px;
+    max-width: 500px;
+    box-shadow: var(--ps-shadow);
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid var(--ps-border);
+}
+
+.ps-tool-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.ps-tool-card .ps-card-icon {
+    font-size: 48px;
+    color: var(--ps-primary);
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.ps-tool-card .ps-card-icon .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+}
+
+.ps-tool-card h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: var(--ps-text);
+}
+
+.ps-tool-card p {
+    color: var(--ps-text-soft);
+    margin-bottom: 25px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Drop Zone */
+.ps-drop-zone {
+    border: 2px dashed var(--ps-primary);
+    border-radius: var(--ps-radius);
+    padding: 30px 20px;
+    background: #f0f8ff;
+    margin-bottom: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.ps-drop-zone:hover {
+    background: #e0f0ff;
+}
+
+.ps-drop-zone input[type="file"] {
+    cursor: pointer !important;
+}
+
+.ps-drop-zone .dashicons {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: var(--ps-primary);
+    margin-bottom: 10px;
+}
+
+.ps-drop-zone p {
+    margin: 0;
+    font-weight: 600;
+    color: var(--ps-primary);
+}
+
+.ps-full-btn {
+    width: 100%;
+    justify-content: center;
+    height: 44px !important;
+    font-size: 15px !important;
+}
+
+.ps-card-footer {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.ps-text-link {
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--ps-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.ps-text-link:hover {
+    color: #135e96;
+}
+
+.ps-divi-input-area input:focus {
+    background: #fff;
+    border-color: var(--ps-primary);
+    outline: none;
+}
+
+/* Banner Preview Fixes */
+#ps-preview-banner-desc p {
+    margin: 0 !important;
+    padding: 0 !important;
+}

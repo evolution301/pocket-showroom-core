@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Build artifacts
+*.zip
+*.tar.gz
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp

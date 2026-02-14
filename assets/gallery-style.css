@@ -1,0 +1,1222 @@
+/* Banner Styles */
+.ps-banner {
+    position: relative;
+    width: 100%;
+    height: 85vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 40px;
+    color: #fff;
+    text-align: center;
+}
+
+.ps-banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(46, 125, 50, 0.4);
+    /* Greenish overlay as requested in image analysis */
+    z-index: 1;
+}
+
+.ps-banner-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    padding: 20px;
+}
+
+.ps-banner h1 {
+    font-size: 52px;
+    margin: 0 0 30px;
+    font-weight: 300;
+    color: var(--ps-title-color, #fff);
+    line-height: 1.1;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    letter-spacing: 0.02em;
+}
+
+.ps-banner-desc {
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--ps-desc-color, rgba(255, 255, 255, 0.92));
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+    font-weight: 300;
+    letter-spacing: 0.015em;
+}
+
+/* Product Count Badge - Bottom Right Fixed */
+.ps-product-count {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    z-index: 3;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 18px 30px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    min-width: 120px;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.ps-count-inner {
+    margin-bottom: 5px;
+}
+
+.ps-count-number {
+    display: block;
+    font-size: 36px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ps-count-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+}
+
+.ps-last-updated {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 5px;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.ps-gallery-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    letter-spacing: 0.01em;
+    line-height: 1.6;
+}
+
+/* Responsive Banner */
+@media (max-width: 768px) {
+    .ps-banner {
+        height: 400px;
+        padding: 20px;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .ps-banner h1 {
+        font-size: 36px;
+        margin-bottom: 20px;
+        font-weight: 300;
+        letter-spacing: 0.01em;
+    }
+
+    .ps-banner .ps-product-count {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-top: 20px;
+        padding: 10px 15px;
+        min-width: 120px;
+    }
+
+    .ps-count-number {
+        font-size: 24px;
+    }
+
+    .ps-banner-desc {
+        font-size: 16px;
+        margin-bottom: 20px;
+        max-width: 85%;
+        text-align: center;
+        font-weight: 300;
+        letter-spacing: 0.01em;
+    }
+}
+
+/* Small mobile screens */
+@media (max-width: 480px) {
+    .ps-banner {
+        height: 350px;
+        padding: 15px;
+    }
+
+    .ps-banner h1 {
+        font-size: 32px;
+        margin-bottom: 15px;
+        font-weight: 300;
+        letter-spacing: 0.01em;
+    }
+
+    .ps-banner-desc {
+        font-size: 15px;
+        margin-bottom: 15px;
+        max-width: 90%;
+        text-align: center;
+        font-weight: 300;
+        letter-spacing: 0.005em;
+    }
+
+    .ps-banner .ps-product-count {
+        margin-top: 15px;
+        padding: 8px 12px;
+        min-width: 100px;
+    }
+
+    .ps-count-number {
+        font-size: 20px;
+    }
+
+    .ps-count-label {
+        font-size: 10px;
+    }
+}
+
+/* Filter Buttons */
+.ps-filter-buttons {
+    margin-bottom: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.ps-filter-btn {
+    padding: 10px 20px;
+    border: 1px solid #e5e5e5;
+    background: #fff;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    color: #666;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+}
+
+.ps-filter-btn:hover {
+    background: #fafafa;
+    transform: translateY(-2px);
+}
+
+.ps-filter-btn.active {
+    background: var(--ps-primary-color, #007cba);
+    color: var(--ps-button-text-color, #fff);
+    border-color: var(--ps-primary-color, #007cba);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 124, 186, 0.15);
+}
+
+.ps-gallery-filters {
+    margin-bottom: 20px;
+    text-align: right;
+}
+
+#ps-search {
+    padding: 12px 20px;
+    width: 250px;
+    border: 1px solid #e8e8e8;
+    border-radius: 30px;
+    font-size: 14px;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    background: #fafafa;
+    outline: none;
+}
+
+#ps-search:focus {
+    border-color: var(--ps-primary-color, #007cba);
+    box-shadow: 0 0 0 3px rgba(0, 124, 186, 0.08);
+    background: #fff;
+}
+
+.ps-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.ps-card {
+    background: #fff;
+    border: 1px solid #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.ps-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: #e8e8e8;
+}
+
+.ps-card-image {
+    position: relative;
+    aspect-ratio: var(--ps-card-ratio, 3/4);
+    background: #f5f5f5;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ps-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.ps-card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.ps-card:hover .ps-card-overlay {
+    opacity: 1;
+}
+
+.ps-view-btn {
+    background: var(--ps-primary-color, #007cba);
+    color: var(--ps-button-text-color, #fff);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    pointer-events: auto;
+    /* Re-enable clicks for button */
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.ps-view-btn:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.ps-card-body {
+    padding: 15px;
+}
+
+.ps-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.ps-model {
+    font-size: 12px;
+    color: #888;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.ps-price {
+    font-size: 14px;
+    color: var(--ps-primary-color, #007cba);
+    font-weight: 700;
+}
+
+.ps-title {
+    margin: 0;
+    font-size: 15px;
+    color: #2c2c2c;
+    line-height: 1.5;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+}
+
+/* Watermark */
+.ps-watermark {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 5;
+    user-select: none;
+}
+
+/* Modal */
+.ps-modal {
+    display: none;
+    position: fixed;
+    z-index: 999999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+}
+
+/*
+ * 弹窗打开时隐藏主题的 header / footer / admin bar
+ * 
+ * 注意: 这里使用 !important 是必要的，因为需要覆盖各种 WordPress 主题的样式。
+ * 不同主题使用不同的选择器特异性和内联样式，没有 !important 无法确保跨主题兼容性。
+ * 
+ * 兼容 Top 20+ WordPress 主题：
+ * - HTML5 通用: header, footer
+ * - 通用 class: .site-header, .site-footer, #masthead, #colophon
+ * - Astra: .ast-above-header, .ast-below-header, .main-header-bar-wrap
+ * - Elementor / Hello: .elementor-location-header/footer, [data-elementor-type]
+ * - Divi: #main-header, #main-footer, #top-header, .et-l--header/footer, #et-footer-nav
+ * - Avada: .fusion-header-wrapper, .fusion-footer, .fusion-footer-widget-area
+ * - OceanWP: #site-header, #sidr, .footer-widgets, #footer-bottom
+ * - GeneratePress: .site-header, .main-navigation, .site-footer
+ * - Neve: .hfg_header, .hfg_footer
+ * - Kadence: .site-header-row, .site-footer-wrap
+ * - Blocksy: header[data-id="type-1"], footer.ct-footer
+ * - BeTheme: #Header_wrapper, #Top_bar, #Footer
+ * - Sydney: .header-wrap, .site-footer
+ * - Flavor/flavor Builder: #flavor-header, #flavor-footer
+ * - Enfold / flavor: #header, #socket, .avia-footer
+ * - Developer themes: .nv-header, .starter-header
+ * - WordPress admin bar
+ */
+body.ps-modal-open,
+body.ps-share-open {
+    overflow: hidden;
+}
+
+/* --- 通用 HTML5 / 常见 class --- */
+body.ps-modal-open>header,
+body.ps-modal-open>footer,
+body.ps-modal-open>.site-header,
+body.ps-modal-open>.site-footer,
+body.ps-modal-open>#masthead,
+body.ps-modal-open>#colophon,
+body.ps-modal-open>#page>header,
+body.ps-modal-open>#page>.site-header,
+/* --- Elementor / Hello Elementor --- */
+body.ps-modal-open .elementor-location-header,
+body.ps-modal-open .elementor-location-footer,
+body.ps-modal-open [data-elementor-type="header"],
+body.ps-modal-open [data-elementor-type="footer"],
+/* --- Divi --- */
+body.ps-modal-open #main-header,
+body.ps-modal-open #main-footer,
+body.ps-modal-open #top-header,
+body.ps-modal-open .et-l--header,
+body.ps-modal-open .et-l--footer,
+body.ps-modal-open #et-footer-nav,
+/* --- Avada --- */
+body.ps-modal-open .fusion-header-wrapper,
+body.ps-modal-open .fusion-footer,
+body.ps-modal-open .fusion-footer-widget-area,
+body.ps-modal-open .fusion-sliding-bar-wrapper,
+/* --- Astra --- */
+body.ps-modal-open .ast-above-header,
+body.ps-modal-open .ast-below-header,
+body.ps-modal-open .main-header-bar-wrap,
+body.ps-modal-open .ast-footer-overlay,
+body.ps-modal-open .site-below-footer-wrap,
+body.ps-modal-open .ast-above-footer,
+/* --- OceanWP --- */
+body.ps-modal-open #site-header,
+body.ps-modal-open #site-navigation-wrap,
+body.ps-modal-open .footer-widgets,
+body.ps-modal-open #footer-bottom,
+/* --- GeneratePress --- */
+body.ps-modal-open .main-navigation,
+body.ps-modal-open .site-info,
+/* --- Neve --- */
+body.ps-modal-open .hfg_header,
+body.ps-modal-open .hfg_footer,
+body.ps-modal-open .nv-header,
+/* --- Kadence --- */
+body.ps-modal-open .site-header-row,
+body.ps-modal-open .site-footer-wrap,
+/* --- Blocksy --- */
+body.ps-modal-open header[data-id="type-1"],
+body.ps-modal-open footer.ct-footer,
+/* --- BeTheme --- */
+body.ps-modal-open #Header_wrapper,
+body.ps-modal-open #Top_bar,
+body.ps-modal-open #Footer,
+/* --- Sydney --- */
+body.ps-modal-open .header-wrap,
+/* --- flavor / flavor-builder --- */
+body.ps-modal-open #flavor-header,
+body.ps-modal-open #flavor-footer,
+/* --- flavor (flavor) --- */
+body.ps-modal-open #header,
+body.ps-modal-open #socket,
+body.ps-modal-open .avia-footer,
+/* --- WordPress admin bar --- */
+body.ps-modal-open #wpadminbar,
+
+/* ===== 以下是 ps-share-open 的同步规则 ===== */
+/* --- 通用 HTML5 / 常见 class --- */
+body.ps-share-open>header,
+body.ps-share-open>footer,
+body.ps-share-open>.site-header,
+body.ps-share-open>.site-footer,
+body.ps-share-open>#masthead,
+body.ps-share-open>#colophon,
+body.ps-share-open>#page>header,
+body.ps-share-open>#page>.site-header,
+/* --- Elementor / Hello Elementor --- */
+body.ps-share-open .elementor-location-header,
+body.ps-share-open .elementor-location-footer,
+body.ps-share-open [data-elementor-type="header"],
+body.ps-share-open [data-elementor-type="footer"],
+/* --- Divi --- */
+body.ps-share-open #main-header,
+body.ps-share-open #main-footer,
+body.ps-share-open #top-header,
+body.ps-share-open .et-l--header,
+body.ps-share-open .et-l--footer,
+body.ps-share-open #et-footer-nav,
+/* --- Avada --- */
+body.ps-share-open .fusion-header-wrapper,
+body.ps-share-open .fusion-footer,
+body.ps-share-open .fusion-footer-widget-area,
+body.ps-share-open .fusion-sliding-bar-wrapper,
+/* --- Astra --- */
+body.ps-share-open .ast-above-header,
+body.ps-share-open .ast-below-header,
+body.ps-share-open .main-header-bar-wrap,
+body.ps-share-open .ast-footer-overlay,
+body.ps-share-open .site-below-footer-wrap,
+body.ps-share-open .ast-above-footer,
+/* --- OceanWP --- */
+body.ps-share-open #site-header,
+body.ps-share-open #site-navigation-wrap,
+body.ps-share-open .footer-widgets,
+body.ps-share-open #footer-bottom,
+/* --- GeneratePress --- */
+body.ps-share-open .main-navigation,
+body.ps-share-open .site-info,
+/* --- Neve --- */
+body.ps-share-open .hfg_header,
+body.ps-share-open .hfg_footer,
+body.ps-share-open .nv-header,
+/* --- Kadence --- */
+body.ps-share-open .site-header-row,
+body.ps-share-open .site-footer-wrap,
+/* --- Blocksy --- */
+body.ps-share-open header[data-id="type-1"],
+body.ps-share-open footer.ct-footer,
+/* --- BeTheme --- */
+body.ps-share-open #Header_wrapper,
+body.ps-share-open #Top_bar,
+body.ps-share-open #Footer,
+/* --- Sydney --- */
+body.ps-share-open .header-wrap,
+/* --- flavor / flavor-builder --- */
+body.ps-share-open #flavor-header,
+body.ps-share-open #flavor-footer,
+/* --- flavor (flavor) --- */
+body.ps-share-open #header,
+body.ps-share-open #socket,
+body.ps-share-open .avia-footer,
+/* --- WordPress admin bar --- */
+body.ps-share-open #wpadminbar {
+    display: none !important;
+}
+
+
+.ps-modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 900px;
+    border-radius: 8px;
+    position: relative;
+    min-height: 400px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.ps-close {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.ps-close:hover,
+.ps-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.ps-modal-layout {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.ps-modal-gallery {
+    flex: 1;
+    min-width: 300px;
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 80vh;
+}
+
+.ps-modal-img-wrapper {
+    position: relative;
+    margin-bottom: 2px;
+}
+
+.ps-modal-img {
+    width: 100%;
+    display: block;
+}
+
+.ps-modal-info {
+    flex: 1;
+    min-width: 300px;
+    padding: 30px;
+}
+
+.ps-modal-info h2 {
+    margin-top: 0;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.ps-header-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.ps-sku {
+    color: #666;
+    font-size: 14px;
+}
+
+.ps-price-large {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--ps-primary-color, #007cba);
+}
+
+.ps-meta-table {
+    margin-bottom: 25px;
+}
+
+.ps-meta-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 14px;
+}
+
+.ps-meta-row span {
+    color: #666;
+}
+
+/* Variants Table */
+.ps-variants-section {
+    margin-bottom: 25px;
+}
+
+.ps-variants-section h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: #333;
+}
+
+.ps-variants-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.ps-variants-table th,
+.ps-variants-table td {
+    text-align: left;
+    padding: 8px;
+    border: 1px solid #eee;
+}
+
+.ps-variants-table th {
+    background: #f9f9f9;
+    font-weight: 600;
+    color: #555;
+}
+
+.ps-desc {
+    color: #444;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.ps-loader {
+    text-align: center;
+    padding: 50px;
+    color: #888;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ps-modal-layout {
+        flex-direction: column;
+    }
+
+    .ps-modal-gallery {
+        max-height: 300px;
+    }
+}
+
+/* ===== SHARE FUNCTIONALITY ===== */
+
+/* Share Button on Product Card */
+.ps-share-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    z-index: 10;
+    pointer-events: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.ps-share-btn:hover {
+    background: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.ps-card:hover .ps-share-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.ps-share-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: #333;
+}
+
+/* Share Button on Banner */
+.ps-banner-share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 30px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    margin-left: 12px;
+    vertical-align: middle;
+}
+
+.ps-banner-share-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+.ps-banner-share-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: #fff;
+}
+
+/* Share Button in Modal */
+.ps-modal-share-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.ps-modal-share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 25px;
+    border: 1px solid #e5e5e5;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    transition: all 0.3s ease;
+}
+
+.ps-modal-share-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ps-modal-share-btn.ps-whatsapp {
+    color: #25D366;
+    border-color: #25D366;
+}
+
+.ps-modal-share-btn.ps-whatsapp:hover {
+    background: #25D366;
+    color: #fff;
+}
+
+.ps-modal-share-btn.ps-wechat {
+    color: #07C160;
+    border-color: #07C160;
+}
+
+.ps-modal-share-btn.ps-wechat:hover {
+    background: #07C160;
+    color: #fff;
+}
+
+.ps-modal-share-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ===== SHARE SHEET (Bottom Popup) ===== */
+.ps-share-sheet-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 10000000;
+    animation: psFadeIn 0.2s ease;
+}
+
+.ps-share-sheet-overlay.active {
+    display: block;
+}
+
+.ps-share-sheet {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 420px;
+    max-width: 95vw;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    z-index: 10000001;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.ps-share-sheet-overlay.active .ps-share-sheet {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.ps-share-sheet-header {
+    text-align: center;
+    padding: 20px 20px 10px;
+    position: relative;
+}
+
+.ps-share-sheet-header::before {
+    content: '';
+    display: none;
+    /* Hide drag handle */
+}
+
+.ps-share-sheet-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.ps-share-sheet-close {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: #f0f0f0;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    color: #666;
+}
+
+.ps-share-sheet-close:hover {
+    background: #e0e0e0;
+}
+
+/* Share Preview Card */
+.ps-share-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 10px 20px 15px;
+    padding: 12px;
+    background: #f8f8f8;
+    border-radius: 12px;
+}
+
+.ps-share-preview-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.ps-share-preview-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ps-share-preview-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.ps-share-preview-desc {
+    font-size: 12px;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Share Options */
+.ps-share-options {
+    padding: 5px 20px 25px;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.ps-share-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+    transition: transform 0.2s;
+}
+
+.ps-share-option:hover {
+    transform: scale(1.08);
+}
+
+.ps-share-option-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: box-shadow 0.2s;
+}
+
+.ps-share-option:hover .ps-share-option-icon {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.ps-share-option-icon.ps-wa-icon {
+    background: #25D366;
+}
+
+.ps-share-option-icon.ps-wc-icon {
+    background: #07C160;
+}
+
+.ps-share-option-icon.ps-copy-icon {
+    background: #555;
+}
+
+.ps-share-option-icon svg {
+    width: 28px;
+    height: 28px;
+    fill: #fff;
+}
+
+.ps-share-option-label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Toast notification */
+.ps-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #333;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10000002;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.ps-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ===== QR CODE MODAL ===== */
+.ps-qr-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 10000001;
+    animation: psFadeIn 0.2s ease;
+}
+
+.ps-qr-modal-overlay.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ps-qr-modal {
+    background: #fff;
+    border-radius: 20px;
+    padding: 30px;
+    width: 320px;
+    max-width: 90vw;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    animation: psScaleIn 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.ps-qr-modal h4 {
+    margin: 0 0 5px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.ps-qr-modal p {
+    margin: 0 0 20px;
+    font-size: 13px;
+    color: #888;
+}
+
+.ps-qr-modal img {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 15px;
+    display: block;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.ps-qr-copy-url {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.ps-qr-copy-url input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: 12px;
+    color: #666;
+    outline: none;
+    min-width: 0;
+}
+
+.ps-qr-copy-btn {
+    padding: 6px 14px;
+    background: #07C160;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.ps-qr-copy-btn:hover {
+    background: #06a853;
+}
+
+.ps-qr-close {
+    padding: 10px 30px;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #555;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.ps-qr-close:hover {
+    background: #e5e5e5;
+}
+
+@keyframes psFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes psScaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ===== LOAD MORE BUTTON (Fix #10) ===== */
+.ps-load-more-wrap {
+    text-align: center;
+    padding: 40px 0 20px;
+}
+
+.ps-load-more-btn {
+    display: inline-block;
+    padding: 14px 48px;
+    border: 2px solid var(--ps-primary-color, #007cba);
+    background: transparent;
+    color: var(--ps-primary-color, #007cba);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.ps-load-more-btn:hover {
+    background: var(--ps-primary-color, #007cba);
+    color: var(--ps-button-text-color, #fff);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 124, 186, 0.25);
+}
+
+.ps-load-more-btn.loading {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Fix F6: Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

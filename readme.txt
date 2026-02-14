@@ -1,0 +1,77 @@
+=== Pocket Showroom Core ===
+Contributors: Evolution301
+Tags: b2b, catalog, product showroom, csv import, gallery, furniture, wholesale
+Requires at least: 5.0
+Tested up to: 6.4
+Requires PHP: 7.4
+Stable tag: 1.1.1
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+A modern B2B product catalog with CSV import, multi-image gallery, and interactive frontend.
+
+== Description ==
+
+Pocket Showroom Core is a WordPress plugin designed for B2B furniture exporters and wholesalers. It replaces traditional PDF catalogs with an interactive online product showroom experience.
+
+**Key Features:**
+
+* **Interactive Product Gallery** - Modern grid layout with category filtering and search
+* **CSV Bulk Import/Export** - Import hundreds of products instantly
+* **Multi-Image Gallery** - Drag-and-drop image upload with sorting
+* **Social Sharing** - Beautiful Open Graph cards for WhatsApp/WeChat sharing
+* **Image Watermarking** - Automatic watermark on uploaded images
+* **AJAX-powered Details** - Product details in modal without page refresh
+* **Responsive Design** - Perfect on mobile, tablet, and desktop
+
+== Installation ==
+
+1. Upload `pocket-showroom-core` folder to `/wp-content/plugins/`
+2. Activate the plugin through the 'Plugins' menu in WordPress
+3. Go to **Pocket Showroom** → **Settings** to configure
+4. Use shortcode `[pocket_showroom]` on any page
+
+== Frequently Asked Questions ==
+
+= How do I add products? =
+
+Go to **Pocket Showroom** → **Add New** in the WordPress admin. Fill in product details and upload images.
+
+= Can I import products from CSV? =
+
+Yes! Go to **Pocket Showroom** → **Import/Export**, download the CSV template, fill it with your data, and upload.
+
+= How do I display the showroom on my site? =
+
+Simply add the shortcode `[pocket_showroom]` to any page or post.
+
+== Screenshots ==
+
+1. Frontend product gallery with grid layout
+2. Product detail modal with all specifications
+3. Admin settings page
+4. CSV import interface
+
+== Changelog ==
+
+= 1.1.1 =
+* Initial public release
+* GitHub auto-update support
+* Bug fixes and performance improvements
+
+= 1.1.0 =
+* Added CSV import/export functionality
+* Multi-image gallery support
+* Social sharing with OG tags
+
+= 1.0.0 =
+* Initial release
+
+== Upgrade Notice ==
+
+= 1.1.1 =
+First public release with GitHub auto-update support!
+
+== Additional Info ==
+
+This plugin supports automatic updates from GitHub Releases. When a new version is released, you'll see an update notification in your WordPress admin.
