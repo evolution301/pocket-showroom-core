@@ -28,6 +28,21 @@ class PS_REST_API
     private function __construct()
     {
         add_action('rest_api_init', [$this, 'register_routes']);
+        add_action('init', [$this, 'add_cors_support']);
+    }
+
+    /**
+     * Add CORS support for external clients (Mini App / Web)
+     */
+    public function add_cors_support()
+    {
+        add_filter('rest_pre_serve_request', function ($value, $result, $request) {
+            header('Access-Control-Allow-Origin: *');
+            header('Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE');
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Allow-Headers: Authorization, Content-Type, X-WP-Nonce');
+            return $value;
+        }, 10, 3);
     }
 
     /**

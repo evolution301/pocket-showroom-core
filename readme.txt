@@ -4,7 +4,7 @@ Tags: b2b, catalog, product showroom, csv import, gallery, furniture, wholesale
 Requires at least: 5.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 2.0.4
+Stable tag: 2.0.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,6 +53,16 @@ Simply add the shortcode `[pocket_showroom]` to any page or post.
 4. CSV import interface
 
 == Changelog ==
+
+= 2.0.7 =
+* Fix: Standardized API namespace to `pocket-showroom/v1` (matching Mini App v2.0 update).
+
+= 2.0.6 =
+* Fix: Reverted API namespace to `ps/v1` to fix 404 errors on legacy Mini Apps.
+
+= 2.0.5 =
+* Fix: Added CORS headers to fix 'Network Error' on Mini Apps/Frontend.
+* Improvement: Added `Access-Control-Allow-Origin: *` to `rest_pre_serve_request`.
 
 = 2.0.4 =
 * Fix: Syntax error in `class-image-watermarker.php` (Unclosed brace).

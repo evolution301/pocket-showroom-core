@@ -42,7 +42,7 @@ defined('ABSPATH') || exit;
                     style="background:#fff; border:1px solid #ddd; padding:15px; border-radius:4px; margin-bottom:20px;">
                     <p><strong>1. API Endpoint URL:</strong></p>
                     <code style="background:#f0f0f1; padding:5px; display:block; margin:5px 0; word-break:break-all;">
-                                                <?php echo esc_url(rest_url('ps/v1/ping')); ?>
+                                                <?php echo esc_url(rest_url('pocket-showroom/v1/ping')); ?>
                                             </code>
                     <p class="description">
                         <?php _e('Copy this URL and try to open it in your browser. If it returns JSON data, the API is working.', 'pocket-showroom'); ?>
@@ -62,7 +62,7 @@ defined('ABSPATH') || exit;
                                 var $res = $('#ps-api-result');
                                 $res.show().html('Checking...');
                                 $.ajax({
-                                    url: '<?php echo esc_url_raw(rest_url('ps/v1/ping')); ?>',
+                                    url: '<?php echo esc_url_raw(rest_url('pocket-showroom/v1/ping')); ?>',
                                     method: 'GET',
                                     success: function (data) {
                                         $res.html('<div style="color:green; font-weight:bold;">✅ Success! API is reachable.</div><pre style="background:#eee; padding:5px; margin-top:5px;">' + JSON.stringify(data) + '</pre>');
@@ -71,7 +71,7 @@ defined('ABSPATH') || exit;
                                         $res.html('<div style="color:red; font-weight:bold;">❌ Error: ' + status + ' ' + error + '</div><p>HTTP Status: ' + xhr.status + '</p><p>Response: ' + xhr.responseText + '</p>');
                                     }
                                 });
-                        });
+                            });
                         });
                     </script>
                 </div>

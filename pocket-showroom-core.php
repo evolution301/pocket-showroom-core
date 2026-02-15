@@ -4,7 +4,7 @@ declare(strict_types=1);
 /*
 Plugin Name: Pocket Showroom Core
 Description: A modern B2B product catalog with CSV import, multi-image gallery, and interactive frontend.
-Version: 2.0.4
+Version: 2.0.7
 Author: Evolution301
 Text Domain: pocket-showroom
 */
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define Constants
-define('PS_CORE_VERSION', '2.0.4');
+define('PS_CORE_VERSION', '2.0.7');
 define('PS_CORE_PATH', plugin_dir_path(__FILE__));
 define('PS_CORE_URL', plugin_dir_url(__FILE__));
 
