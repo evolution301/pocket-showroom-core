@@ -8,6 +8,8 @@
  * @version 2.0.0
  */
 
+declare(strict_types=1);
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -68,13 +70,13 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
             $this->cache_key = 'ps_github_updater_' . md5($this->github_user . '/' . $this->github_repo);
 
             // Hook into WordPress update system
-            add_filter('site_transient_update_plugins', array($this, 'check_for_update'));
-            add_filter('plugins_api', array($this, 'plugin_popup'), 10, 3);
-            add_filter('upgrader_post_install', array($this, 'after_install'), 10, 3);
+            add_filter('site_transient_update_plugins', [$this, 'check_for_update']);
+            add_filter('plugins_api', [$this, 'plugin_popup'], 10, 3);
+            add_filter('upgrader_post_install', [$this, 'after_install'], 10, 3);
 
             // Add "Check for updates" link
-            add_action('admin_init', array($this, 'manual_check_trigger'));
-            add_filter('plugin_action_links_' . $this->plugin_basename, array($this, 'add_check_update_link'));
+            add_action('admin_init', [$this, 'manual_check_trigger']);
+            add_filter('plugin_action_links_' . $this->plugin_basename, [$this, 'add_check_update_link']);
         }
 
         /**
@@ -131,18 +133,18 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
 
             // Compare versions
             if (version_compare($this->current_version, $remote_info->version, '<')) {
-                $plugin_data = array(
+                $plugin_data = [
                     'slug' => dirname($this->plugin_basename),
                     'new_version' => $remote_info->version,
                     'url' => $remote_info->url,
                     'package' => $remote_info->download_url,
                     'tested' => $remote_info->tested ?? '6.4',
                     'requires_php' => $remote_info->requires_php ?? '7.4',
-                    'icons' => array(
+                    'icons' => [
                         '1x' => PS_CORE_URL . 'assets/icon-128x128.png',
                         '2x' => PS_CORE_URL . 'assets/icon-256x256.png',
-                    ),
-                );
+                    ],
+                ];
 
                 $transient->response[$this->plugin_basename] = (object) $plugin_data;
             }
@@ -166,13 +168,13 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
             // Fetch latest release from GitHub API
             $response = wp_remote_get(
                 "https://api.github.com/repos/{$this->github_user}/{$this->github_repo}/releases/latest",
-                array(
+                [
                     'timeout' => 10,
-                    'headers' => array(
+                    'headers' => [
                         'Accept' => 'application/vnd.github.v3+json',
                         'User-Agent' => 'WordPress/' . get_bloginfo('version') . '; ' . home_url(),
-                    ),
-                )
+                    ],
+                ]
             );
 
             if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
@@ -207,7 +209,7 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
                 $download_url = "https://github.com/{$this->github_user}/{$this->github_repo}/archive/refs/tags/{$release->tag_name}.zip";
             }
 
-            $info = (object) array(
+            $info = (object) [
                 'version' => $version,
                 'url' => $release->html_url,
                 'download_url' => $download_url,
@@ -215,7 +217,7 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
                 'tested' => '6.4',
                 'last_updated' => $release->published_at,
                 'changelog' => $release->body ?? '',
-            );
+            ];
 
             // Cache the result
             set_site_transient($this->cache_key, $info, $this->cache_expiration);
@@ -247,7 +249,7 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
                 return $result;
             }
 
-            return (object) array(
+            return (object) [
                 'name' => 'Pocket Showroom Core',
                 'slug' => dirname($this->plugin_basename),
                 'version' => $remote_info->version,
@@ -256,14 +258,14 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
                 'last_updated' => $remote_info->last_updated,
                 'homepage' => 'https://github.com/' . $this->github_user . '/' . $this->github_repo,
                 'short_description' => 'A modern B2B product catalog with CSV import, multi-image gallery, and interactive frontend.',
-                'sections' => array(
+                'sections' => [
                     'description' => '<p>A modern B2B product catalog with CSV import, multi-image gallery, and interactive frontend.</p>',
                     'changelog' => '<pre>' . esc_html($remote_info->changelog) . '</pre>',
-                ),
+                ],
                 'download_link' => $remote_info->download_url,
                 'tested' => $remote_info->tested ?? '6.4',
                 'requires_php' => $remote_info->requires_php ?? '7.4',
-            );
+            ];
         }
 
         /**

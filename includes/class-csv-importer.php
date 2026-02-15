@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 if (!defined('ABSPATH')) {
     exit;
@@ -19,16 +20,16 @@ class PS_CSV_Importer
 
     private function __construct()
     {
-        add_action('admin_menu', array($this, 'add_import_page'));
-        add_action('admin_init', array($this, 'process_csv_import'));
-        add_action('admin_init', array($this, 'process_csv_export'));
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
+        add_action('admin_menu', [$this, 'add_import_page']);
+        add_action('admin_init', [$this, 'process_csv_import']);
+        add_action('admin_init', [$this, 'process_csv_export']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
     }
 
     public function enqueue_assets($hook)
     {
         if (strpos($hook, 'ps-import') !== false) {
-            wp_enqueue_style('ps-admin-style', PS_CORE_URL . 'assets/admin-style.css', array(), PS_CORE_VERSION);
+            wp_enqueue_style('ps-admin-style', PS_CORE_URL . 'assets/admin-style.css', [], PS_CORE_VERSION);
         }
     }
 
@@ -40,7 +41,7 @@ class PS_CSV_Importer
             'Import / Export',
             'manage_options',
             'ps-import',
-            array($this, 'render_import_page')
+            [$this, 'render_import_page']
         );
     }
 
@@ -136,14 +137,14 @@ class PS_CSV_Importer
             fwrite($output, "\xEF\xBB\xBF");
 
             // CSV Columns
-            fputcsv($output, array('Product Name', 'Model No.', 'EXW Price', 'Category', 'Description', 'Material', 'MOQ', 'Loading', 'Delivery Time', 'Images', 'Size Variants', 'Custom Fields'));
+            fputcsv($output, ['Product Name', 'Model No.', 'EXW Price', 'Category', 'Description', 'Material', 'MOQ', 'Loading', 'Delivery Time', 'Images', 'Size Variants', 'Custom Fields']);
 
             // Fetch Items
-            $args = array(
+            $args = [
                 'post_type' => 'ps_item',
                 'posts_per_page' => -1,
                 'post_status' => 'publish'
-            );
+            ];
             $query = new WP_Query($args);
 
             if ($query->have_posts()) {
@@ -169,7 +170,7 @@ class PS_CSV_Importer
 
                     // Images: 合并 Featured Image + Gallery 为单列
                     // Featured Image 放最前面，与编辑器"第一张即封面"逻辑一致
-                    $all_image_urls = array();
+                    $all_image_urls = [];
 
                     $thumb_id = get_post_thumbnail_id($id);
                     if ($thumb_id) {
@@ -202,7 +203,7 @@ class PS_CSV_Importer
                     $variants = get_post_meta($id, '_ps_size_variants', true);
                     $variant_str = '';
                     if (is_array($variants)) {
-                        $v_parts = array();
+                        $v_parts = [];
                         foreach ($variants as $v) {
                             $v_parts[] = $v['label'] . ':' . $v['value'];
                         }
@@ -217,7 +218,7 @@ class PS_CSV_Importer
                     $dynamic_specs = get_post_meta($id, '_ps_dynamic_specs', true);
                     $specs_str = '';
                     if (is_array($dynamic_specs) && !empty($dynamic_specs)) {
-                        $s_parts = array();
+                        $s_parts = [];
                         foreach ($dynamic_specs as $spec) {
                             if (!empty($spec['key'])) {
                                 $s_parts[] = $spec['key'] . ':' . $spec['val'];
@@ -226,7 +227,7 @@ class PS_CSV_Importer
                         $specs_str = implode(' | ', $s_parts);
                     }
 
-                    fputcsv($output, array($title, $sku, $price, $category, $desc, $material, $moq, $loading, $lead_time, $images_str, $variant_str, $specs_str));
+                    fputcsv($output, [$title, $sku, $price, $category, $desc, $material, $moq, $loading, $lead_time, $images_str, $variant_str, $specs_str]);
                 }
             }
             wp_reset_postdata();
@@ -281,12 +282,12 @@ class PS_CSV_Importer
                     // Check if product exists by SKU
                     $existing_id = $this->get_product_by_sku($sku);
 
-                    $post_data = array(
+                    $post_data = [
                         'post_title' => $title,
                         'post_content' => $description,
                         'post_status' => 'publish',
                         'post_type' => 'ps_item',
-                    );
+                    ];
 
                     if ($existing_id) {
                         $post_data['ID'] = $existing_id;
@@ -307,15 +308,15 @@ class PS_CSV_Importer
 
                         // Parse Variants
                         if (!empty($variants_raw)) {
-                            $variants_array = array();
+                            $variants_array = [];
                             $variant_items = explode('|', $variants_raw);
                             foreach ($variant_items as $v_item) {
                                 $parts = explode(':', $v_item);
                                 if (count($parts) >= 2) {
-                                    $variants_array[] = array(
+                                    $variants_array[] = [
                                         'label' => trim($parts[0]),
                                         'value' => trim($parts[1])
-                                    );
+                                    ];
                                 }
                             }
                             if (!empty($variants_array)) {
@@ -334,7 +335,7 @@ class PS_CSV_Importer
                         // Handle Images: 第一张设为封面，全部存入 Gallery
                         if (!empty($images_raw)) {
                             $urls = array_map('trim', explode(',', $images_raw));
-                            $gallery_ids = array();
+                            $gallery_ids = [];
                             $is_first = true;
 
                             foreach ($urls as $url) {
@@ -356,15 +357,15 @@ class PS_CSV_Importer
 
                         // Handle Custom Fields (Dynamic Specs): format "key1:value1 | key2:value2"
                         if (!empty($custom_fields_raw)) {
-                            $specs_array = array();
+                            $specs_array = [];
                             $spec_items = explode('|', $custom_fields_raw);
                             foreach ($spec_items as $s_item) {
                                 $parts = explode(':', trim($s_item), 2); // limit 2 to allow : in values
                                 if (count($parts) >= 2) {
-                                    $specs_array[] = array(
+                                    $specs_array[] = [
                                         'key' => sanitize_text_field(trim($parts[0])),
                                         'val' => sanitize_text_field(trim($parts[1]))
-                                    );
+                                    ];
                                 }
                             }
                             if (!empty($specs_array)) {
@@ -391,21 +392,21 @@ class PS_CSV_Importer
             return false;
         }
 
-        $args = array(
+        $args = [
             'post_type' => 'ps_item',
-            'meta_query' => array(
+            'meta_query' => [
                 'relation' => 'OR',
-                array(
+                [
                     'key' => '_ps_model',
                     'value' => $sku,
-                ),
-                array(
+                ],
+                [
                     'key' => '_bfs_sku', // Legacy support
                     'value' => $sku,
-                ),
-            ),
+                ],
+            ],
             'fields' => 'ids',
-        );
+        ];
         $posts = get_posts($args);
         return !empty($posts) ? $posts[0] : false;
     }
@@ -417,7 +418,7 @@ class PS_CSV_Importer
 
         // SSRF 防护: 仅允许 HTTP/HTTPS 协议
         $scheme = wp_parse_url($url, PHP_URL_SCHEME);
-        if (!in_array(strtolower($scheme), array('http', 'https'), true)) {
+        if (!in_array(strtolower($scheme), ['http', 'https'], true)) {
             return false;
         }
 
@@ -427,7 +428,7 @@ class PS_CSV_Importer
             return false;
         }
         $host_lower = strtolower($host);
-        $blocked = array('localhost', '127.0.0.1', '0.0.0.0', '::1');
+        $blocked = ['localhost', '127.0.0.1', '0.0.0.0', '::1'];
         if (in_array($host_lower, $blocked, true)) {
             return false;
         }
@@ -445,10 +446,10 @@ class PS_CSV_Importer
         if (is_wp_error($tmp))
             return false;
 
-        $file_array = array(
+        $file_array = [
             'name' => basename($url),
             'tmp_name' => $tmp
-        );
+        ];
 
         $id = media_handle_sideload($file_array, $post_id);
 

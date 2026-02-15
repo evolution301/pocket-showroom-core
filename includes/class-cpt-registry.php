@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 if (!defined('ABSPATH')) {
     exit;
@@ -19,14 +20,14 @@ class PS_CPT_Registry
 
     private function __construct()
     {
-        add_action('init', array($this, 'register_post_type'));
-        add_action('init', array($this, 'register_taxonomy'));
-        add_filter('enter_title_here', array($this, 'change_title_placeholder'));
+        add_action('init', [$this, 'register_post_type']);
+        add_action('init', [$this, 'register_taxonomy']);
+        add_filter('enter_title_here', [$this, 'change_title_placeholder']);
     }
 
     public function register_post_type()
     {
-        $labels = array(
+        $labels = [
             'name' => _x('Showroom Items', 'Post Type General Name', 'pocket-showroom'),
             'singular_name' => _x('Item', 'Post Type Singular Name', 'pocket-showroom'),
             'menu_name' => __('Pocket Showroom', 'pocket-showroom'),
@@ -50,13 +51,13 @@ class PS_CPT_Registry
             'remove_featured_image' => __('Remove cover image', 'pocket-showroom'),
             'use_featured_image' => __('Use as cover image', 'pocket-showroom'),
             'items_list' => __('Items list', 'pocket-showroom'),
-        );
-        $args = array(
+        ];
+        $args = [
             'label' => __('Showroom Item', 'pocket-showroom'),
             'description' => __('B2B Product Catalog', 'pocket-showroom'),
             'labels' => $labels,
-            'supports' => array('title', 'thumbnail'),
-            'taxonomies' => array('ps_category'),
+            'supports' => ['title', 'thumbnail'],
+            'taxonomies' => ['ps_category'],
             'hierarchical' => false,
             'public' => true,
             'show_ui' => true,
@@ -71,13 +72,13 @@ class PS_CPT_Registry
             'publicly_queryable' => true,
             'capability_type' => 'post',
             'show_in_rest' => true,
-        );
+        ];
         register_post_type('ps_item', $args);
     }
 
     public function register_taxonomy()
     {
-        $labels = array(
+        $labels = [
             'name' => _x('Collections', 'Taxonomy General Name', 'pocket-showroom'),
             'singular_name' => _x('Collection', 'Taxonomy Singular Name', 'pocket-showroom'),
             'menu_name' => __('Collections', 'pocket-showroom'),
@@ -87,8 +88,8 @@ class PS_CPT_Registry
             'edit_item' => __('Edit Collection', 'pocket-showroom'),
             'update_item' => __('Update Collection', 'pocket-showroom'),
             'view_item' => __('View Collection', 'pocket-showroom'),
-        );
-        $args = array(
+        ];
+        $args = [
             'labels' => $labels,
             'hierarchical' => true,
             'public' => true,
@@ -97,8 +98,8 @@ class PS_CPT_Registry
             'show_in_nav_menus' => true,
             'show_tagcloud' => true,
             'show_in_rest' => true,
-        );
-        register_taxonomy('ps_category', array('ps_item'), $args);
+        ];
+        register_taxonomy('ps_category', ['ps_item'], $args);
     }
 
     public function change_title_placeholder($title)

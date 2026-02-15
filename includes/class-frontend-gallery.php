@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 if (!defined('ABSPATH')) {
     exit;
@@ -19,28 +20,28 @@ class PS_Frontend_Gallery
 
     private function __construct()
     {
-        add_shortcode('pocket_showroom', array($this, 'render_gallery'));
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
-        add_action('wp_ajax_ps_get_product_modal', array($this, 'ajax_get_product_modal'));
-        add_action('wp_ajax_nopriv_ps_get_product_modal', array($this, 'ajax_get_product_modal'));
+        add_shortcode('pocket_showroom', [$this, 'render_gallery']);
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
+        add_action('wp_ajax_ps_get_product_modal', [$this, 'ajax_get_product_modal']);
+        add_action('wp_ajax_nopriv_ps_get_product_modal', [$this, 'ajax_get_product_modal']);
         // Fix #10: Load More AJAX
-        add_action('wp_ajax_ps_load_more', array($this, 'ajax_load_more'));
-        add_action('wp_ajax_nopriv_ps_load_more', array($this, 'ajax_load_more'));
-        add_action('wp_head', array($this, 'maybe_hide_layout_elements'), 999);
+        add_action('wp_ajax_ps_load_more', [$this, 'ajax_load_more']);
+        add_action('wp_ajax_nopriv_ps_load_more', [$this, 'ajax_load_more']);
+        add_action('wp_head', [$this, 'maybe_hide_layout_elements'], 999);
         // Fix #23: 产品更新时清除缓存的最后更新日期
-        add_action('save_post_ps_item', array($this, 'clear_last_updated_cache'));
+        add_action('save_post_ps_item', [$this, 'clear_last_updated_cache']);
     }
 
     public function enqueue_assets()
     {
-        wp_register_style('ps-gallery-css', PS_CORE_URL . 'assets/gallery-style.css', array(), PS_CORE_VERSION);
-        wp_register_script('ps-gallery-js', PS_CORE_URL . 'assets/gallery-script.js', array('jquery'), PS_CORE_VERSION, true);
+        wp_register_style('ps-gallery-css', PS_CORE_URL . 'assets/gallery-style.css', [], PS_CORE_VERSION);
+        wp_register_script('ps-gallery-js', PS_CORE_URL . 'assets/gallery-script.js', ['jquery'], PS_CORE_VERSION, true);
 
-        wp_localize_script('ps-gallery-js', 'ps_ajax', array(
+        wp_localize_script('ps-gallery-js', 'ps_ajax', [
             'url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('ps_gallery_nonce'),
             'watermark_text' => get_option('ps_watermark_text', 'Pocket Showroom'),
-            'i18n' => array(
+            'i18n' => [
                 'load_more' => __('Load More', 'pocket-showroom'),
                 'loading' => __('Loading...', 'pocket-showroom'),
                 // Fix F2: Add missing i18n strings
@@ -51,8 +52,8 @@ class PS_Frontend_Gallery
                 'untitled' => __('Untitled', 'pocket-showroom'),
                 'link_copied' => __('Link copied!', 'pocket-showroom'),
                 'qr_error' => __('QR code failed to load. Please copy the link below.', 'pocket-showroom'),
-            ),
-        ));
+            ],
+        ]);
     }
 
     /**
@@ -78,7 +79,7 @@ class PS_Frontend_Gallery
 
         // Get Terms for Filter
         $item_terms = get_the_terms(get_the_ID(), 'ps_category');
-        $term_slugs = array();
+        $term_slugs = [];
         if ($item_terms && !is_wp_error($item_terms)) {
             foreach ($item_terms as $t) {
                 $term_slugs[] = $t->slug;
@@ -124,9 +125,9 @@ class PS_Frontend_Gallery
         wp_enqueue_style('ps-gallery-css');
         wp_enqueue_script('ps-gallery-js');
 
-        $atts = shortcode_atts(array(
+        $atts = shortcode_atts([
             'posts_per_page' => 12,
-        ), $atts, 'pocket_showroom');
+        ], $atts, 'pocket_showroom');
 
         $watermark_text = get_option('ps_watermark_text', 'Pocket Showroom');
 
@@ -153,13 +154,13 @@ class PS_Frontend_Gallery
         // Fix #23: 缓存最后更新日期，避免每次页面加载都查询
         $last_updated = get_transient('ps_last_updated_date');
         if (false === $last_updated) {
-            $last_post = get_posts(array(
+            $last_post = get_posts([
                 'post_type' => 'ps_item',
                 'posts_per_page' => 1,
                 'orderby' => 'date',
                 'order' => 'DESC',
                 'post_status' => 'publish'
-            ));
+            ]);
             $last_updated = '';
             if (!empty($last_post)) {
                 $last_updated = get_the_date('F j, Y', $last_post[0]->ID);
@@ -168,22 +169,22 @@ class PS_Frontend_Gallery
         }
 
         $posts_per_page = intval($atts['posts_per_page']);
-        $args = array(
+        $args = [
             'post_type' => 'ps_item',
             'posts_per_page' => $posts_per_page,
             'post_status' => 'publish',
             'orderby' => 'date',
             'order' => 'DESC',
-        );
+        ];
 
         $query = new WP_Query($args);
         $max_pages = $query->max_num_pages;
 
         // Get Categories
-        $terms = get_terms(array(
+        $terms = get_terms([
             'taxonomy' => 'ps_category',
             'hide_empty' => false,
-        ));
+        ]);
 
         ob_start();
         ?>
@@ -191,14 +192,14 @@ class PS_Frontend_Gallery
         // Fix #26: CSS 变量改用 wp_add_inline_style 注入，避免内联 <style> 标签
         $card_ratio = get_option('ps_card_aspect_ratio', '3/4');
         // 安全校验：只允许合法的比例值
-        $allowed_ratios = array('1/1', '3/4', '4/3', '16/9', '9/16', 'auto');
+        $allowed_ratios = ['1/1', '3/4', '4/3', '16/9', '9/16', 'auto'];
         if (!in_array($card_ratio, $allowed_ratios, true)) {
             $card_ratio = '3/4';
         }
         $ratio_css = ($card_ratio === 'auto') ? 'auto' : $card_ratio;
 
         $inline_css = sprintf(
-            '.ps-gallery-container, .ps-modal { --ps-primary-color: %s; --ps-button-text-color: %s; --ps-title-color: %s; --ps-desc-color: %s; } .ps-card-image { --ps-card-ratio: %s; }',
+            ':root { --ps-primary-color: %s; --ps-button-text-color: %s; --ps-title-color: %s; --ps-desc-color: %s; } .ps-card-image { --ps-card-ratio: %s; }',
             esc_attr($primary_color),
             esc_attr($button_text_color),
             esc_attr($banner_title_color),
@@ -522,14 +523,14 @@ class PS_Frontend_Gallery
         $page = isset($_POST['page']) ? absint($_POST['page']) : 1;
         $per_page = isset($_POST['per_page']) ? min(100, absint($_POST['per_page'])) : 12;
 
-        $args = array(
+        $args = [
             'post_type' => 'ps_item',
             'posts_per_page' => $per_page,
             'paged' => $page,
             'post_status' => 'publish',
             'orderby' => 'date',
             'order' => 'DESC',
-        );
+        ];
 
         $query = new WP_Query($args);
         $watermark_text = get_option('ps_watermark_text', 'Pocket Showroom');
@@ -544,7 +545,7 @@ class PS_Frontend_Gallery
         wp_reset_postdata();
         $html = ob_get_clean();
 
-        wp_send_json_success(array('html' => $html));
+        wp_send_json_success(['html' => $html]);
     }
 
     /**

@@ -7,6 +7,7 @@
     --ps-text-soft: #646970;
     --ps-radius: 8px;
     --ps-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --ps-brand-color: #007cba;
     margin-top: -20px;
     /* Pull up to hide WP gap */
 }
@@ -499,7 +500,7 @@
 }
 
 input:checked+.ps-slider {
-    background-color: #007cba;
+    background-color: var(--ps-brand-color);
 }
 
 input:checked+.ps-slider:before {
@@ -535,8 +536,8 @@ input:checked+.ps-slider:before {
 }
 
 .ps-position-grid input:checked+span {
-    background: #007cba;
-    border-color: #005a87;
+    background: var(--ps-brand-color);
+    border-color: var(--ps-brand-color);
 }
 
 /* --- DIVI-LIKE COLOR PICKER --- */

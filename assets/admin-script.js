@@ -18,8 +18,8 @@ jQuery(document).ready(function ($) {
         e.preventDefault();
         if (mediaUploader) { mediaUploader.open(); return; }
         mediaUploader = wp.media.frames.file_frame = wp.media({
-            title: 'Select Product Images',
-            button: { text: 'Add to Gallery' },
+            title: ps_admin_vars.select_images,
+            button: { text: ps_admin_vars.add_to_gallery },
             multiple: true
         });
         mediaUploader.on('select', function () {
@@ -71,8 +71,8 @@ jQuery(document).ready(function ($) {
         var index = $('#ps-size-variants .ps-size-row').length;
         var html = `
             <div class="ps-size-row" style="display:flex; gap:10px; margin-bottom:10px;">
-                <input type="text" class="ps-input" name="_ps_size_variants[${index}][label]" placeholder="Variant Name" style="flex:1;">
-                <input type="text" class="ps-input" name="_ps_size_variants[${index}][value]" placeholder="Dimensions" style="flex:2;">
+                <input type="text" class="ps-input" name="_ps_size_variants[${index}][label]" placeholder="${ps_admin_vars.variant_name_placeholder}" style="flex:1;">
+                <input type="text" class="ps-input" name="_ps_size_variants[${index}][value]" placeholder="${ps_admin_vars.dimensions_placeholder}" style="flex:2;">
                 <span class="dashicons dashicons-move ps-sort-handle" style="cursor:move; color:#ccc; align-self:center;"></span>
                 <button type="button" class="ps-remove-btn" style="color:red; background:none; border:none; cursor:pointer;">×</button>
             </div>
@@ -115,8 +115,8 @@ jQuery(document).ready(function ($) {
         e.preventDefault();
         var template = `
             <div class="ps-spec-row">
-                <input type="text" name="_ps_dynamic_specs[key][]" class="ps-spec-key" placeholder="Field Name" value="">
-                <input type="text" name="_ps_dynamic_specs[val][]" class="ps-spec-val" placeholder="Value" value="">
+                <input type="text" name="_ps_dynamic_specs[key][]" class="ps-spec-key" placeholder="${ps_admin_vars.field_name_placeholder}" value="">
+                <input type="text" name="_ps_dynamic_specs[val][]" class="ps-spec-val" placeholder="${ps_admin_vars.value_placeholder}" value="">
                 <span class="dashicons dashicons-move ps-sort-handle" style="cursor:move; color:#ccc; align-self:center;"></span>
                 <button type="button" class="ps-remove-btn">×</button>
             </div>
@@ -138,7 +138,7 @@ jQuery(document).ready(function ($) {
     // Banner Button Text Live Preview
     $('#ps_banner_button_text').on('input', function () {
         var val = $(this).val();
-        $('#ps-preview-banner-btn').text(val ? val : 'Explore Now');
+        $('#ps-preview-banner-btn').text(val ? val : ps_admin_vars.explore_now);
     });
 
 
@@ -497,13 +497,13 @@ jQuery(document).ready(function ($) {
     // --- Live Text Preview ---
     $('#ps_banner_title').on('input', function () {
         var val = $(this).val();
-        $('#ps-preview-banner-title').text(val ? val : 'Banner Title');
+        $('#ps-preview-banner-title').text(val ? val : ps_admin_vars.banner_title_fallback);
     });
 
     $('#ps_banner_desc').on('input', function () {
         var val = $(this).val();
         // AUDIT3-10: 使用 .text() 而非 .html() 防止 XSS
-        $('#ps-preview-banner-desc').text(val ? val : 'Banner description goes here.');
+        $('#ps-preview-banner-desc').text(val ? val : ps_admin_vars.banner_desc_fallback);
     });
 
     // Banner Image Preview Update
@@ -512,8 +512,8 @@ jQuery(document).ready(function ($) {
         e.preventDefault();
         if (bannerFrame) { bannerFrame.open(); return; }
         bannerFrame = wp.media({
-            title: 'Select Banner Image',
-            button: { text: 'Use this image' },
+            title: ps_admin_vars.select_banner_image,
+            button: { text: ps_admin_vars.use_this_image },
             multiple: false
         });
         bannerFrame.on('select', function () {
@@ -531,7 +531,7 @@ jQuery(document).ready(function ($) {
     $('#ps_remove_banner_image').on('click', function (e) {
         e.preventDefault();
         $('#ps_banner_image_id').val('');
-        $('.ps-image-preview-wrapper').html('<div class="ps-no-image">No Image</div>');
+        $('.ps-image-preview-wrapper').html('<div class="ps-no-image">' + ps_admin_vars.no_image + '</div>');
         $('#ps-live-preview-container').css('background-image', 'none');
     });
 
@@ -541,8 +541,8 @@ jQuery(document).ready(function ($) {
         e.preventDefault();
         if (wmUploader) { wmUploader.open(); return; }
         wmUploader = wp.media({
-            title: 'Select Watermark Image',
-            button: { text: 'Use this image' },
+            title: ps_admin_vars.select_watermark_image,
+            button: { text: ps_admin_vars.use_this_image },
             multiple: false
         });
         wmUploader.on('select', function () {
@@ -601,7 +601,7 @@ jQuery(document).ready(function ($) {
                 // Image Size
                 $('#ps-watermark-layer .ps-wm-image').css('width', (size * 3) + 'px'); // simplified scale
             } else {
-                $('#ps-watermark-layer .ps-wm-text').text('(No Image)').show();
+                $('#ps-watermark-layer .ps-wm-text').text(ps_admin_vars.no_image_parens).show();
             }
         }
 

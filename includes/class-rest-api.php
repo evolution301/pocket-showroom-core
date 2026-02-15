@@ -1,19 +1,11 @@
 <?php
 /**
- * REST API for Pocket Showroom
- * 
- * Provides public endpoints for the WeChat Mini Program (and any other client)
- * to read product data from this WordPress site.
- *
- * Endpoints:
- *   GET /wp-json/ps/v1/products          — Product list (paginated, filterable)
- *   GET /wp-json/ps/v1/products/{id}     — Single product detail
- *   GET /wp-json/ps/v1/categories        — Category (Collection) list
- *   GET /wp-json/ps/v1/banner            — Banner configuration
- *   GET /wp-json/ps/v1/ping              — Health check (verify plugin is active)
+ * Pocket Showroom REST API
  *
  * @package PocketShowroom
  */
+
+declare(strict_types=1);
 
 if (!defined('ABSPATH')) {
     exit;
@@ -21,10 +13,7 @@ if (!defined('ABSPATH')) {
 
 class PS_REST_API
 {
-    /**
-     * API namespace
-     */
-    const API_NAMESPACE = 'ps/v1';
+    const API_NAMESPACE = 'pocket-showroom/v1';
 
     private static $instance = null;
 
@@ -38,136 +27,124 @@ class PS_REST_API
 
     private function __construct()
     {
-        add_action('rest_api_init', array($this, 'register_routes'));
+        add_action('rest_api_init', [$this, 'register_routes']);
     }
 
     /**
-     * Register all REST API routes
+     * Register API routes
      */
     public function register_routes()
     {
         // --- Health Check ---
-        register_rest_route(self::API_NAMESPACE, '/ping', array(
+        register_rest_route(self::API_NAMESPACE, '/ping', [
             'methods' => 'GET',
-            'callback' => array($this, 'handle_ping'),
+            'callback' => [$this, 'handle_ping'],
             'permission_callback' => '__return_true',
-        ));
+        ]);
 
         // --- Product List ---
-        register_rest_route(self::API_NAMESPACE, '/products', array(
+        register_rest_route(self::API_NAMESPACE, '/products', [
             'methods' => 'GET',
-            'callback' => array($this, 'get_products'),
+            'callback' => [$this, 'get_products'],
             'permission_callback' => '__return_true',
-            'args' => array(
-                'page' => array(
+            'args' => [
+                'page' => [
                     'default' => 1,
                     'sanitize_callback' => 'absint',
-                ),
-                'per_page' => array(
+                ],
+                'per_page' => [
                     'default' => 12,
                     'sanitize_callback' => 'absint',
-                ),
-                'category' => array(
+                ],
+                'category' => [
                     'default' => '',
                     'sanitize_callback' => 'sanitize_text_field',
-                ),
-                'search' => array(
+                ],
+                'search' => [
                     'default' => '',
                     'sanitize_callback' => 'sanitize_text_field',
-                ),
-            ),
-        ));
+                ],
+            ],
+        ]);
 
         // --- Single Product ---
-        register_rest_route(self::API_NAMESPACE, '/products/(?P<id>\d+)', array(
+        register_rest_route(self::API_NAMESPACE, '/products/(?P<id>\d+)', [
             'methods' => 'GET',
-            'callback' => array($this, 'get_product'),
+            'callback' => [$this, 'get_product'],
             'permission_callback' => '__return_true',
-            'args' => array(
-                'id' => array(
+            'args' => [
+                'id' => [
                     'validate_callback' => function ($param) {
                         return is_numeric($param);
                     },
-                ),
-            ),
-        ));
+                ],
+            ],
+        ]);
 
         // --- Categories ---
-        register_rest_route(self::API_NAMESPACE, '/categories', array(
+        register_rest_route(self::API_NAMESPACE, '/categories', [
             'methods' => 'GET',
-            'callback' => array($this, 'get_categories'),
+            'callback' => [$this, 'get_categories'],
             'permission_callback' => '__return_true',
-        ));
+        ]);
 
         // --- Banner ---
-        register_rest_route(self::API_NAMESPACE, '/banner', array(
+        register_rest_route(self::API_NAMESPACE, '/banner', [
             'methods' => 'GET',
-            'callback' => array($this, 'get_banner'),
+            'callback' => [$this, 'get_banner'],
             'permission_callback' => '__return_true',
-        ));
+        ]);
     }
 
     // =============================================
-    //  Ping / Health Check
+    // Callbacks
     // =============================================
 
     /**
-     * Health check endpoint — used by Mini Program to verify that
-     * this WordPress site has the PS plugin installed and active.
-     *
-     * @return WP_REST_Response
+     * /ping
      */
     public function handle_ping()
     {
-        return new WP_REST_Response(array(
+        return new WP_REST_Response([
             'status' => 'ok',
             'plugin' => 'pocket-showroom',
             'version' => defined('PS_CORE_VERSION') ? PS_CORE_VERSION : 'unknown',
             'site' => get_bloginfo('name'),
-        ), 200);
+        ], 200);
     }
 
     // =============================================
-    //  Products
+    // Products
     // =============================================
 
     /**
-     * Get paginated product list.
-     *
-     * Query params:
-     *   page     — Page number (default: 1)
-     *   per_page — Items per page (default: 12, max: 50)
-     *   category — Filter by category slug
-     *   search   — Search keyword
-     *
-     * @param WP_REST_Request $request
-     * @return WP_REST_Response
+     * GET /products
      */
     public function get_products($request)
     {
-        $page = max(1, $request->get_param('page'));
-        $per_page = min(50, max(1, $request->get_param('per_page')));
+        $page = $request->get_param('page');
+        $per_page = $request->get_param('per_page');
         $category = $request->get_param('category');
         $search = $request->get_param('search');
 
-        $args = array(
+        $args = [
             'post_type' => 'ps_item',
             'post_status' => 'publish',
             'posts_per_page' => $per_page,
             'paged' => $page,
             'orderby' => 'date',
             'order' => 'DESC',
-        );
+        ];
 
         // Category filter
         if (!empty($category)) {
-            $args['tax_query'] = array(
-                array(
+            $args['tax_query'] = [
+                [
                     'taxonomy' => 'ps_category',
                     'field' => 'slug',
                     'terms' => $category,
-                ),
-            );
+                ],
+            ];
         }
 
         // Search filter
@@ -176,7 +153,7 @@ class PS_REST_API
         }
 
         $query = new WP_Query($args);
-        $items = array();
+        $items = [];
 
         if ($query->have_posts()) {
             while ($query->have_posts()) {
@@ -186,79 +163,72 @@ class PS_REST_API
             wp_reset_postdata();
         }
 
-        return new WP_REST_Response(array(
+        return new WP_REST_Response([
             'items' => $items,
             'total' => (int) $query->found_posts,
             'total_pages' => (int) $query->max_num_pages,
             'page' => $page,
             'per_page' => $per_page,
-        ), 200);
+        ], 200);
     }
 
     /**
-     * Get single product detail.
-     *
-     * @param WP_REST_Request $request
-     * @return WP_REST_Response
+     * GET /products/:id
      */
     public function get_product($request)
     {
-        $post_id = (int) $request->get_param('id');
+        $post_id = $request->get_param('id');
         $post = get_post($post_id);
 
         if (!$post || $post->post_type !== 'ps_item' || $post->post_status !== 'publish') {
-            return new WP_REST_Response(array(
+            return new WP_REST_Response([
                 'error' => 'Product not found',
-            ), 404);
+            ], 404);
         }
 
         return new WP_REST_Response($this->format_product_detail($post), 200);
     }
 
     // =============================================
-    //  Categories
+    // Categories
     // =============================================
 
     /**
-     * Get all product categories (Collections).
-     *
-     * @return WP_REST_Response
+     * GET /categories
      */
     public function get_categories()
     {
-        $terms = get_terms(array(
+        $terms = get_terms([
             'taxonomy' => 'ps_category',
             'hide_empty' => false,
             'orderby' => 'name',
             'order' => 'ASC',
-        ));
+        ]);
 
-        $categories = array();
+        $categories = [];
 
         if (!is_wp_error($terms)) {
             foreach ($terms as $term) {
-                $categories[] = array(
+                $categories[] = [
                     'id' => $term->term_id,
                     'name' => $term->name,
                     'slug' => $term->slug,
                     'count' => $term->count,
-                );
+                ];
             }
         }
 
-        return new WP_REST_Response(array(
+        return new WP_REST_Response([
             'categories' => $categories,
-        ), 200);
+        ], 200);
     }
 
     // =============================================
-    //  Banner
+    // Banner
     // =============================================
 
     /**
-     * Get banner configuration from plugin settings.
-     *
-     * @return WP_REST_Response
+     * GET /banner
      */
     public function get_banner()
     {
@@ -268,7 +238,7 @@ class PS_REST_API
             $banner_bg = wp_get_attachment_image_url($banner_image_id, 'full');
         }
 
-        return new WP_REST_Response(array(
+        return new WP_REST_Response([
             'title' => get_option('ps_banner_title', 'Pocket Showroom'),
             'description' => get_option('ps_banner_desc', ''),
             'buttonText' => get_option('ps_banner_button_text', 'Get a Quote'),
@@ -279,61 +249,49 @@ class PS_REST_API
             'buttonTextColor' => get_option('ps_button_text_color', '#ffffff'),
             'titleColor' => get_option('ps_banner_title_color', '#ffffff'),
             'descColor' => get_option('ps_banner_desc_color', '#ffffffcc'),
-        ), 200);
+        ], 200);
     }
 
     // =============================================
-    //  Data Formatting Helpers
+    // Helpers
     // =============================================
 
     /**
-     * Format a product for the list view (summary, lightweight).
-     *
-     * @param int $post_id
-     * @return array
+     * Format for list view
      */
     private function format_product_summary($post_id)
     {
-        // Thumbnail (cover image)
-        $thumb_url = get_the_post_thumbnail_url($post_id, 'medium');
-        if (!$thumb_url) {
-            $thumb_url = '';
-        }
-
-        // Model number
         $model = get_post_meta($post_id, '_ps_model', true);
-
-        // Price
         $price = get_post_meta($post_id, '_ps_list_price', true);
+
+        $thumb_id = get_post_thumbnail_id($post_id);
+        $thumb_url = $thumb_id ? wp_get_attachment_image_url($thumb_id, 'medium') : '';
 
         // Categories
         $terms = get_the_terms($post_id, 'ps_category');
-        $categories = array();
+        $categories = [];
         if ($terms && !is_wp_error($terms)) {
             foreach ($terms as $t) {
-                $categories[] = array(
+                $categories[] = [
                     'id' => $t->term_id,
                     'name' => $t->name,
                     'slug' => $t->slug,
-                );
+                ];
             }
         }
 
-        return array(
+        return [
             'id' => $post_id,
             'title' => get_the_title($post_id),
             'model' => $model ?: '',
             'price' => $price ?: '',
             'thumbnail' => $thumb_url,
             'categories' => $categories,
-        );
+        ];
     }
 
     /**
-     * Format a product for the detail view (full data).
-     *
-     * @param WP_Post $post
-     * @return array
+     * Format for detail view
      */
     private function format_product_detail($post)
     {
@@ -341,51 +299,52 @@ class PS_REST_API
 
         // Gallery images (full URLs)
         $gallery_ids = get_post_meta($post_id, '_ps_gallery_images', true);
-        $gallery = array();
+        $gallery = [];
         if (!empty($gallery_ids)) {
             $ids = explode(',', $gallery_ids);
             foreach ($ids as $img_id) {
-                $url = wp_get_attachment_image_url(trim($img_id), 'large');
+                $url = wp_get_attachment_image_url($img_id, 'large');
                 if ($url) {
                     $gallery[] = $url;
                 }
             }
         }
 
-        // If no gallery, try featured image
-        if (empty($gallery)) {
-            $thumb = get_the_post_thumbnail_url($post_id, 'large');
-            if ($thumb) {
-                $gallery[] = $thumb;
+        // Add featured image to gallery if not present
+        $feat_id = get_post_thumbnail_id($post_id);
+        if ($feat_id) {
+            $feat_url = wp_get_attachment_image_url($feat_id, 'large');
+            if ($feat_url && !in_array($feat_url, $gallery)) {
+                array_unshift($gallery, $feat_url);
             }
         }
 
         // Size variants
         $size_variants = get_post_meta($post_id, '_ps_size_variants', true);
         if (!is_array($size_variants)) {
-            $size_variants = array();
+            $size_variants = [];
         }
 
         // Dynamic specs
         $dynamic_specs = get_post_meta($post_id, '_ps_dynamic_specs', true);
         if (!is_array($dynamic_specs)) {
-            $dynamic_specs = array();
+            $dynamic_specs = [];
         }
 
         // Categories
         $terms = get_the_terms($post_id, 'ps_category');
-        $categories = array();
+        $categories = [];
         if ($terms && !is_wp_error($terms)) {
             foreach ($terms as $t) {
-                $categories[] = array(
+                $categories[] = [
                     'id' => $t->term_id,
                     'name' => $t->name,
                     'slug' => $t->slug,
-                );
+                ];
             }
         }
 
-        return array(
+        return [
             'id' => $post_id,
             'title' => get_the_title($post_id),
             'model' => get_post_meta($post_id, '_ps_model', true) ?: '',
@@ -400,6 +359,9 @@ class PS_REST_API
             'dynamicSpecs' => $dynamic_specs,
             'categories' => $categories,
             'permalink' => get_permalink($post_id),
-        );
+        ];
     }
 }
+
+// Initialize
+PS_REST_API::get_instance();

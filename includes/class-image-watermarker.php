@@ -1,6 +1,9 @@
 <?php
-if (!defined('ABSPATH'))
+declare(strict_types=1);
+
+if (!defined('ABSPATH')) {
     exit;
+}
 
 class PS_Image_Watermarker
 {
@@ -17,7 +20,7 @@ class PS_Image_Watermarker
 
     private function __construct()
     {
-        add_filter('wp_generate_attachment_metadata', array($this, 'process_image_watermark'), 10, 2);
+        add_filter('wp_generate_attachment_metadata', [$this, 'process_image_watermark'], 10, 2);
     }
 
     /**
@@ -53,13 +56,13 @@ class PS_Image_Watermarker
         }
 
         // 缓存所有设置，避免在循环中重复调用 get_option（修复 #11）
-        $settings = array(
+        $settings = [
             'type' => get_option('ps_watermark_type', 'text'),
             'opacity' => (int) get_option('ps_watermark_opacity', 37),
             'size_pct' => (int) get_option('ps_watermark_size', 6),
             'position' => get_option('ps_watermark_position', 'br'),
             'rotation' => (int) get_option('ps_watermark_rotation', 0),
-        );
+        ];
 
         if ($settings['type'] === 'text') {
             $settings['text'] = get_option('ps_watermark_text', 'Pocket Showroom');
