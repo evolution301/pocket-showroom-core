@@ -35,7 +35,7 @@ A modern B2B product catalog WordPress plugin designed for furniture exporters, 
 
 ### Method 1: Download from GitHub (Recommended)
 
-1. Download the latest release: [pocket-showroom-core-v3.0.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.0.0/pocket-showroom-core.zip)
+1. Download the latest release: [pocket-showroom-core-v3.0.3.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.0.3/pocket-showroom-core.zip)
 2. Go to **WordPress Admin** → **Plugins** → **Add New** → **Upload Plugin**
 3. Upload the ZIP file and click **Install Now**
 4. Activate the plugin
@@ -186,6 +186,11 @@ Configure image watermark:
 
 ## Changelog
 
+### v3.0.3 (2026-02-25)
+- **UI Restore**: Reverted to the classic full-width custom admin editor UI from v2.0.4 (custom title bar, Save/Preview buttons, full-width grid layout)
+- **Fix**: Eliminated admin panel layout deformation caused by conflicting CSS/JS overrides
+- **Version**: Bumped to 3.0.3 to force browser cache refresh
+
 ### v3.0.0 (2026-02-16)
 - **Huge Update**: B2B Power Suite Released!
 - **New**: Container Loading Calculator (CBM/40HQ)
@@ -282,7 +287,7 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 
 ### 方法一：从 GitHub 下载（推荐）
 
-1. 下载最新版本：[pocket-showroom-core-v3.0.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.0.0/pocket-showroom-core.zip)
+1. 下载最新版本：[pocket-showroom-core-v3.0.3.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.0.3/pocket-showroom-core.zip)
 2. 进入 **WordPress 后台** → **插件** → **安装插件** → **上传插件**
 3. 上传 ZIP 文件，点击 **现在安装**
 4. 激活插件
@@ -432,6 +437,11 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 - 位置
 
 ## 更新日志
+
+### v3.0.3 (2026-02-25)
+- **UI 恢复**: 将管理后台编辑界面还原为 v2.0.4 经典全屏定制版（自定义标题栏、保存/预览按钮、全宽网格布局）
+- **修复**: 彻底消除因 CSS/JS 冲突导致的后台界面变形问题
+- **版本**: 升级至 3.0.3 强制浏览器刷新缓存
 
 ### v3.0.0 (2026-02-16)
 - **重磅更新**: B2B Power Suite 正式发布！
