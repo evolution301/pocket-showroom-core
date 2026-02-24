@@ -89,18 +89,13 @@ class PS_Meta_Fields
         if ($status_label === 'Publish')
             $status_label = 'Published';
 
-        ?>
         // Helper to locate template
         $template_path = PS_CORE_PATH . 'templates/meta-boxes.php';
         if (file_exists($template_path)) {
-        include $template_path;
+            include $template_path;
         } else {
-        echo '<div class="error">
-            <p>' . __('Meta box template not found.', 'pocket-showroom') . '</p>
-        </div>';
+            echo '<div class="error"><p>' . __('Meta box template not found.', 'pocket-showroom') . '</p></div>';
         }
-        }
-        <?php
     }
 
     public function save_meta_box($post_id)

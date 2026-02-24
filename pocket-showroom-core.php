@@ -4,7 +4,7 @@ declare(strict_types=1);
 /*
 Plugin Name: Pocket Showroom Core
 Description: A modern B2B product catalog with CSV import, multi-image gallery, and interactive frontend.
-Version: 2.0.7
+Version: 3.0.3
 Author: Evolution301
 Text Domain: pocket-showroom
 */
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define Constants
-define('PS_CORE_VERSION', '2.0.7');
+define('PS_CORE_VERSION', '3.0.3');
 define('PS_CORE_PATH', plugin_dir_path(__FILE__));
 define('PS_CORE_URL', plugin_dir_url(__FILE__));
 
@@ -34,6 +34,7 @@ require_once PS_CORE_PATH . 'includes/class-settings.php';
 require_once PS_CORE_PATH . 'includes/class-image-watermarker.php';
 require_once PS_CORE_PATH . 'includes/class-rest-api.php';
 require_once PS_CORE_PATH . 'includes/class-plugin-updater.php';
+require_once PS_CORE_PATH . 'includes/class-module-loader.php';
 
 
 // Initialize Classes
@@ -50,6 +51,7 @@ function ps_core_init_plugin()
     PS_Settings::get_instance();
     PS_Image_Watermarker::get_instance();
     PS_REST_API::get_instance();
+    PS_Module_Loader::get_instance();
 }
 add_action('plugins_loaded', 'ps_core_init_plugin');
 

@@ -35,7 +35,7 @@ A modern B2B product catalog WordPress plugin designed for furniture exporters, 
 
 ### Method 1: Download from GitHub (Recommended)
 
-1. Download the latest release: [pocket-showroom-core-v2.0.2.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v2.0.2/pocket-showroom-core.zip)
+1. Download the latest release: [pocket-showroom-core-v3.0.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.0.0/pocket-showroom-core.zip)
 2. Go to **WordPress Admin** → **Plugins** → **Add New** → **Upload Plugin**
 3. Upload the ZIP file and click **Install Now**
 4. Activate the plugin
@@ -186,6 +186,15 @@ Configure image watermark:
 
 ## Changelog
 
+### v3.0.0 (2026-02-16)
+- **Huge Update**: B2B Power Suite Released!
+- **New**: Container Loading Calculator (CBM/40HQ)
+- **New**: Smart Quotation Cart & PDF Request
+- **New**: Sales Rep Avatar & Floating Contact Widget
+- **New**: Fair Mode (Printable QR Code Labels)
+- **New**: Private Mode (Password Protection)
+- **UI**: Complete Design System Overhaul (Royal Blue Theme)
+
 ### v2.0.2 (2026-02-15)
 - **Fix**: Resolved "Settings page access denied" error by correcting the admin menu link URL.
 
@@ -273,7 +282,7 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 
 ### 方法一：从 GitHub 下载（推荐）
 
-1. 下载最新版本：[pocket-showroom-core-v2.0.2.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v2.0.2/pocket-showroom-core.zip)
+1. 下载最新版本：[pocket-showroom-core-v3.0.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.0.0/pocket-showroom-core.zip)
 2. 进入 **WordPress 后台** → **插件** → **安装插件** → **上传插件**
 3. 上传 ZIP 文件，点击 **现在安装**
 4. 激活插件
@@ -423,6 +432,15 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 - 位置
 
 ## 更新日志
+
+### v3.0.0 (2026-02-16)
+- **重磅更新**: B2B Power Suite 正式发布！
+- **新增**: 集装箱装载计算器 (CBM/40HQ)
+- **新增**: 智能报价车 & PDF 询盘
+- **新增**: 业务员头像 & 悬浮联系组件
+- **新增**: 展会模式 (可打印 QR 标签)
+- **新增**: 私密模式 (密码保护)
+- **UI**: 全新设计系统重构 (皇家蓝主题)
 
 ### v2.0.2 (2026-02-15)
 - **修复**: 修正后台设置链接错误导致的 "权限不足" 问题。

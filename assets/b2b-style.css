@@ -1,0 +1,224 @@
+/* --- POCKET SHOWROOM B2B POWER SUITE (Frontend) --- */
+
+:root {
+    --ps-b2b-primary: #2563EB;
+    --ps-b2b-primary-hover: #1D4ED8;
+    --ps-b2b-bg-soft: #EFF6FF;
+    --ps-b2b-border: #DBEAFE;
+    --ps-b2b-text: #1E3A8A;
+    --ps-b2b-radius: 8px;
+}
+
+/* --- 1. Container Calculator Widget --- */
+.ps-b2b-calculator {
+    margin-top: 20px;
+    padding: 20px;
+    background: var(--ps-b2b-bg-soft);
+    border: 1px solid var(--ps-b2b-border);
+    border-radius: var(--ps-b2b-radius);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ps-b2b-cal-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ps-b2b-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ps-b2b-calc-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.ps-b2b-input {
+    padding: 8px 12px;
+    border: 1px solid #BFDBFE;
+    border-radius: 6px;
+    width: 120px;
+    font-size: 14px;
+    outline: none;
+}
+
+.ps-b2b-input:focus {
+    border-color: var(--ps-b2b-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.ps-b2b-result {
+    font-weight: 700;
+    color: var(--ps-b2b-primary);
+    font-size: 15px;
+}
+
+.ps-b2b-note {
+    font-size: 12px;
+    color: #64748B;
+    margin: 0;
+}
+
+/* --- 2. Quote Request Elements --- */
+.ps-btn-quote {
+    width: 100%;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: white;
+    border: 1px solid var(--ps-b2b-primary);
+    color: var(--ps-b2b-primary);
+    border-radius: var(--ps-b2b-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ps-btn-quote:hover {
+    background: var(--ps-b2b-bg-soft);
+}
+
+/* Quote Cart Table */
+.ps-quote-wrap {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    background: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+}
+
+.ps-quote-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.ps-quote-table th {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid #E2E8F0;
+    color: #475569;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ps-quote-table td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.ps-quote-form {
+    background: #F8FAFC;
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px solid #E2E8F0;
+}
+
+.ps-form-row {
+    margin-bottom: 16px;
+}
+
+.ps-form-row label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+}
+
+.ps-form-btn {
+    background: var(--ps-b2b-primary);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.ps-form-btn:hover {
+    background: var(--ps-b2b-primary-hover);
+}
+
+/* --- 3. Sales Rep Floating Button --- */
+.ps-sales-float {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+    animation: ps-slide-up 0.5s ease-out;
+}
+
+.ps-sales-bubble {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #E2E8F0;
+    max-width: 260px;
+}
+
+.ps-sales-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #E2E8F0;
+}
+
+.ps-sales-info h4 {
+    margin: 0;
+    font-size: 14px;
+    color: #1E293B;
+}
+
+.ps-sales-info small {
+    font-size: 12px;
+    color: #64748B;
+}
+
+.ps-sales-btn {
+    background: #25D366;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 99px;
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.2s;
+}
+
+.ps-sales-btn:hover {
+    transform: translateY(-2px);
+}
+
+@keyframes ps-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

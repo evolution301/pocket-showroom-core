@@ -42,7 +42,7 @@ defined('ABSPATH') || exit;
                     style="background:#fff; border:1px solid #ddd; padding:15px; border-radius:4px; margin-bottom:20px;">
                     <p><strong>1. API Endpoint URL:</strong></p>
                     <code style="background:#f0f0f1; padding:5px; display:block; margin:5px 0; word-break:break-all;">
-                                                <?php echo esc_url(rest_url('pocket-showroom/v1/ping')); ?>
+                                                <?php echo esc_url(rest_url('ps/v1/ping')); ?>
                                             </code>
                     <p class="description">
                         <?php _e('Copy this URL and try to open it in your browser. If it returns JSON data, the API is working.', 'pocket-showroom'); ?>
@@ -62,7 +62,7 @@ defined('ABSPATH') || exit;
                                 var $res = $('#ps-api-result');
                                 $res.show().html('Checking...');
                                 $.ajax({
-                                    url: '<?php echo esc_url_raw(rest_url('pocket-showroom/v1/ping')); ?>',
+                                    url: '<?php echo esc_url_raw(rest_url('ps/v1/ping')); ?>',
                                     method: 'GET',
                                     success: function (data) {
                                         $res.html('<div style="color:green; font-weight:bold;">✅ Success! API is reachable.</div><pre style="background:#eee; padding:5px; margin-top:5px;">' + JSON.stringify(data) + '</pre>');
@@ -71,7 +71,7 @@ defined('ABSPATH') || exit;
                                         $res.html('<div style="color:red; font-weight:bold;">❌ Error: ' + status + ' ' + error + '</div><p>HTTP Status: ' + xhr.status + '</p><p>Response: ' + xhr.responseText + '</p>');
                                     }
                                 });
-                            });
+                        });
                         });
                     </script>
                 </div>
@@ -170,7 +170,7 @@ defined('ABSPATH') || exit;
             <!-- Row 1: All Settings (horizontal) -->
             <div class="ps-banner-settings-row">
                 <!-- Image Settings -->
-                <div class="ps-banner-settings-col">
+                <div class="ps-banner-settings-col" style="flex: 0 0 250px;">
                     <h3>
                         <?php _e('Banner Image', 'pocket-showroom'); ?>
                     </h3>
@@ -181,10 +181,10 @@ defined('ABSPATH') || exit;
                             <div class="ps-image-preview-wrapper" style="margin-bottom: 15px;">
                                 <?php if ($banner_image_url): ?>
                                     <img src="<?php echo esc_url($banner_image_url); ?>"
-                                        style="width: 100%; max-width: 100%; height: auto; border-radius: 6px; border: 1px solid #ddd;">
+                                        style="width: 100%; max-width: 100%; height: auto; border-radius: 4px; border: 1px solid #eee;">
                                 <?php else: ?>
                                     <div class="ps-no-image"
-                                        style="background:#f0f0f1; padding: 40px 20px; text-align:center; color:#888; border-radius: 6px; border: 2px dashed #ccc;">
+                                        style="background:#f9f9f9; padding: 30px 20px; text-align:center; color:#999; border-radius: 4px; border: 1px dashed #ccc;">
                                         <?php _e('No Image', 'pocket-showroom'); ?>
                                     </div>
                                 <?php endif; ?>
@@ -203,51 +203,54 @@ defined('ABSPATH') || exit;
                 </div>
 
                 <!-- Text Settings -->
-                <div class="ps-banner-settings-col" style="flex: 1;">
+                <div class="ps-banner-settings-col" style="flex: 2;">
                     <h3>
                         <?php _e('Text Content', 'pocket-showroom'); ?>
                     </h3>
                     <div class="ps-form-group">
-                        <label>
+                        <label class="ps-label">
                             <?php _e('Banner Title (H1)', 'pocket-showroom'); ?>
                         </label>
                         <input type="text" name="ps_banner_title" id="ps_banner_title"
-                            value="<?php echo esc_attr($banner_title); ?>" class="large-text ps-input" />
+                            value="<?php echo esc_attr($banner_title); ?>" class="ps-input" style="font-size: 16px; font-weight: 600;" />
                     </div>
                     <div class="ps-form-group">
-                        <label>
+                        <label class="ps-label">
                             <?php _e('Banner Description', 'pocket-showroom'); ?>
                         </label>
-                        <textarea name="ps_banner_desc" id="ps_banner_desc" class="large-text ps-input"
+                        <textarea name="ps_banner_desc" id="ps_banner_desc" class="ps-input"
                             rows="4"><?php echo esc_textarea($banner_desc); ?></textarea>
                     </div>
                     <div style="display: flex; gap: 20px;">
                         <div class="ps-form-group" style="flex: 1;">
-                            <label>
+                            <label class="ps-label">
                                 <?php _e('Button Text', 'pocket-showroom'); ?>
                             </label>
                             <input type="text" name="ps_banner_button_text" id="ps_banner_button_text"
                                 value="<?php echo esc_attr(get_option('ps_banner_button_text', 'Explore Now')); ?>"
-                                class="regular-text ps-input" />
+                                class="ps-input" />
                         </div>
                         <div class="ps-form-group" style="flex: 1;">
-                            <label>
+                            <label class="ps-label">
                                 <?php _e('Button URL', 'pocket-showroom'); ?>
                             </label>
                             <input type="url" name="ps_banner_button_url" id="ps_banner_button_url"
                                 value="<?php echo esc_attr(get_option('ps_banner_button_url', '')); ?>"
-                                class="large-text ps-input" placeholder="https://..." />
+                                class="ps-input" placeholder="https://..." />
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Product Card Display -->
-                <div class="ps-banner-settings-col" style="flex: 0.8;">
+            <!-- Row 2: Appearance & Colors -->
+            <div class="ps-banner-settings-row" style="margin-top: 20px;">
+                 <!-- Product Card Display -->
+                 <div class="ps-banner-settings-col" style="flex: 1;">
                     <h3>
                         <?php _e('Product Card Display', 'pocket-showroom'); ?>
                     </h3>
                     <div class="ps-form-group">
-                        <label>
+                        <label class="ps-label">
                             <?php _e('Image Aspect Ratio', 'pocket-showroom'); ?>
                         </label>
                         <select name="ps_card_aspect_ratio" id="ps_card_aspect_ratio" class="ps-input"
@@ -279,13 +282,13 @@ defined('ABSPATH') || exit;
                 </div>
 
                 <!-- Color Settings -->
-                <div class="ps-banner-settings-col">
+                <div class="ps-banner-settings-col" style="flex: 2;">
                     <h3>
-                        <?php _e('Colors', 'pocket-showroom'); ?>
+                        <?php _e('Theme Colors', 'pocket-showroom'); ?>
                     </h3>
-                    <div class="ps-colors-row" style="flex-wrap: wrap;">
+                    <div class="ps-colors-row">
                         <div class="ps-color-item">
-                            <label>
+                            <label class="ps-label">
                                 <?php _e('Overlay', 'pocket-showroom'); ?>
                             </label>
                             <input type="hidden" name="ps_banner_overlay_color" id="ps_banner_overlay_color"
@@ -293,7 +296,7 @@ defined('ABSPATH') || exit;
                             <div class="ps-divi-picker" id="ps-picker-overlay"></div>
                         </div>
                         <div class="ps-color-item">
-                            <label>
+                            <label class="ps-label">
                                 <?php _e('Primary', 'pocket-showroom'); ?>
                             </label>
                             <input type="hidden" name="ps_primary_color" id="ps_primary_color"
@@ -301,7 +304,7 @@ defined('ABSPATH') || exit;
                             <div class="ps-divi-picker" id="ps-picker-primary"></div>
                         </div>
                         <div class="ps-color-item">
-                            <label>
+                            <label class="ps-label">
                                 <?php _e('Btn Text', 'pocket-showroom'); ?>
                             </label>
                             <input type="hidden" name="ps_button_text_color" id="ps_button_text_color"
@@ -309,7 +312,7 @@ defined('ABSPATH') || exit;
                             <div class="ps-divi-picker" id="ps-picker-button-text"></div>
                         </div>
                         <div class="ps-color-item">
-                            <label>
+                            <label class="ps-label">
                                 <?php _e('Title', 'pocket-showroom'); ?>
                             </label>
                             <input type="hidden" name="ps_banner_title_color" id="ps_banner_title_color"
@@ -317,7 +320,7 @@ defined('ABSPATH') || exit;
                             <div class="ps-divi-picker" id="ps-picker-title"></div>
                         </div>
                         <div class="ps-color-item">
-                            <label>
+                            <label class="ps-label">
                                 <?php _e('Desc', 'pocket-showroom'); ?>
                             </label>
                             <input type="hidden" name="ps_banner_desc_color" id="ps_banner_desc_color"
