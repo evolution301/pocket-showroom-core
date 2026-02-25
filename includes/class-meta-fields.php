@@ -47,6 +47,24 @@ class PS_Meta_Fields
         wp_enqueue_media();
         wp_enqueue_style('ps-admin-css', PS_CORE_URL . 'assets/admin-style.css', [], PS_CORE_VERSION);
         wp_enqueue_script('ps-admin-js', PS_CORE_URL . 'assets/admin-script.js', ['jquery', 'jquery-ui-sortable'], PS_CORE_VERSION, true);
+
+        // Fix: Inject required translations for admin-script.js to work on the product edit page
+        wp_localize_script('ps-admin-js', 'ps_admin_vars', [
+            'select_images' => __('Select Product Images', 'pocket-showroom'),
+            'add_to_gallery' => __('Add to Gallery', 'pocket-showroom'),
+            'variant_name_placeholder' => __('Variant Name', 'pocket-showroom'),
+            'dimensions_placeholder' => __('Dimensions', 'pocket-showroom'),
+            'field_name_placeholder' => __('Field Name', 'pocket-showroom'),
+            'value_placeholder' => __('Value', 'pocket-showroom'),
+            'explore_now' => __('Explore Now', 'pocket-showroom'),
+            'banner_title_fallback' => __('Banner Title', 'pocket-showroom'),
+            'banner_desc_fallback' => __('Banner description goes here.', 'pocket-showroom'),
+            'select_banner_image' => __('Select Banner Image', 'pocket-showroom'),
+            'use_this_image' => __('Use this image', 'pocket-showroom'),
+            'no_image' => __('No Image', 'pocket-showroom'),
+            'select_watermark_image' => __('Select Watermark Image', 'pocket-showroom'),
+            'no_image_parens' => __('(No Image)', 'pocket-showroom'),
+        ]);
     }
 
     public function remove_standard_meta_boxes()
