@@ -21,7 +21,7 @@ jQuery(document).ready(function ($) {
         mediaUploader = wp.media.frames.file_frame = wp.media({
             title: ps_admin_vars.select_images,
             button: { text: ps_admin_vars.add_to_gallery },
-            multiple: true
+            multiple: 'add'
         });
         mediaUploader.on('select', function () {
             var selection = mediaUploader.state().get('selection');
