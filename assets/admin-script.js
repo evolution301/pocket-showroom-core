@@ -14,8 +14,8 @@ jQuery(document).ready(function ($) {
     });
 
     // --- Gallery Manager (Existing) ---
-    // Support both ID based (new UI) and Class based (fallback/old UI) selectors
-    $('#ps-add-images, .ps-add-gallery-btn').on('click', function (e) {
+    // Support both ID based (new UI), Class based (fallback/old UI), and Bulk Upload buttons
+    $('#ps-add-images, .ps-add-gallery-btn, #ps-bulk-upload-btn').on('click', function (e) {
         e.preventDefault();
         if (mediaUploader) { mediaUploader.open(); return; }
         mediaUploader = wp.media.frames.file_frame = wp.media({
