@@ -136,10 +136,11 @@ defined('ABSPATH') || exit;
                             }
                         }
                         ?>
-                        <div class="ps-gallery-add" id="ps-add-images">
+                        <div class="ps-gallery-add ps-add-gallery-btn" id="ps-add-images"
+                            style="cursor:pointer; display:flex; flex-direction:column; justify-content:center; align-items:center; border:2px dashed #ccc; border-radius:8px; padding:20px 0; color:#888;">
                             <span class="dashicons dashicons-camera"
-                                style="font-size:24px; width:24px; height:24px; margin-bottom:5px;"></span>
-                            <span style="font-size:12px;">Add Media</span>
+                                style="font-size:32px; width:32px; height:32px; margin-bottom:10px;"></span>
+                            <span style="font-size:14px; font-weight:600;">Add Media</span>
                         </div>
                     </div>
                     <input type="hidden" name="_ps_gallery_images" id="_ps_gallery_images"
