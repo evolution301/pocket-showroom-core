@@ -30,6 +30,8 @@ class PS_Frontend_Gallery
         add_action('wp_head', [$this, 'maybe_hide_layout_elements'], 999);
         // Fix #23: 产品更新时清除缓存的最后更新日期
         add_action('save_post_ps_item', [$this, 'clear_last_updated_cache']);
+        // Fix #28: Override the single product layout
+        add_filter('the_content', [$this, 'render_single_product'], 99);
     }
 
     public function enqueue_assets()
@@ -198,12 +200,17 @@ class PS_Frontend_Gallery
         }
         $ratio_css = ($card_ratio === 'auto') ? 'auto' : $card_ratio;
 
+        $banner_cta_scale = get_option('ps_banner_cta_scale', '1');
+        $banner_share_scale = get_option('ps_banner_share_scale', '1');
+
         $inline_css = sprintf(
-            ':root { --ps-primary-color: %s; --ps-button-text-color: %s; --ps-title-color: %s; --ps-desc-color: %s; } .ps-card-image { --ps-card-ratio: %s; }',
+            ':root { --ps-primary-color: %s; --ps-button-text-color: %s; --ps-title-color: %s; --ps-desc-color: %s; --ps-cta-scale: %s; --ps-share-scale: %s; } .ps-card-image { --ps-card-ratio: %s; }',
             esc_attr($primary_color),
             esc_attr($button_text_color),
             esc_attr($banner_title_color),
             esc_attr($banner_desc_color),
+            esc_attr($banner_cta_scale),
+            esc_attr($banner_share_scale),
             esc_attr($ratio_css)
         );
         wp_add_inline_style('ps-gallery-css', $inline_css);
@@ -218,11 +225,11 @@ class PS_Frontend_Gallery
                 <div class="ps-banner-desc" style="max-width:500px; margin:0 auto; text-align:center;">
                     <?php echo nl2br(esc_html($banner_desc)); ?>
                 </div>
-                <div
-                    style="margin-top:20px; display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;">
+                <div class="ps-banner-buttons"
+                    style="margin-top:45px; display:flex; align-items:center; justify-content:center; gap:20px; flex-wrap:wrap;">
                     <?php if ($banner_button_text): ?>
                         <a href="<?php echo esc_url($banner_button_url); ?>" class="ps-banner-cta-btn"
-                            style="display:inline-block; padding:12px 28px; background-color:<?php echo esc_attr($primary_color); ?>; color:<?php echo esc_attr($button_text_color); ?>; border-radius:4px; font-size:14px; font-weight:600; text-decoration:none; transition:opacity 0.3s;"><?php echo esc_html($banner_button_text); ?></a>
+                            style="display:inline-flex; align-items:center; justify-content:center; background-color:<?php echo esc_attr($primary_color); ?>; color:<?php echo esc_attr($button_text_color); ?>; border-radius:4px; font-weight:600; text-decoration:none; transition:opacity 0.3s;"><?php echo esc_html($banner_button_text); ?></a>
                     <?php endif; ?>
 
                     <?php
@@ -240,10 +247,25 @@ class PS_Frontend_Gallery
                         </svg>
                         Share
                     </button>
+                </div> <!-- End Buttons -->
+
+                <!-- Mobile Only Product Count (Inside content flow) -->
+                <div class="ps-product-count ps-product-count-mobile">
+                    <div class="ps-count-inner">
+                        <span class="ps-count-number"><?php echo intval($published_count); ?></span>
+                        <span class="ps-count-label"><?php _e('Products Ready', 'pocket-showroom'); ?></span>
+                    </div>
+                    <?php if ($last_updated): ?>
+                        <div class="ps-last-updated">
+                            <?php printf(__('Updated: %s', 'pocket-showroom'), $last_updated); ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
+
             </div>
 
-            <div class="ps-product-count">
+            <!-- Desktop Only Product Count (Absolute positioned) -->
+            <div class="ps-product-count ps-product-count-desktop">
                 <div class="ps-count-inner">
                     <span class="ps-count-number"><?php echo intval($published_count); ?></span>
                     <span class="ps-count-label"><?php _e('Products Ready', 'pocket-showroom'); ?></span>
@@ -259,16 +281,20 @@ class PS_Frontend_Gallery
         <div class="ps-gallery-container">
             <!-- Filter Bar -->
             <div class="ps-gallery-filters">
+                <!-- Placing search top helps it act as a primary action on mobile -->
+                <input type="text" id="ps-search" placeholder="<?php _e('Search products...', 'pocket-showroom'); ?>">
+
                 <?php if (!empty($terms) && !is_wp_error($terms)): ?>
-                    <div class="ps-filter-buttons">
-                        <button class="ps-filter-btn active" data-cat="all"><?php _e('All', 'pocket-showroom'); ?></button>
-                        <?php foreach ($terms as $term): ?>
-                            <button class="ps-filter-btn"
-                                data-cat="<?php echo esc_attr($term->slug); ?>"><?php echo esc_html($term->name); ?></button>
-                        <?php endforeach; ?>
+                    <div class="ps-filter-buttons-wrapper">
+                        <div class="ps-filter-buttons">
+                            <button class="ps-filter-btn active" data-cat="all"><?php _e('All', 'pocket-showroom'); ?></button>
+                            <?php foreach ($terms as $term): ?>
+                                <button class="ps-filter-btn"
+                                    data-cat="<?php echo esc_attr($term->slug); ?>"><?php echo esc_html($term->name); ?></button>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                 <?php endif; ?>
-                <input type="text" id="ps-search" placeholder="<?php _e('Search products...', 'pocket-showroom'); ?>">
             </div>
 
             <!-- Grid -->
@@ -391,7 +417,6 @@ class PS_Frontend_Gallery
         $gallery_ids = get_post_meta($post_id, '_ps_gallery_images', true);
         $images_html = '';
 
-        // Helper to wrap image with watermark
         $wrap_img = function ($img_tag) use ($watermark_text) {
             if ($watermark_text) {
                 return '<div class="ps-modal-img-wrapper">' . $img_tag . '<div class="ps-watermark">' . esc_html($watermark_text) . '</div></div>';
@@ -424,69 +449,128 @@ class PS_Frontend_Gallery
         $lead_time = get_post_meta($post_id, '_ps_lead_time', true);
         $price = get_post_meta($post_id, '_ps_list_price', true);
 
+        // Visibility Toggles
+        $show_model = get_post_meta($post_id, '_ps_show_model', true) !== '' ? get_post_meta($post_id, '_ps_show_model', true) : '1';
+        $show_list_price = get_post_meta($post_id, '_ps_show_list_price', true) !== '' ? get_post_meta($post_id, '_ps_show_list_price', true) : '1';
+        $show_material = get_post_meta($post_id, '_ps_show_material', true) !== '' ? get_post_meta($post_id, '_ps_show_material', true) : '1';
+        $show_moq = get_post_meta($post_id, '_ps_show_moq', true) !== '' ? get_post_meta($post_id, '_ps_show_moq', true) : '1';
+        $show_loading = get_post_meta($post_id, '_ps_show_loading', true) !== '' ? get_post_meta($post_id, '_ps_show_loading', true) : '1';
+        $show_lead_time = get_post_meta($post_id, '_ps_show_lead_time', true) !== '' ? get_post_meta($post_id, '_ps_show_lead_time', true) : '1';
+
         // Variants
         $variants = get_post_meta($post_id, '_ps_size_variants', true);
-        $variants_html = '';
-        if (!empty($variants) && is_array($variants)) {
-            $variants_html .= '<div class="ps-variants-section"><h4>' . __('Available Sizes', 'pocket-showroom') . '</h4><table class="ps-variants-table"><thead><tr><th>' . __('Variant', 'pocket-showroom') . '</th><th>' . __('Dimensions', 'pocket-showroom') . '</th></tr></thead><tbody>';
-            foreach ($variants as $v) {
-                $variants_html .= '<tr><td>' . esc_html($v['label']) . '</td><td>' . esc_html($v['value']) . '</td></tr>';
-            }
-            $variants_html .= '</tbody></table></div>';
-        }
 
-        // Dynamic Specs (Custom Fields) — 修复 #3: 在 Modal 中显示自定义规格
+        // Dynamic Specs (Custom Fields)
         $dynamic_specs = get_post_meta($post_id, '_ps_dynamic_specs', true);
-        $specs_html = '';
-        if (!empty($dynamic_specs) && is_array($dynamic_specs)) {
-            $specs_html .= '<div class="ps-specs-section"><h4>' . __('Specifications', 'pocket-showroom') . '</h4><table class="ps-variants-table"><tbody>';
-            foreach ($dynamic_specs as $spec) {
-                if (!empty($spec['key'])) {
-                    $specs_html .= '<tr><td>' . esc_html($spec['key']) . '</td><td>' . esc_html($spec['val']) . '</td></tr>';
-                }
-            }
-            $specs_html .= '</tbody></table></div>';
-        }
-
         ?>
         <div class="ps-modal-layout">
             <div class="ps-modal-gallery">
                 <?php echo $images_html; ?>
             </div>
-            <div class="ps-modal-info">
-                <h2><?php echo get_the_title($post_id); ?></h2>
-                <div class="ps-header-meta">
-                    <span class="ps-sku"><?php printf(__('Model: %s', 'pocket-showroom'), $model); ?></span>
-                    <?php if ($price): ?>
-                        <span class="ps-price-large"><?php printf(__('EXW: %s', 'pocket-showroom'), $price); ?></span>
-                    <?php endif; ?>
+            <div class="ps-modal-info ps-single-content">
+                <!-- 卡片 1: 基础信息 -->
+                <div class="ps-single-card ps-card-highlight">
+                    <h1 class="ps-single-title"><?php echo get_the_title($post_id); ?></h1>
+
+                    <div class="ps-single-meta-flex">
+                        <?php if ($show_model === '1' && $model): ?>
+                            <div class="ps-meta-item">
+                                <span class="ps-meta-label">Model</span>
+                                <span class="ps-meta-val ps-model-badge"><?php echo esc_html($model); ?></span>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($show_list_price === '1' && $price): ?>
+                            <div class="ps-meta-item ps-price-flag">
+                                <span class="ps-meta-label">Price</span>
+                                <span class="ps-meta-val ps-price-amount"><?php echo esc_html($price); ?></span>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
-                <div class="ps-meta-table">
-                    <?php if ($material): ?>
-                        <div class="ps-meta-row"><span><?php _e('Material:', 'pocket-showroom'); ?></span>
-                            <strong><?php echo esc_html($material); ?></strong>
-                        </div><?php endif; ?>
-                    <?php if ($moq): ?>
-                        <div class="ps-meta-row"><span><?php _e('MOQ:', 'pocket-showroom'); ?></span>
-                            <strong><?php echo esc_html($moq); ?></strong>
-                        </div><?php endif; ?>
-                    <?php if ($loading): ?>
-                        <div class="ps-meta-row"><span><?php _e('Loading (40HQ):', 'pocket-showroom'); ?></span>
-                            <strong><?php echo esc_html($loading); ?></strong>
-                        </div><?php endif; ?>
-                    <?php if ($lead_time): ?>
-                        <div class="ps-meta-row"><span><?php _e('Delivery Time:', 'pocket-showroom'); ?></span>
-                            <strong><?php echo esc_html($lead_time); ?></strong>
-                        </div><?php endif; ?>
+                <!-- 卡片 2: 规格参数列表 -->
+                <div class="ps-single-card">
+                    <h3 class="ps-card-title">Specifications</h3>
+                    <div class="ps-specs-list">
+                        <?php if ($show_material === '1' && $material): ?>
+                            <div class="ps-spec-row">
+                                <span class="ps-spec-key">Material</span>
+                                <span class="ps-spec-val"><?php echo esc_html($material); ?></span>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($show_moq === '1' && $moq): ?>
+                            <div class="ps-spec-row">
+                                <span class="ps-spec-key">MOQ</span>
+                                <span class="ps-spec-val"><?php echo esc_html($moq); ?></span>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($show_loading === '1' && $loading): ?>
+                            <div class="ps-spec-row">
+                                <span class="ps-spec-key">40HQ Loading</span>
+                                <span class="ps-spec-val"><?php echo esc_html($loading); ?></span>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($show_lead_time === '1' && $lead_time): ?>
+                            <div class="ps-spec-row">
+                                <span class="ps-spec-key">Lead Time</span>
+                                <span class="ps-spec-val"><?php echo esc_html($lead_time); ?></span>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- 动态参数 -->
+                        <?php if (!empty($dynamic_specs) && is_array($dynamic_specs)): ?>
+                            <?php foreach ($dynamic_specs as $spec): ?>
+                                <?php $show_spec = isset($spec['show']) ? $spec['show'] : '1'; ?>
+                                <?php if ($show_spec === '1' && !empty($spec['key'])): ?>
+                                    <div class="ps-spec-row">
+                                        <span class="ps-spec-key"><?php echo esc_html($spec['key']); ?></span>
+                                        <span class="ps-spec-val"><?php echo esc_html($spec['val']); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
-                <?php echo $variants_html; ?>
-                <?php echo $specs_html; ?>
+                <!-- 卡片 3: 可选尺寸 (如果有) -->
+                <?php
+                $has_visible_sizes = false;
+                if (!empty($variants) && is_array($variants)) {
+                    foreach ($variants as $v) {
+                        $show_v = isset($v['show']) ? $v['show'] : '1';
+                        if ($show_v === '1') {
+                            $has_visible_sizes = true;
+                            break;
+                        }
+                    }
+                }
+                ?>
+                <?php if ($has_visible_sizes): ?>
+                    <div class="ps-single-card">
+                        <h3 class="ps-card-title">Available Sizes</h3>
+                        <div class="ps-variants-grid">
+                            <?php foreach ($variants as $v): ?>
+                                <?php $show_v = isset($v['show']) ? $v['show'] : '1'; ?>
+                                <?php if ($show_v === '1'): ?>
+                                    <div class="ps-variant-box">
+                                        <div class="ps-variant-label"><?php echo esc_html($v['label']); ?></div>
+                                        <div class="ps-variant-val"><?php echo esc_html($v['value']); ?></div>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
-                <div class="ps-desc">
-                    <?php echo wp_kses_post(wpautop($post->post_content)); ?>
-                </div>
+                <!-- 卡片 4: 产品详情/描述 -->
+                <?php if (trim($post->post_content)): ?>
+                    <div class="ps-single-card ps-desc-card">
+                        <h3 class="ps-card-title">Details</h3>
+                        <div class="ps-single-desc">
+                            <?php echo wp_kses_post(wpautop($post->post_content)); ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
                 <!-- Share Buttons in Modal -->
                 <div class="ps-modal-share-row">
@@ -642,4 +726,239 @@ class PS_Frontend_Gallery
             <?php
         }
     }
+
+    /**
+     * Fix #28: 统一前端产品详情页布局 (Mobile-first, Mini-program style)
+     * 忽略后台编辑器（如 Elementor 等）自由排版，强制使用统一样式
+     */
+    public function render_single_product($content)
+    {
+        if (!is_singular('ps_item') || !in_the_loop() || !is_main_query()) {
+            return $content;
+        }
+
+        $post_id = get_the_ID();
+
+        // --- 收集数据 ---
+        $watermark_text = get_option('ps_watermark_text', 'Pocket Showroom');
+        $model = get_post_meta($post_id, '_ps_model', true);
+        $material = get_post_meta($post_id, '_ps_material', true);
+        $moq = get_post_meta($post_id, '_ps_moq', true);
+        $loading = get_post_meta($post_id, '_ps_loading', true);
+        $lead_time = get_post_meta($post_id, '_ps_lead_time', true);
+        $price = get_post_meta($post_id, '_ps_list_price', true);
+        $variants = get_post_meta($post_id, '_ps_size_variants', true);
+        $dynamic_specs = get_post_meta($post_id, '_ps_dynamic_specs', true);
+
+        // Visibility Toggles
+        $show_model = get_post_meta($post_id, '_ps_show_model', true) !== '' ? get_post_meta($post_id, '_ps_show_model', true) : '1';
+        $show_list_price = get_post_meta($post_id, '_ps_show_list_price', true) !== '' ? get_post_meta($post_id, '_ps_show_list_price', true) : '1';
+        $show_material = get_post_meta($post_id, '_ps_show_material', true) !== '' ? get_post_meta($post_id, '_ps_show_material', true) : '1';
+        $show_moq = get_post_meta($post_id, '_ps_show_moq', true) !== '' ? get_post_meta($post_id, '_ps_show_moq', true) : '1';
+        $show_loading = get_post_meta($post_id, '_ps_show_loading', true) !== '' ? get_post_meta($post_id, '_ps_show_loading', true) : '1';
+        $show_lead_time = get_post_meta($post_id, '_ps_show_lead_time', true) !== '' ? get_post_meta($post_id, '_ps_show_lead_time', true) : '1';
+
+        // 轮播图配置
+        $gallery_ids = get_post_meta($post_id, '_ps_gallery_images', true);
+        $images_html = '';
+
+        $wrap_img = function ($img_tag) use ($watermark_text) {
+            if ($watermark_text) {
+                return '<div class="ps-single-swiper-slide swiper-slide">' . $img_tag . '<div class="ps-watermark">' . esc_html($watermark_text) . '</div></div>';
+            }
+            return '<div class="ps-single-swiper-slide swiper-slide">' . $img_tag . '</div>';
+        };
+
+        if (!empty($gallery_ids)) {
+            $ids = explode(',', $gallery_ids);
+            foreach ($ids as $id) {
+                $img_url = wp_get_attachment_image_url($id, 'large');
+                if ($img_url) {
+                    $img_tag = '<img src="' . esc_url($img_url) . '" alt="' . esc_attr(get_the_title()) . '">';
+                    $images_html .= $wrap_img($img_tag);
+                }
+            }
+        } else {
+            $thumb = get_the_post_thumbnail_url($post_id, 'large');
+            if ($thumb) {
+                $img_tag = '<img src="' . esc_url($thumb) . '" alt="' . esc_attr(get_the_title()) . '">';
+                $images_html = $wrap_img($img_tag);
+            }
+        }
+
+        // --- 构建 HTML ---
+        ob_start();
+        ?>
+        <!-- 引入 Swiper (如果没全局引入的话) -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+        <div class="ps-single-product-wrapper">
+            <!-- 1. 顶部轮播图 -->
+            <div class="ps-single-swiper swiper">
+                <div class="swiper-wrapper">
+                    <?php echo $images_html; ?>
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+
+            <!-- 内容区域：卡片式结构 -->
+            <div class="ps-single-content">
+
+                <!-- 卡片 1: 基础信息 -->
+                <div class="ps-single-card ps-card-highlight">
+                    <h1 class="ps-single-title"><?php the_title(); ?></h1>
+
+                    <div class="ps-single-meta-flex">
+                        <?php if ($show_model === '1' && $model): ?>
+                            <div class="ps-meta-item">
+                                <span class="ps-meta-label">Model</span>
+                                <span class="ps-meta-val ps-model-badge"><?php echo esc_html($model); ?></span>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($show_list_price === '1' && $price): ?>
+                            <div class="ps-meta-item ps-price-flag">
+                                <span class="ps-meta-label">Price</span>
+                                <span class="ps-meta-val ps-price-amount"><?php echo esc_html($price); ?></span>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- 卡片 2: 规格参数列表 -->
+                <div class="ps-single-card">
+                    <h3 class="ps-card-title">Specifications</h3>
+                    <div class="ps-specs-list">
+                        <?php if ($show_material === '1' && $material): ?>
+                            <div class="ps-spec-row">
+                                <span class="ps-spec-key">Material</span>
+                                <span class="ps-spec-val"><?php echo esc_html($material); ?></span>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($show_moq === '1' && $moq): ?>
+                            <div class="ps-spec-row">
+                                <span class="ps-spec-key">MOQ</span>
+                                <span class="ps-spec-val"><?php echo esc_html($moq); ?></span>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($show_loading === '1' && $loading): ?>
+                            <div class="ps-spec-row">
+                                <span class="ps-spec-key">40HQ Loading</span>
+                                <span class="ps-spec-val"><?php echo esc_html($loading); ?></span>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($show_lead_time === '1' && $lead_time): ?>
+                            <div class="ps-spec-row">
+                                <span class="ps-spec-key">Lead Time</span>
+                                <span class="ps-spec-val"><?php echo esc_html($lead_time); ?></span>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- 动态参数 -->
+                        <?php if (!empty($dynamic_specs) && is_array($dynamic_specs)): ?>
+                            <?php foreach ($dynamic_specs as $spec): ?>
+                                <?php $show_spec = isset($spec['show']) ? $spec['show'] : '1'; ?>
+                                <?php if ($show_spec === '1' && !empty($spec['key'])): ?>
+                                    <div class="ps-spec-row">
+                                        <span class="ps-spec-key"><?php echo esc_html($spec['key']); ?></span>
+                                        <span class="ps-spec-val"><?php echo esc_html($spec['val']); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- 卡片 3: 可选尺寸 (如果有) -->
+                <?php
+                $has_visible_sizes = false;
+                if (!empty($variants) && is_array($variants)) {
+                    foreach ($variants as $v) {
+                        $show_v = isset($v['show']) ? $v['show'] : '1';
+                        if ($show_v === '1') {
+                            $has_visible_sizes = true;
+                            break;
+                        }
+                    }
+                }
+                ?>
+                <?php if ($has_visible_sizes): ?>
+                    <div class="ps-single-card">
+                        <h3 class="ps-card-title">Available Sizes</h3>
+                        <div class="ps-variants-grid">
+                            <?php foreach ($variants as $v): ?>
+                                <?php $show_v = isset($v['show']) ? $v['show'] : '1'; ?>
+                                <?php if ($show_v === '1'): ?>
+                                    <div class="ps-variant-box">
+                                        <div class="ps-variant-label"><?php echo esc_html($v['label']); ?></div>
+                                        <div class="ps-variant-val"><?php echo esc_html($v['value']); ?></div>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- 卡片 4: 产品详情/描述 -->
+                <?php if (trim($content)): ?>
+                    <div class="ps-single-card ps-desc-card">
+                        <h3 class="ps-card-title">Details</h3>
+                        <div class="ps-single-desc">
+                            <?php echo do_shortcode($content); ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+            </div>
+
+            <!-- 底部工具栏 -->
+            <div class="ps-single-bottom-bar">
+                <button class="ps-bottom-btn ps-copy-btn" onclick="psCopyCurrentUrl()">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path
+                            d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                    </svg>
+                    Copy Link
+                </button>
+            </div>
+
+            <!-- Toast 通知 -->
+            <div class="ps-toast" id="ps-global-toast">Link Copied</div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // 初始化轮播图
+                if (typeof Swiper !== 'undefined') {
+                    new Swiper('.ps-single-swiper', {
+                        pagination: {
+                            el: '.swiper-pagination',
+                            clickable: true,
+                        },
+                        loop: false,
+                        autoHeight: false
+                    });
+                }
+
+                // 为了避免和自带的主题/内容冲突，我们将这个生成好的 wrapper 直接 append 到 content 中
+                // 某些主题强行在外层加了很多 padding，我们把自身的样式定死
+            });
+
+            function psCopyCurrentUrl() {
+                var dummy = document.createElement('input'), url = window.location.href;
+                document.body.appendChild(dummy);
+                dummy.value = url;
+                dummy.select();
+                document.execCommand('copy');
+                document.body.removeChild(dummy);
+
+                var toast = document.getElementById('ps-global-toast');
+                toast.classList.add('show');
+                setTimeout(function () { toast.classList.remove('show'); }, 2000);
+            }
+        </script>
+        <?php
+        return ob_get_clean();
+    }
 }
+

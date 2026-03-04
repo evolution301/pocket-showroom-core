@@ -1,0 +1,284 @@
+/*
+ * ============================================================
+ * POCKET SHOWROOM — PRODUCT EDIT PAGE CSS
+ * ============================================================
+ * 作用范围：【仅】产品编辑页（post.php + post-new.php）
+ * 命名空间：所有规则以 .ps-edit-page 为根选择器
+ *
+ * 规则：
+ * - 本文件的任何修改只影响产品编辑页，不会触碰 Settings 页
+ * - 不需要再害怕"改了这里那边又乱掉"
+ * ============================================================
+ */
+
+/* ─── OUTER WRAPPER (WP Layout Overrides) ─────────────────── */
+/*
+ * 这些裸 ID 选择器（#titlediv 等）本身就只存在于产品编辑页，
+ * 不可能影响 Settings 页，所以不需要加命名空间前缀。
+ * 保留在本文件中是为了把"编辑页所有样式"集中管理。
+ */
+#titlediv,
+#postdivrich,
+#submitdiv {
+    display: none !important;
+}
+
+#postbox-container-1 {
+    display: none !important;
+}
+
+#wp-content-editor-tools {
+    display: none !important;
+}
+
+/* 让 WP 的 editor 区宽度撑满 */
+#poststuff {
+    min-width: 0 !important;
+    padding-top: 10px !important;
+}
+
+#post-body {
+    margin-right: 0 !important;
+    width: 100% !important;
+}
+
+#post-body.columns-2 {
+    margin-right: 0 !important;
+}
+
+#post-body-content {
+    margin-right: 0 !important;
+    width: 100% !important;
+    float: none !important;
+}
+
+#postbox-container-2 {
+    float: none !important;
+    width: 100% !important;
+    margin-right: 0 !important;
+}
+
+/* ─── PAGE WRAPPER ────────────────────────────────────────── */
+.ps-edit-page {
+    padding: 0 20px 0 40px;
+    box-sizing: border-box;
+}
+
+/* ─── HEADER ROW (title input bar) ───────────────────────── */
+.ps-edit-page .ps-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+/* ─── COLUMN LAYOUT ───────────────────────────────────────── */
+/* Note: the actual grid is set in the template inline <style>
+   with !important to override WP admin floating.
+   These rules handle column-level defaults only. */
+.ps-edit-page .ps-col-main {
+    min-width: 0;
+    /* Prevent grid overflow */
+}
+
+.ps-edit-page .ps-col-side {
+    min-width: 0;
+}
+
+/* Right column cards: tighter body padding */
+.ps-edit-page .ps-col-side .ps-card-body {
+    padding: 15px;
+}
+
+/* ─── 2-COLUMN GRID ───────────────────────────────────────── */
+.ps-edit-page .ps-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 20px;
+}
+
+@media (max-width: 960px) {
+    .ps-edit-page .ps-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ─── CARDS ───────────────────────────────────────────────── */
+.ps-edit-page .ps-card {
+    background: #fff;
+    border: 1px solid var(--ps-border);
+    border-radius: var(--ps-radius);
+    box-shadow: var(--ps-shadow);
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.ps-edit-page .ps-card-header {
+    padding: 12px 20px;
+    background: #fff;
+    border-bottom: 1px solid var(--ps-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: var(--ps-radius);
+    border-top-right-radius: var(--ps-radius);
+}
+
+.ps-edit-page .ps-card-header h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--ps-primary);
+}
+
+.ps-edit-page .ps-card-body {
+    padding: 20px;
+}
+
+/* ─── TITLE INPUT ─────────────────────────────────────────── */
+.ps-edit-page .ps-title-input {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--ps-primary);
+    background-color: #fff;
+    border: 1px solid var(--ps-border);
+    border-radius: var(--ps-radius);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+.ps-edit-page .ps-title-input:focus {
+    border-color: var(--ps-accent);
+    outline: none;
+    box-shadow: 0 0 0 1px var(--ps-accent);
+}
+
+/* ─── GALLERY (admin thumbnail grid) ─────────────────────── */
+.ps-edit-page .ps-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+}
+
+.ps-edit-page .ps-gallery-item {
+    aspect-ratio: 1;
+    background: #f9f9f9;
+    border-radius: var(--ps-radius);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--ps-border);
+    cursor: move;
+}
+
+.ps-edit-page .ps-gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.ps-edit-page .ps-gallery-item:hover img {
+    transform: scale(1.05);
+}
+
+.ps-edit-page .ps-gallery-item .remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #000;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 18px;
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.ps-edit-page .ps-gallery-item:hover .remove {
+    opacity: 1;
+}
+
+.ps-edit-page .ps-gallery-add {
+    aspect-ratio: 1;
+    border: 1px dashed #ccc;
+    border-radius: var(--ps-radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #999;
+    transition: all 0.2s;
+    background: #fafafa;
+}
+
+.ps-edit-page .ps-gallery-add:hover {
+    border-color: var(--ps-primary);
+    color: var(--ps-primary);
+    background: #fff;
+}
+
+/* ─── FORM ROWS ───────────────────────────────────────────── */
+.ps-edit-page .ps-form-row {
+    margin-bottom: 15px;
+}
+
+/* ─── INPUT FIELDS (编辑页宽度 = 100%) ──────────────────── */
+.ps-edit-page .ps-input,
+.ps-edit-page .ps-spec-key,
+.ps-edit-page .ps-spec-val {
+    width: 100%;
+}
+
+/* ─── SPECS GRID ──────────────────────────────────────────── */
+.ps-edit-page .ps-specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 20px;
+}
+
+@media (max-width: 600px) {
+    .ps-edit-page .ps-specs-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ps-edit-page .ps-spec-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+.ps-edit-page .ps-spec-row .ps-spec-key {
+    flex: 1;
+}
+
+.ps-edit-page .ps-spec-row .ps-spec-val {
+    flex: 2;
+}
+
+/* ─── NOTICE TIP ──────────────────────────────────────────── */
+.ps-edit-page .ps-notice-tip {
+    background: #f8f9fa;
+    color: var(--ps-text-soft);
+    padding: 10px 15px;
+    border-radius: var(--ps-radius);
+    font-size: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--ps-border);
+}

@@ -29,7 +29,7 @@ class PS_CSV_Importer
     public function enqueue_assets($hook)
     {
         if (strpos($hook, 'ps-import') !== false) {
-            wp_enqueue_style('ps-admin-style', PS_CORE_URL . 'assets/admin-style.css', [], PS_CORE_VERSION);
+            wp_enqueue_style('ps-admin-shared', PS_CORE_URL . 'assets/admin-shared.css', [], PS_CORE_VERSION);
         }
     }
 
@@ -166,7 +166,11 @@ class PS_CSV_Importer
 
                     // Category
                     $terms = get_the_terms($id, 'ps_category');
-                    $category = $terms ? $terms[0]->name : '';
+                    $category = '';
+                    if (!empty($terms) && !is_wp_error($terms)) {
+                        $cat_names = wp_list_pluck($terms, 'name');
+                        $category = implode(', ', $cat_names);
+                    }
 
                     // Images: 合并 Featured Image + Gallery 为单列
                     // Featured Image 放最前面，与编辑器"第一张即封面"逻辑一致
@@ -306,6 +310,16 @@ class PS_CSV_Importer
                         update_post_meta($post_id, '_ps_loading', $loading);
                         update_post_meta($post_id, '_ps_lead_time', $lead_time);
 
+                        // 这是一次重大改进：只有当表格里有数据时，才开启对应的展示开关；没数据则关闭。
+                        update_post_meta($post_id, '_ps_show_model', !empty($sku) ? '1' : '0');
+                        update_post_meta($post_id, '_ps_show_list_price', !empty($price) ? '1' : '0');
+                        update_post_meta($post_id, '_ps_show_material', !empty($material) ? '1' : '0');
+                        update_post_meta($post_id, '_ps_show_moq', !empty($moq) ? '1' : '0');
+                        update_post_meta($post_id, '_ps_show_loading', !empty($loading) ? '1' : '0');
+                        update_post_meta($post_id, '_ps_show_lead_time', !empty($lead_time) ? '1' : '0');
+                        update_post_meta($post_id, '_ps_show_sizes', !empty($variants_raw) ? '1' : '0');
+                        update_post_meta($post_id, '_ps_show_custom_fields', !empty($custom_fields_raw) ? '1' : '0');
+
                         // Parse Variants
                         if (!empty($variants_raw)) {
                             $variants_array = [];
@@ -416,6 +430,38 @@ class PS_CSV_Importer
         if (!filter_var($url, FILTER_VALIDATE_URL))
             return false;
 
+        // --- STEP 1: Fast URL Match (Is this an existing site URL?) ---
+        $existing_id = attachment_url_to_postid($url);
+        if ($existing_id) {
+            if ($is_featured)
+                set_post_thumbnail($post_id, $existing_id);
+            return $existing_id;
+        }
+
+        // --- STEP 2: Database Filename Match (Double check against duplicates) ---
+        global $wpdb;
+        $filename = basename(parse_url($url, PHP_URL_PATH));
+        if ($filename) {
+            // Find attachment by checking _wp_attached_file meta
+            $query = $wpdb->prepare(
+                "SELECT post_id FROM {$wpdb->postmeta} 
+                 WHERE meta_key = '_wp_attached_file' 
+                 AND meta_value LIKE %s 
+                 LIMIT 1",
+                '%' . $wpdb->esc_like($filename)
+            );
+            $meta_id = $wpdb->get_var($query);
+            if ($meta_id) {
+                // Confirm the post actually exists and is an attachment
+                if (get_post_type($meta_id) === 'attachment') {
+                    if ($is_featured)
+                        set_post_thumbnail($post_id, $meta_id);
+                    return $meta_id;
+                }
+            }
+        }
+
+        // --- STEP 3: Fallback - Actually Download and Sideload ---
         // SSRF 防护: 仅允许 HTTP/HTTPS 协议
         $scheme = wp_parse_url($url, PHP_URL_SCHEME);
         if (!in_array(strtolower($scheme), ['http', 'https'], true)) {

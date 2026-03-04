@@ -32,7 +32,11 @@ class PS_REST_API
     }
 
     /**
-     * Add CORS support for external clients (Mini App / Web)
+     * Add CORS support for external clients (Mini App / WeChat Web)
+     *
+     * ⚠️ NOTE: Allow-Origin is set to '*' intentionally because WeChat Mini Program
+     * requests do not send browser cookies and cannot use credentials-based CORS.
+     * For production, consider restricting this to your WeChat domain if possible.
      */
     public function add_cors_support()
     {
@@ -368,7 +372,7 @@ class PS_REST_API
             'moq' => get_post_meta($post_id, '_ps_moq', true) ?: '',
             'loading' => get_post_meta($post_id, '_ps_loading', true) ?: '',
             'leadTime' => get_post_meta($post_id, '_ps_lead_time', true) ?: '',
-            'description' => wp_kses_post($post->post_content),
+            'description' => wp_kses_post(nl2br($post->post_content)),
             'gallery' => $gallery,
             'sizeVariants' => $size_variants,
             'dynamicSpecs' => $dynamic_specs,
@@ -377,6 +381,3 @@ class PS_REST_API
         ];
     }
 }
-
-// Initialize
-PS_REST_API::get_instance();

@@ -1,0 +1,1070 @@
+/*
+ * ============================================================
+ * POCKET SHOWROOM — SETTINGS PAGE CSS (完整版)
+ * ============================================================
+ * 作用范围：【仅】Settings 页（ps-settings）
+ * 命名空间：所有规则以 .ps-settings-page 为根选择器
+ * 基准版本：3.0.6（完整移植 + 隔离）+ 黑色主题
+ *
+ * 规则：
+ * - 本文件的任何修改只影响 Settings 页，不会触碰产品编辑页
+ * - 不需要再害怕"改了这里那边又乱掉"
+ * ============================================================
+ */
+
+/* ─── PAGE WRAPPER ────────────────────────────────────────── */
+.ps-settings-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    margin-top: -10px;
+}
+
+/* ─── HEADER ──────────────────────────────────────────────── */
+.ps-settings-page .ps-header {
+    padding: 20px 0 10px;
+    border-bottom: 1px solid var(--ps-border);
+    margin-bottom: 0;
+}
+
+/* --- SETTINGS PAGE CONTAINER (80vw centered, mirrors 3.0.6) --- */
+.ps-settings-page #ps-settings-form,
+.ps-settings-page .ps-tab-content {
+    max-width: 85vw;
+    margin: 30px auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* ─── SHORTCODES / TOOLS / DIAG CARDS ─────────────────────── */
+.ps-settings-page .ps-shortcode-box,
+.ps-settings-page .ps-diag-block,
+.ps-settings-page .ps-card {
+    background: #fff;
+    border-radius: var(--ps-radius, 8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
+    border: 1px solid #eee;
+    padding: 30px;
+}
+
+.ps-settings-page .ps-card-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fcfcfc;
+}
+
+.ps-settings-page .ps-card-header h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ps-primary);
+}
+
+.ps-settings-page .ps-card-body {
+    padding: 20px;
+}
+
+.ps-settings-page .ps-shortcode-box h3,
+.ps-settings-page .ps-diag-block h3,
+.ps-settings-page .ps-card h3 {
+    margin: 0 0 15px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ps-primary);
+}
+
+.ps-settings-page .ps-shortcode-tag {
+    display: inline-block;
+    background: #f0f0f1;
+    border: 1px solid var(--ps-border);
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-family: monospace;
+    font-size: 14px;
+    color: var(--ps-primary);
+    cursor: pointer;
+    user-select: all;
+}
+
+/* ─── SETTINGS PAGE 3-COLUMN LAYOUT (Watermark tab) ───────── */
+.ps-settings-page .ps-settings-layout-3col {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ps-settings-page .ps-settings-layout-3col h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ps-primary);
+}
+
+.ps-settings-page .ps-col-inputs {
+    flex: 0 0 260px;
+}
+
+.ps-settings-page .ps-col-preview {
+    flex: 1;
+    min-width: 0;
+}
+
+.ps-settings-page .ps-col-colors-wrapper {
+    flex: 1 1 100%;
+    margin-top: 20px;
+}
+
+.ps-settings-page .ps-col-colors {
+    flex: 0 0 200px;
+}
+
+/* ─── BANNER TAB: Top-to-bottom card layout ─────────────────  */
+.ps-settings-page .ps-banner-settings-row {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ps-settings-page .ps-banner-settings-row h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ps-primary);
+}
+
+.ps-settings-page .ps-banner-settings-col {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.ps-settings-page .ps-banner-preview-row {
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* ─── COLORS ROW ─────────────────────────────────────────── */
+.ps-settings-page .ps-colors-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.ps-settings-page .ps-color-item {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.ps-settings-page .ps-color-item label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    text-align: center;
+}
+
+/* ─── COMMON FORM COMPONENTS ─────────────────────────────── */
+.ps-settings-page .ps-form-group {
+    margin-bottom: 20px;
+}
+
+.ps-settings-page .ps-form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.ps-settings-page .ps-canvas-wrapper {
+    border: 1px solid #ccc;
+    padding: 10px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.ps-settings-page .ps-radio-group {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+/* ─── WATERMARK PREVIEW CANVAS ───────────────────────────── */
+.ps-settings-page #ps-preview-canvas {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 66.66%;
+    overflow: hidden;
+    background: #f0f0f0;
+}
+
+.ps-settings-page #ps-watermark-layer {
+    position: absolute;
+    transform-origin: center center;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.ps-settings-page .ps-wm-text {
+    font-family: sans-serif;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── POSITION GRID (9-cell watermark selector) ─────────── */
+.ps-settings-page .ps-position-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 40px);
+    gap: 5px;
+}
+
+.ps-settings-page .ps-position-grid label {
+    display: block;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    margin: 0 !important;
+}
+
+.ps-settings-page .ps-position-grid input[type="radio"] {
+    display: none;
+}
+
+.ps-settings-page .ps-position-grid span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: #eee;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.ps-settings-page .ps-position-grid input[type="radio"]:checked+span {
+    background: var(--ps-primary);
+    border-color: var(--ps-primary);
+}
+
+/* ─── DIVI COLOR PICKER (全部放在 Settings 命名空间下) ──── */
+.ps-settings-page .ps-divi-picker-container {
+    position: relative;
+    display: inline-block;
+    z-index: 100;
+}
+
+.ps-settings-page .ps-divi-trigger {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 1px #ddd, 0 4px 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    position: relative;
+    background: #eee;
+    transition: transform 0.2s;
+}
+
+.ps-settings-page .ps-divi-trigger:hover {
+    transform: scale(1.05);
+}
+
+.ps-settings-page .ps-divi-trigger-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+}
+
+.ps-settings-page .ps-divi-picker-wrapper {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: 260px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    display: none;
+    border: 1px solid #eee;
+    z-index: 9999;
+}
+
+.ps-settings-page .ps-divi-picker-wrapper.active {
+    display: block;
+    animation: psPopUp 0.2s ease-out;
+}
+
+@keyframes psPopUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.ps-settings-page .ps-divi-picker-wrapper:after {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    right: auto;
+    margin-left: -6px;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    transform: rotate(45deg);
+    border-top: 1px solid #eee;
+    border-left: 1px solid #eee;
+    border-right: none;
+}
+
+.ps-settings-page .ps-divi-palette {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.ps-settings-page .ps-divi-swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.1s;
+}
+
+.ps-settings-page .ps-divi-swatch:hover {
+    transform: scale(1.2);
+}
+
+.ps-settings-page .ps-divi-controls {
+    display: flex;
+    gap: 12px;
+    height: 150px;
+    margin-bottom: 15px;
+}
+
+.ps-settings-page .ps-divi-saturation {
+    flex: 1;
+    position: relative;
+    background: red;
+    background-image: linear-gradient(to right, #fff, rgba(255, 255, 255, 0)), linear-gradient(to top, #000, rgba(0, 0, 0, 0));
+    border-radius: 6px;
+    cursor: crosshair;
+    overflow: hidden;
+}
+
+.ps-settings-page .ps-divi-cursor {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    margin: -6px 0 0 -6px;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+.ps-settings-page .ps-divi-sliders-col {
+    width: auto;
+    flex: 0 0 40px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.ps-settings-page .ps-divi-slider-track {
+    width: 14px;
+    flex: 0 0 14px;
+    height: 100%;
+    position: relative;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.ps-settings-page .ps-divi-hue-track {
+    background: linear-gradient(to bottom, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+}
+
+.ps-settings-page .ps-divi-alpha-track {
+    background: #fff url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAH0lEQVQYV2N89+7dfwYkYObMmf+YYUacinkinI4GAC8sZAnP2eVnAAAAAElFTkSuQmCC') repeat;
+}
+
+.ps-settings-page .ps-divi-alpha-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 15px;
+}
+
+.ps-settings-page .ps-divi-slider-handle {
+    position: absolute;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    background: #fff;
+    border-radius: 50%;
+    margin-left: -12px;
+    margin-top: -12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    border: 1px solid #eee;
+}
+
+.ps-settings-page .ps-divi-input-area {
+    margin-bottom: 12px;
+}
+
+.ps-settings-page .ps-divi-input-area input {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    text-align: left;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: monospace;
+    background: #f0f0f1;
+}
+
+.ps-settings-page .ps-divi-input-area input:focus {
+    background: #fff;
+    border-color: var(--ps-primary);
+    outline: none;
+}
+
+/* ─── TOOLS PAGE (CSV Import) ────────────────────────────── */
+.ps-settings-page .ps-tools-container {
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.ps-settings-page .ps-tool-card {
+    background: #fff;
+    border-radius: var(--ps-radius, 8px);
+    padding: 40px;
+    flex: 1;
+    min-width: 300px;
+    max-width: 500px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid var(--ps-border);
+}
+
+.ps-settings-page .ps-tool-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.ps-settings-page .ps-tool-card .ps-card-icon {
+    font-size: 48px;
+    color: var(--ps-primary);
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.ps-settings-page .ps-tool-card .ps-card-icon .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+}
+
+.ps-settings-page .ps-tool-card h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: var(--ps-text, #1d2327);
+}
+
+.ps-settings-page .ps-tool-card p {
+    color: var(--ps-text-soft, #777);
+    margin-bottom: 25px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.ps-settings-page .ps-drop-zone {
+    border: 2px dashed var(--ps-primary);
+    border-radius: var(--ps-radius, 8px);
+    padding: 30px 20px;
+    background: #f8f8f8;
+    margin-bottom: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.ps-settings-page .ps-drop-zone:hover {
+    background: #f0f0f0;
+}
+
+.ps-settings-page .ps-drop-zone input[type="file"] {
+    cursor: pointer !important;
+}
+
+.ps-settings-page .ps-drop-zone .dashicons {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: var(--ps-primary);
+    margin-bottom: 10px;
+}
+
+.ps-settings-page .ps-drop-zone p {
+    margin: 0;
+    font-weight: 600;
+    color: var(--ps-primary);
+}
+
+.ps-settings-page .ps-full-btn {
+    width: 100%;
+    justify-content: center;
+    height: 44px !important;
+    font-size: 15px !important;
+}
+
+.ps-settings-page .ps-card-footer {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.ps-settings-page .ps-text-link {
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--ps-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ─── B2B MODULES GRID ───────────────────────────────────── */
+.ps-settings-page .ps-modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.ps-settings-page .ps-module-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s;
+}
+
+.ps-settings-page .ps-module-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.ps-settings-page .ps-module-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.ps-settings-page .ps-module-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ps-primary);
+}
+
+.ps-settings-page .ps-module-desc {
+    font-size: 13px;
+    color: var(--ps-text-soft, #777);
+    margin: 0 0 12px;
+    line-height: 1.5;
+}
+
+.ps-settings-page .ps-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #eee;
+    color: #555;
+}
+
+.ps-settings-page .ps-tag-logistics {
+    background: #e3f0ff;
+    color: #1a6bb5;
+}
+
+.ps-settings-page .ps-tag-sales {
+    background: #e6f8e6;
+    color: #2a7a2a;
+}
+
+.ps-settings-page .ps-tag-security {
+    background: #fff3e3;
+    color: #aa5500;
+}
+
+.ps-settings-page .ps-tag-exhibition {
+    background: #f3e3ff;
+    color: #7700aa;
+}
+
+.ps-settings-page .ps-tag-growth {
+    background: #e3fff3;
+    color: #007744;
+}
+
+/* ─── BANNER PREVIEW FIX ─────────────────────────────────── */
+.ps-settings-page #ps-preview-banner-desc p {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ─── ASPECT RATIO CARD ──────────────────────────────────── */
+.ps-settings-page .ps-ratio-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ps-settings-page .ps-ratio-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 10px 14px;
+    border: 2px solid var(--ps-border);
+    border-radius: 4px;
+    background: #fff;
+    min-width: 80px;
+}
+
+.ps-settings-page .ps-ratio-card.selected {
+    border-color: var(--ps-primary);
+    background: var(--ps-primary);
+    color: #fff;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────── */
+@media (max-width: 960px) {
+
+    .ps-settings-page .ps-banner-settings-row,
+    .ps-settings-page .ps-settings-layout-3col {
+        flex-direction: column;
+    }
+
+    .ps-settings-page .ps-col-inputs,
+    .ps-settings-page .ps-col-colors {
+        flex: unset;
+        width: 100%;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* PREMIUM BANNER TAB - Complete Redesign                      */
+/* ═══════════════════════════════════════════════════════════ */
+
+/* ─── Zone 1: Top 2-column card grid ─────────────────────── */
+.ps-settings-page .ps-banner-zone-top {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.ps-settings-page .ps-banner-card {
+    background: #fff;
+    border: 1px solid #ebebeb;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: box-shadow 0.2s;
+}
+
+.ps-settings-page .ps-banner-card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Card Header (label with icon) ──────────────────────── */
+.ps-settings-page .ps-banner-card-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #888;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.ps-settings-page .ps-banner-card-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+    color: #bbb;
+}
+
+/* ─── Image Preview Slot ──────────────────────────────────── */
+.ps-settings-page .ps-banner-img-preview-slot {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f4f4f5;
+    border: 1px solid #e8e8e8;
+    flex: 1;
+}
+
+.ps-settings-page .ps-banner-img-preview-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.ps-settings-page .ps-banner-img-empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #ccc;
+    gap: 8px;
+}
+
+.ps-settings-page .ps-banner-img-empty .dashicons {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+}
+
+.ps-settings-page .ps-banner-img-empty p {
+    margin: 0;
+    font-size: 12px;
+    color: #bbb;
+}
+
+/* ─── Image action buttons ────────────────────────────────── */
+.ps-settings-page .ps-banner-img-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.ps-settings-page .ps-banner-img-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 9px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 7px;
+    border: 1.5px solid #e0e0e0;
+    background: #fafafa;
+    color: #444;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+}
+
+.ps-settings-page .ps-banner-img-btn:hover {
+    background: #f0f0f0;
+    border-color: #ccc;
+    color: #222;
+}
+
+.ps-settings-page .ps-banner-img-btn .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.ps-settings-page .ps-banner-img-btn--remove {
+    color: #d63638;
+    border-color: #f5c6c6;
+    background: #fff8f8;
+    flex: 0 0 auto;
+    width: auto;
+    padding: 9px 10px;
+}
+
+.ps-settings-page .ps-banner-img-btn--remove:hover {
+    background: #fde8e8;
+    border-color: #d63638;
+}
+
+/* ─── Text card fields ────────────────────────────────────── */
+.ps-settings-page .ps-banner-card--text {
+    justify-content: flex-start;
+}
+
+.ps-settings-page .ps-banner-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ps-settings-page .ps-banner-field--grow {
+    flex: 1;
+}
+
+.ps-settings-page .ps-banner-field-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #999;
+}
+
+.ps-settings-page .ps-banner-input {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1.5px solid #e8e8e8;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1d2327;
+    background: #fafafa;
+    box-sizing: border-box;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+.ps-settings-page .ps-banner-input:focus {
+    outline: none;
+    border-color: var(--ps-primary, #1d2327);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(29, 35, 39, 0.06);
+}
+
+.ps-settings-page .ps-banner-input--title {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+}
+
+.ps-settings-page .ps-banner-textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+
+.ps-settings-page .ps-banner-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 34px;
+    cursor: pointer;
+}
+
+.ps-settings-page .ps-banner-field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.ps-settings-page .ps-banner-field-hint {
+    margin: 0;
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.5;
+}
+
+/* ─── Zone 2: Middle bar (colors + card display) ──────────── */
+.ps-settings-page .ps-banner-zone-middle {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    background: #fff;
+    border: 1px solid #ebebeb;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.ps-settings-page .ps-banner-zone-middle-section {
+    padding: 20px 24px;
+    flex: 1;
+    min-width: 0;
+}
+
+.ps-settings-page .ps-banner-zone-middle-section--colors {
+    flex: 0 0 auto;
+}
+
+.ps-settings-page .ps-banner-zone-divider {
+    width: 1px;
+    background: #f0f0f0;
+    align-self: stretch;
+    flex-shrink: 0;
+}
+
+.ps-settings-page .ps-banner-section-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 14px;
+}
+
+.ps-settings-page .ps-banner-section-title .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: #ccc;
+}
+
+/* ─── Color chips row ─────────────────────────────────────── */
+.ps-settings-page .ps-banner-colors-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.ps-settings-page .ps-banner-color-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.ps-settings-page .ps-banner-chip-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* ─── Zone 3: Live Preview (Mac browser frame) ────────────── */
+.ps-settings-page .ps-banner-zone-preview {
+    background: #fff;
+    border: 1px solid #ebebeb;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.ps-settings-page .ps-banner-preview-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ebebeb;
+}
+
+.ps-settings-page .ps-banner-preview-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ddd;
+    flex-shrink: 0;
+}
+
+.ps-settings-page .ps-banner-preview-dot:nth-child(1) {
+    background: #ff5f57;
+}
+
+.ps-settings-page .ps-banner-preview-dot:nth-child(2) {
+    background: #ffbd2e;
+}
+
+.ps-settings-page .ps-banner-preview-dot:nth-child(3) {
+    background: #28c840;
+}
+
+.ps-settings-page .ps-banner-preview-label {
+    margin-left: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #bbb;
+}
+
+/* ─── Save Row ────────────────────────────────────────────── */
+.ps-settings-page .ps-banner-save-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: 4px 0 20px;
+}
+
+.ps-settings-page .ps-banner-save-row .ps-btn-primary {
+    padding: 10px 28px;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+}
+
+/* ─── Responsive for Banner Zones ────────────────────────── */
+@media (max-width: 900px) {
+    .ps-settings-page .ps-banner-zone-top {
+        grid-template-columns: 1fr;
+    }
+
+    .ps-settings-page .ps-banner-img-preview-slot {
+        aspect-ratio: 16/7;
+    }
+
+    .ps-settings-page .ps-banner-zone-middle {
+        flex-direction: column;
+    }
+
+    .ps-settings-page .ps-banner-zone-divider {
+        width: 100%;
+        height: 1px;
+    }
+}

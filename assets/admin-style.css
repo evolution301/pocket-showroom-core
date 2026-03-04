@@ -1,59 +1,116 @@
-/* --- MODERN EDITOR STYLES (CUSTOM UI) --- */
+/*
+ * ============================================================
+ * ⚠️  DEPRECATED — 此文件不再使用
+ * ============================================================
+ * 本文件内容已拆分到以下三个文件中：
+ *
+ *   - assets/admin-shared.css   ← 共用变量、按钮、开关（两个后台页面都加载）
+ *   - assets/admin-edit.css     ← 产品编辑页专属（.ps-edit-page 命名空间）
+ *   - assets/admin-settings.css ← Settings 页专属（.ps-settings-page 命名空间）
+ *
+ * 以后修改样式时：
+ *   - 改产品编辑页 → 只动 admin-edit.css
+ *   - 改 Settings 页 → 只动 admin-settings.css
+ *   - 改两页共用的按钮/开关 → 只动 admin-shared.css
+ *
+ * 这样任何修改都不会跨页面污染。
+ * ============================================================
+ */
+
 .ps-modern-ui {
-    --ps-primary: #2271b1;
+    --ps-primary: #1d2327;
+    /* Darker, more elegant primary */
+    --ps-accent: #c5a47e;
+    /* Gold/Bronze accent */
     --ps-bg: #fff;
-    --ps-border: #dcdcde;
-    --ps-text: #1d2327;
-    --ps-text-soft: #646970;
-    --ps-radius: 8px;
-    --ps-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    --ps-brand-color: #007cba;
-    margin-top: -20px;
-    /* Pull up to hide WP gap */
+    --ps-border: #e0e0e0;
+    --ps-text: #333;
+    --ps-text-soft: #777;
+    --ps-radius: 4px;
+    /* Sharper corners for luxury feel */
+    --ps-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
 
-.ps-header {
+/* --- GRID LAYOUT --- */
+.ps-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 960px) {
+    .ps-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- CARDS --- */
+.ps-card {
+    background: #fff;
+    border: 1px solid var(--ps-border);
+    border-radius: var(--ps-radius);
+    box-shadow: var(--ps-shadow);
+    margin-bottom: 20px;
+    /* overflow: hidden;  <-- REMOVED TO ALLOW POPUPS */
+    position: relative;
+    /* Ensure z-index context */
+}
+
+.ps-card-header {
+    padding: 12px 20px;
+    background: #fff;
+    /* Clean white header */
+    border-bottom: 1px solid var(--ps-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    background: #fff;
-    padding: 15px 25px;
-    border-radius: var(--ps-radius);
-    box-shadow: var(--ps-shadow);
+    border-top-left-radius: var(--ps-radius);
+    border-top-right-radius: var(--ps-radius);
 }
 
+.ps-card-header h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--ps-primary);
+}
+
+.ps-card-body {
+    padding: 20px;
+}
+
+/* --- TITLE INPUT --- */
 .ps-title-input {
-    border: none !important;
-    font-size: 24px !important;
-    font-weight: 600 !important;
     width: 100%;
-    outline: none !important;
-    background: transparent !important;
-    color: #1d2327 !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-}
-
-.ps-title-input::placeholder {
-    color: #ccc;
+    padding: 12px 15px;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--ps-primary);
+    background-color: #fff;
+    border: 1px solid var(--ps-border);
+    border-radius: var(--ps-radius);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 20px;
+    box-sizing: border-box;
 }
 
 .ps-title-input:focus {
-    box-shadow: none !important;
+    border-color: var(--ps-accent);
+    outline: none;
+    box-shadow: 0 0 0 1px var(--ps-accent);
 }
 
-.ps-actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
+/* --- BUTTONS --- */
 .ps-btn {
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
     border: 1px solid transparent;
     transition: all 0.2s;
@@ -61,6 +118,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .ps-btn-primary {
@@ -70,72 +129,35 @@
 }
 
 .ps-btn-primary:hover {
-    background: #135e96;
+    background: #000;
     color: #fff;
 }
 
 .ps-btn-secondary {
-    background: #f6f7f7;
+    background: #fff;
     color: var(--ps-primary);
-    border-color: var(--ps-primary);
+    border: 1px solid var(--ps-border);
 }
 
 .ps-btn-secondary:hover {
-    background: #f0f0f1;
-    color: #135e96;
+    border-color: var(--ps-primary);
+    background: #fafafa;
 }
 
-.ps-grid {
-    display: grid;
-    grid-template-columns: 1fr 380px;
-    /* Main vs Sidebar (Fixed width sidebar) */
-    gap: 25px;
-}
-
-/* Cards */
-.ps-card {
-    background: #fff;
-    border-radius: var(--ps-radius);
-    box-shadow: var(--ps-shadow);
-    margin-bottom: 25px;
-    overflow: hidden;
-    border: 1px solid #eee;
-}
-
-.ps-card-header {
-    padding: 15px 20px;
-    border-bottom: 1px solid #f0f0f0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #fcfcfc;
-}
-
-.ps-card-header h3 {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 600;
-    color: #1d2327;
-}
-
-.ps-card-body {
-    padding: 20px;
-}
-
-/* Gallery */
+/* --- GALLERY --- */
 .ps-gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 15px;
+    gap: 12px;
 }
 
 .ps-gallery-item {
     aspect-ratio: 1;
-    background: #f0f0f0;
-    border-radius: 6px;
+    background: #f9f9f9;
+    border-radius: var(--ps-radius);
     position: relative;
     overflow: hidden;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--ps-border);
     cursor: move;
 }
 
@@ -143,187 +165,414 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.ps-gallery-item:hover img {
+    transform: scale(1.05);
 }
 
 .ps-gallery-item .remove {
     position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    width: 20px;
-    height: 20px;
+    top: 4px;
+    right: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #000;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     text-align: center;
     line-height: 18px;
     cursor: pointer;
     font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.ps-gallery-item:hover .remove {
+    opacity: 1;
 }
 
 .ps-gallery-add {
     aspect-ratio: 1;
-    border: 2px dashed #ccc;
-    border-radius: 6px;
+    border: 1px dashed #ccc;
+    border-radius: var(--ps-radius);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: #888;
+    color: #999;
     transition: all 0.2s;
+    background: #fafafa;
 }
 
 .ps-gallery-add:hover {
     border-color: var(--ps-primary);
     color: var(--ps-primary);
-    background: #f8fbff;
+    background: #fff;
 }
 
-/* Item Specifications: 2-column grid layout */
-.ps-specs-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0 20px;
-    /* No vertical gap (ps-form-row already has margin-bottom), 20px horizontal gap */
-}
-
-@media (max-width: 782px) {
-    .ps-specs-grid {
-        grid-template-columns: 1fr;
-        /* Stack on small screens */
-    }
-}
-
-/* Form Fields */
+/* --- FORMS --- */
 .ps-form-row {
     margin-bottom: 15px;
 }
 
+/* --- TOGGLE SWITCHES --- */
+.ps-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.ps-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.ps-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.ps-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked+.ps-slider {
+    background-color: var(--ps-primary);
+}
+
+input:focus+.ps-slider {
+    box-shadow: 0 0 1px var(--ps-primary);
+}
+
+input:checked+.ps-slider:before {
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+    transform: translateX(20px);
+}
+
+.ps-slider.round {
+    border-radius: 24px;
+}
+
+.ps-slider.round:before {
+    border-radius: 50%;
+}
+
 .ps-label {
     display: block;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
-    color: #646970;
-    margin-bottom: 5px;
+    color: var(--ps-text-soft);
+    margin-bottom: 6px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-.ps-input {
+.ps-input,
+.ps-spec-key,
+.ps-spec-val {
     width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #dcdcde;
-    border-radius: 4px;
-    font-size: 14px;
+    padding: 8px 10px;
+    border: 1px solid var(--ps-border);
+    border-radius: 2px;
+    font-size: 13px;
     box-sizing: border-box;
     transition: border-color 0.2s;
+    background: #fff;
+    color: var(--ps-text);
 }
 
-.ps-input:focus {
+.ps-input:focus,
+.ps-spec-key:focus,
+.ps-spec-val:focus {
     border-color: var(--ps-primary);
     outline: none;
-    box-shadow: 0 0 0 1px var(--ps-primary);
+}
+
+/* Specs Grid */
+.ps-specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 20px;
+}
+
+@media (max-width: 600px) {
+    .ps-specs-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Dynamic Specs */
 .ps-spec-row {
     display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 15px;
+    margin-bottom: 12px;
     align-items: center;
-    background: #f8f9fa;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #eee;
 }
 
-.ps-spec-key {
+.ps-spec-row .ps-spec-key {
     flex: 1;
-    font-weight: 600;
-    border: none;
-    background: transparent;
-    border-bottom: 1px dashed #ccc;
-    padding: 5px;
-    font-size: 13px;
 }
 
-.ps-spec-val {
-    flex: 1.5;
-    border: 1px solid #ddd;
-    border-radius: 3px;
-    padding: 5px 8px;
-    font-size: 13px;
+.ps-spec-row .ps-spec-val {
+    flex: 2;
 }
 
 .ps-remove-btn {
-    color: #d63638;
+    color: #ccc;
     background: none;
     border: none;
     cursor: pointer;
     font-size: 18px;
     line-height: 1;
     padding: 0 5px;
+    transition: color 0.2s;
+}
+
+.ps-remove-btn:hover {
+    color: #d63638;
 }
 
 .ps-notice-tip {
-    background: #e5f5fa;
-    color: #0085ba;
+    background: #f8f9fa;
+    color: var(--ps-text-soft);
     padding: 10px 15px;
-    border-radius: 4px;
+    border-radius: var(--ps-radius);
     font-size: 12px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     gap: 10px;
+    border: 1px solid var(--ps-border);
 }
 
-/* Color Picker Helpers (Keep existing if needed) */
+/*
+ * ============================================================
+ * ⛔ 废弃警告 (DEPRECATED) — 请勿再引用此文件！
+ * ============================================================
+ * 此文件已被正式废弃，请勿在任何 PHP 文件中通过 wp_enqueue_style()
+ * 加载此文件。内容已拆分至以下三个新文件：
+ *
+ *   - assets/admin-shared.css  ← 全部后台页面通用样式
+ *   - assets/admin-edit.css    ← 仅限产品编辑页（.ps-edit-page）
+ *   - assets/admin-settings.css ← 仅限 Settings 页（.ps-settings-page）
+ *
+ * 如有不明白的地方，请查阅 implementation_plan.md
+ * ============================================================
+ */
+/* --- COLOR PICKER (DIVI STYLE) --- */
 .ps-divi-picker-container {
     position: relative;
     display: inline-block;
+    z-index: 10;
 }
 
 .ps-divi-trigger {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: 2px solid #fff;
-    box-shadow: 0 0 0 1px #ddd, 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 0 1px #ddd;
     cursor: pointer;
     background: #ccc;
     position: relative;
+    transition: transform 0.2s;
 }
 
-/* Responsive */
-@media (max-width: 960px) {
-    .ps-grid {
-        grid-template-columns: 1fr;
+.ps-divi-trigger:hover {
+    transform: scale(1.1);
+}
+
+.ps-divi-picker-wrapper {
+    position: absolute;
+    top: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 240px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    display: none;
+    border: 1px solid #eee;
+    z-index: 1000;
+}
+
+.ps-divi-picker-wrapper.active {
+    display: block;
+    animation: psFadeIn 0.2s ease-out;
+}
+
+@keyframes psFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(5px);
     }
 
-    .ps-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-
-    .ps-actions {
-        width: 100%;
-        justify-content: flex-end;
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
     }
 }
 
-/* --- SETTINGS PAGE CONTAINER --- */
+.ps-divi-palette {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.ps-divi-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Color Controls Layout */
+.ps-divi-controls {
+    display: flex;
+    gap: 10px;
+    height: 120px;
+    margin-bottom: 12px;
+}
+
+.ps-divi-saturation {
+    flex: 1;
+    position: relative;
+    background: red;
+    /* JS updates this */
+    background-image: linear-gradient(to right, #fff, rgba(255, 255, 255, 0)), linear-gradient(to top, #000, rgba(0, 0, 0, 0));
+    border-radius: 4px;
+    cursor: crosshair;
+}
+
+.ps-divi-cursor {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    margin: -5px 0 0 -5px;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+/* Side-by-Side Sliders */
+.ps-divi-sliders-col {
+    display: flex;
+    gap: 8px;
+}
+
+.ps-divi-slider-track {
+    width: 12px;
+    height: 100%;
+    border-radius: 6px;
+    position: relative;
+    cursor: pointer;
+    box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.ps-divi-hue-track {
+    background: linear-gradient(to bottom, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+}
+
+.ps-divi-alpha-track {
+    background: #fff url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAH0lEQVQYV2N89+7dfwYkYObMmf+YYUacinkinI4GAC8sZAnP2eVnAAAAAElFTkSuQmCC') repeat;
+}
+
+.ps-divi-slider-handle {
+    position: absolute;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    border: 1px solid #ddd;
+}
+
+.ps-divi-input-area input {
+    width: 100%;
+    font-family: monospace;
+    font-size: 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    padding: 6px;
+}
+
 /* --- SETTINGS PAGE CONTAINER --- */
 #ps-settings-form,
 #ps-tab-watermark,
 #ps-tab-banner,
 #ps-tab-shortcodes {
-    max-width: 85vw;
-    margin: 30px auto;
-    /* Center the container */
+    max-width: 1200px;
+    /* Constrain width for readability */
+    margin: 20px auto;
     padding: 0 20px;
-    /* Breathing room on sides */
-    box-sizing: border-box;
+}
+
+/* --- OVERRIDE WP DEFAULT TABS (.nav-tab) FOR MODERN LOOK --- */
+.ps-modern-ui .nav-tab-wrapper {
+    border-bottom: 1px solid var(--ps-border);
+    margin: 20px 20px 30px;
+    padding: 0;
+}
+
+.ps-modern-ui .nav-tab {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--ps-text-soft);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 10px 20px;
+    margin-right: 15px;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+}
+
+.ps-modern-ui .nav-tab:hover {
+    color: var(--ps-primary);
+    background: transparent;
+}
+
+.ps-modern-ui .nav-tab-active,
+.ps-modern-ui .nav-tab-active:hover {
+    background: transparent;
+    color: var(--ps-primary);
+    border-bottom: 2px solid var(--ps-primary);
+}
+
+.ps-modern-ui .nav-tab:focus {
+    box-shadow: none;
+    outline: none;
+    color: var(--ps-primary);
 }
 
 /* --- SETTINGS PAGE 3-COLUMN LAYOUT --- */
@@ -356,568 +605,60 @@
     margin-top: 20px;
 }
 
-/* --- BANNER TAB: Top-Bottom Layout --- */
-.ps-banner-settings-row {
-    display: flex;
-    gap: 40px;
-    /* Increased gap for better breathing room */
-    align-items: flex-start;
-    margin-bottom: 30px;
-
-    /* "Gather" settings in a nice card */
-    background: #fff;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.ps-banner-settings-col {
-    flex: 1 1 0;
-    min-width: 0;
-}
-
-.ps-banner-preview-row {
-    width: 100%;
-    margin-top: 10px;
-}
-
-/* Colors Row Layout */
-.ps-colors-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    align-items: flex-start;
-}
-
-.ps-color-item {
-    flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-}
-
-.ps-color-item label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #555;
-    text-align: center;
-}
-
-/* Third column for position/rotation/save controls */
 .ps-col-colors {
     flex: 0 0 200px;
 }
 
-/* Common Settings Components */
-.ps-form-group {
-    margin-bottom: 20px;
-}
-
-.ps-form-group label {
-    display: block;
+/* --- ISOLATE .ps-input IN WP SETTINGS TABLES --- */
+.ps-modern-ui .form-table th {
     font-weight: 600;
-    margin-bottom: 8px;
+    color: var(--ps-primary);
 }
 
-.ps-canvas-wrapper {
-    border: 1px solid #ccc;
-    padding: 10px;
-    background: #fff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-
-#ps-preview-canvas {
-    position: relative;
-    width: 100%;
-    height: 0;
-    padding-bottom: 66.66%;
-    overflow: hidden;
-    background: #f0f0f0;
-}
-
-#ps-preview-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-#ps-watermark-layer {
-    position: absolute;
-    transform-origin: center center;
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: 10;
-}
-
-.ps-wm-text {
-    font-family: sans-serif;
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-/* Switch */
-.ps-switch {
-    position: relative;
-    display: inline-block;
-    width: 40px;
-    height: 24px;
-}
-
-.ps-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.ps-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 24px;
-}
-
-.ps-slider:before {
-    position: absolute;
-    content: "";
-    height: 16px;
-    width: 16px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-}
-
-input:checked+.ps-slider {
-    background-color: var(--ps-brand-color);
-}
-
-input:checked+.ps-slider:before {
-    transform: translateX(16px);
-}
-
-/* Position Grid */
-.ps-position-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 40px);
-    gap: 5px;
-}
-
-.ps-position-grid label {
-    display: block;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    margin: 0 !important;
-}
-
-.ps-position-grid input {
-    display: none;
-}
-
-.ps-position-grid span {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background: #eee;
-    border: 2px solid #ddd;
-    border-radius: 4px;
-}
-
-.ps-position-grid input:checked+span {
-    background: var(--ps-brand-color);
-    border-color: var(--ps-brand-color);
-}
-
-/* --- DIVI-LIKE COLOR PICKER --- */
-/* Adjust positioning for row layout */
-.ps-divi-picker-container {
-    position: relative;
-    display: inline-block;
-    z-index: 100;
-}
-
-.ps-divi-trigger {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 3px solid #fff;
-    box-shadow: 0 0 0 1px #ddd, 0 4px 10px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    position: relative;
-    background: #eee;
-    transition: transform 0.2s;
-}
-
-.ps-divi-trigger:hover {
-    transform: scale(1.05);
-}
-
-.ps-divi-trigger-inner {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 50%;
-}
-
-.ps-divi-picker-wrapper {
-    /* Center the picker below the trigger */
-    position: absolute;
-    top: 50px;
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    width: 260px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    padding: 15px;
-    display: none;
-    border: 1px solid #eee;
-    z-index: 999;
-}
-
-.ps-divi-picker-wrapper.active {
-    display: block;
-    animation: psPopUp 0.2s ease-out;
-}
-
-@keyframes psPopUp {
-    from {
-        opacity: 0;
-        transform: translateX(-50%) translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-    }
-}
-
-/* Arrow pointing UP to trigger */
-.ps-divi-picker-wrapper:after {
-    content: "";
-    position: absolute;
-    top: -7px;
-    left: 50%;
-    right: auto;
-    margin-left: -6px;
-    width: 12px;
-    height: 12px;
-    background: #fff;
-    transform: rotate(45deg);
-    border-top: 1px solid #eee;
-    border-left: 1px solid #eee;
-    border-right: none;
-}
-
-.ps-divi-palette {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 8px;
-    margin-bottom: 15px;
-}
-
-.ps-divi-swatch {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
-    transition: transform 0.1s;
-}
-
-.ps-divi-swatch:hover {
-    transform: scale(1.2);
-}
-
-.ps-divi-controls {
-    display: flex;
-    gap: 12px;
-    height: 150px;
-    margin-bottom: 15px;
-}
-
-.ps-divi-saturation {
-    flex: 1;
-    position: relative;
-    background: red;
-    background-image: linear-gradient(to right, #fff, rgba(255, 255, 255, 0)), linear-gradient(to top, #000, rgba(0, 0, 0, 0));
-    border-radius: 6px;
-    cursor: crosshair;
-    overflow: hidden;
-}
-
-.ps-divi-cursor {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border: 2px solid #fff;
-    border-radius: 50%;
-    margin: -6px 0 0 -6px;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-    pointer-events: none;
-}
-
-.ps-divi-sliders-col {
-    width: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.ps-divi-slider-track {
-    flex: 1;
-    position: relative;
-    border-radius: 15px;
-    cursor: pointer;
-    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.1);
-}
-
-.ps-divi-hue-track {
-    background: linear-gradient(to bottom, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
-}
-
-.ps-divi-alpha-track {
-    background: #fff url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAH0lEQVQYV2N89+7dfwYkYObMmf+YYUacinkinI4GAC8sZAnP2eVnAAAAAElFTkSuQmCC') repeat;
-}
-
-.ps-divi-alpha-gradient {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 15px;
-}
-
-.ps-divi-slider-handle {
-    position: absolute;
-    left: 50%;
-    width: 24px;
-    height: 24px;
-    background: #fff;
-    border-radius: 50%;
-    margin-left: -12px;
-    margin-top: -12px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    border: 1px solid #eee;
-}
-
-/* SIDE-BY-SIDE SLIDERS (Requested Fix) */
-.ps-divi-sliders-col {
+.ps-modern-ui .form-table .ps-input {
     width: auto;
-    /* Allow auto width */
-    flex: 0 0 40px;
-    /* Fixed width column for sliders */
-    display: flex;
-    flex-direction: row;
-    /* Horizontal */
-    gap: 10px;
+    min-width: 300px;
+    max-width: 100%;
 }
 
-.ps-divi-slider-track {
-    width: 15px;
-    /* Narrow vertical sliders */
-    flex: 1;
-    /* Stretch height is not applicable here as we want fixed height, so we use flex-basis in parent usually, but here sliders are vertical */
-    height: 100%;
-}
-
-/* Wait, the sliders are vertical tracks, so we want them side-by-side vertically? 
-   No, the previous CSS was flex-direction: column (stacked).
-   The user wants "Side by side" like in the screenshot (Hue and Alpha tracks next to each other vertically).
-   Let's check the structure:
-   .ps-divi-controls (flex row)
-      .ps-divi-saturation (flex 1)
-      .ps-divi-sliders-col (flex column)
-         .ps-divi-hue-track
-         .ps-divi-alpha-track
-   
-   To make them "side by side" (two columns next to saturation), we need to keep flex-direction: column for vertical stacking?
-   Wait, the user says "debugging bars should be side by side... now two rows small pitiful".
-   The screenshot shows Hue and Alpha tracks are vertical bars, placed NEXT to each other.
-   
-   So:
-   Saturation | Hue | Alpha
-   
-   Currently:
-   Saturation | [Hue]
-                [Alpha] (Stacked vertically)
-                
-   We want:
-   Saturation | [Hue] [Alpha] (Side by side)
-*/
-
-.ps-divi-sliders-col {
-    width: auto;
-    display: flex;
-    flex-direction: row;
-    /* Side by Side */
-    gap: 8px;
-}
-
-.ps-divi-slider-track {
-    width: 14px;
-    /* Fixed width for tracks */
-    flex: 0 0 14px;
-    height: 100%;
-    /* Full height of container */
-    position: relative;
-    border-radius: 15px;
-    cursor: pointer;
-    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.1);
-}
-
-.ps-divi-input-area {
-    margin-bottom: 12px;
-}
-
-.ps-divi-input-area input {
-    width: 100%;
-    padding: 8px;
-    font-size: 14px;
-    text-align: left;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-family: monospace;
-    background: #f0f0f1;
-}
-
-/* --- TOOLS PAGE (Import/Export) --- */
-.ps-tools-container {
+/* Banner Settings Layout */
+.ps-banner-settings-row {
     display: flex;
     gap: 30px;
-    margin-top: 30px;
+    background: #fff;
+    padding: 30px;
+    border-radius: var(--ps-radius);
+    border: 1px solid var(--ps-border);
+    box-shadow: var(--ps-shadow);
     flex-wrap: wrap;
 }
 
-.ps-tool-card {
-    background: #fff;
-    border-radius: var(--ps-radius);
-    padding: 40px;
+.ps-banner-settings-col {
     flex: 1;
-    min-width: 300px;
-    max-width: 500px;
-    box-shadow: var(--ps-shadow);
-    text-align: center;
-    transition: transform 0.2s, box-shadow 0.2s;
+    min-width: 250px;
+}
+
+.ps-banner-preview-row {
+    margin-top: 20px;
+}
+
+.ps-canvas-wrapper {
     border: 1px solid var(--ps-border);
-}
-
-.ps-tool-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-}
-
-.ps-tool-card .ps-card-icon {
-    font-size: 48px;
-    color: var(--ps-primary);
-    margin-bottom: 20px;
-    display: inline-block;
-}
-
-.ps-tool-card .ps-card-icon .dashicons {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-}
-
-.ps-tool-card h2 {
-    margin-top: 0;
-    font-size: 20px;
-    color: var(--ps-text);
-}
-
-.ps-tool-card p {
-    color: var(--ps-text-soft);
-    margin-bottom: 25px;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-/* Drop Zone */
-.ps-drop-zone {
-    border: 2px dashed var(--ps-primary);
     border-radius: var(--ps-radius);
-    padding: 30px 20px;
-    background: #f0f8ff;
-    margin-bottom: 20px;
-    position: relative;
-    cursor: pointer;
-    transition: background 0.2s;
+    overflow: hidden;
+    background: #fff;
 }
 
-.ps-drop-zone:hover {
-    background: #e0f0ff;
+/* Colors Row */
+.ps-colors-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
-.ps-drop-zone input[type="file"] {
-    cursor: pointer !important;
-}
-
-.ps-drop-zone .dashicons {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-    color: var(--ps-primary);
-    margin-bottom: 10px;
-}
-
-.ps-drop-zone p {
-    margin: 0;
-    font-weight: 600;
-    color: var(--ps-primary);
-}
-
-.ps-full-btn {
-    width: 100%;
-    justify-content: center;
-    height: 44px !important;
-    font-size: 15px !important;
-}
-
-.ps-card-footer {
-    margin-top: 25px;
-    padding-top: 20px;
-    border-top: 1px solid #f0f0f0;
-}
-
-.ps-text-link {
-    text-decoration: none;
-    font-weight: 600;
-    color: var(--ps-primary);
-    display: inline-flex;
+.ps-color-item {
+    display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 5px;
-}
-
-.ps-text-link:hover {
-    color: #135e96;
-}
-
-.ps-divi-input-area input:focus {
-    background: #fff;
-    border-color: var(--ps-primary);
-    outline: none;
-}
-
-/* Banner Preview Fixes */
-#ps-preview-banner-desc p {
-    margin: 0 !important;
-    padding: 0 !important;
 }

@@ -33,8 +33,10 @@ class PS_Settings
         }
 
         wp_enqueue_media();
-        wp_enqueue_style('ps-admin-style', PS_CORE_URL . 'assets/admin-style.css', [], PS_CORE_VERSION);
-        wp_enqueue_script('ps-admin-script', PS_CORE_URL . 'assets/admin-script.js', ['jquery'], PS_CORE_VERSION, true);
+        // 加载共用基础样式 + Settings 页专属样式（两者分离，修改互不影响）
+        wp_enqueue_style('ps-admin-shared', PS_CORE_URL . 'assets/admin-shared.css', [], PS_CORE_VERSION);
+        wp_enqueue_style('ps-admin-settings', PS_CORE_URL . 'assets/admin-settings-v3.css', ['ps-admin-shared'], PS_CORE_VERSION);
+        wp_enqueue_script('ps-admin-script', PS_CORE_URL . 'assets/admin-script.js', ['jquery', 'jquery-ui-sortable'], PS_CORE_VERSION, true);
         wp_localize_script('ps-admin-script', 'ps_admin_vars', [
             'select_images' => __('Select Product Images', 'pocket-showroom'),
             'add_to_gallery' => __('Add to Gallery', 'pocket-showroom'),
@@ -87,6 +89,8 @@ class PS_Settings
         register_setting('ps_settings_group', 'ps_button_text_color');
         register_setting('ps_settings_group', 'ps_banner_title_color');
         register_setting('ps_settings_group', 'ps_banner_desc_color');
+        register_setting('ps_settings_group', 'ps_banner_cta_scale');
+        register_setting('ps_settings_group', 'ps_banner_share_scale');
 
         // Card Display Settings
         register_setting('ps_settings_group', 'ps_card_aspect_ratio');
@@ -121,6 +125,8 @@ class PS_Settings
             'button_text_color' => '#ffffff', // Default White
             'banner_title_color' => '#ffffff',
             'banner_desc_color' => 'rgba(255, 255, 255, 0.95)',
+            'banner_cta_scale' => '1',
+            'banner_share_scale' => '1',
             // Card display
             'card_aspect_ratio' => '3/4',
         ];
@@ -149,6 +155,8 @@ class PS_Settings
         $button_text_color = get_option('ps_button_text_color', $defaults['button_text_color']);
         $banner_title_color = get_option('ps_banner_title_color', $defaults['banner_title_color']);
         $banner_desc_color = get_option('ps_banner_desc_color', $defaults['banner_desc_color']);
+        $banner_cta_scale = get_option('ps_banner_cta_scale', $defaults['banner_cta_scale']);
+        $banner_share_scale = get_option('ps_banner_share_scale', $defaults['banner_share_scale']);
 
         $banner_image_url = '';
         if ($banner_image_id) {

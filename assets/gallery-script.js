@@ -123,6 +123,8 @@ jQuery(document).ready(function ($) {
         }
     });
 
+    // ===== CATEGORY TOGGLE (Removed in favor of horizontal scroll with mask) =====
+
     // ===== LOAD MORE (Fix #10 + Fix #20 i18n) =====
     var loadMoreText = psI18n('load_more', 'Load More');
     var loadingText = psI18n('loading', 'Loading...');

@@ -1,0 +1,466 @@
+/*
+ * ============================================================
+ * POCKET SHOWROOM — SHARED CSS
+ * ============================================================
+ * 作用范围：所有后台页面共用（产品编辑页 + Settings 页都会加载）
+ *
+ * 规则：
+ * - 本文件只放"真正共用"的组件：变量、按钮、开关、输入框
+ * - 不得放任何与特定页面布局相关的样式
+ * - 任何页面专属样式分别放入 admin-edit.css 或 admin-settings.css
+ * ============================================================
+ */
+
+/* --- CSS VARIABLES (全局变量) --- */
+:root {
+    --ps-primary: #1d2327;
+    --ps-accent: #c5a47e;
+    --ps-bg: #fff;
+    --ps-border: #e0e0e0;
+    --ps-text: #333;
+    --ps-text-soft: #777;
+    --ps-radius: 4px;
+    --ps-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* --- FONT STACK (全局字体) --- */
+.ps-edit-page,
+.ps-settings-page {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+        Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* ─── BUTTONS ─────────────────────────────────────────────── */
+.ps-btn {
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ps-btn-primary {
+    background: var(--ps-primary);
+    color: #fff;
+    border-color: var(--ps-primary);
+}
+
+.ps-btn-primary:hover {
+    background: #000;
+    color: #fff;
+}
+
+.ps-btn-secondary {
+    background: #fff;
+    color: var(--ps-primary);
+    border: 1px solid var(--ps-border);
+}
+
+.ps-btn-secondary:hover {
+    border-color: var(--ps-primary);
+    background: #fafafa;
+}
+
+/* ─── FORM LABEL ──────────────────────────────────────────── */
+.ps-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ps-text-soft);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ─── TOGGLE SWITCHES ─────────────────────────────────────── */
+.ps-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.ps-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.ps-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.ps-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked+.ps-slider {
+    background-color: var(--ps-primary);
+}
+
+input:focus+.ps-slider {
+    box-shadow: 0 0 1px var(--ps-primary);
+}
+
+input:checked+.ps-slider:before {
+    transform: translateX(20px);
+}
+
+.ps-slider.round {
+    border-radius: 24px;
+}
+
+.ps-slider.round:before {
+    border-radius: 50%;
+}
+
+/* ─── INPUT BASE ──────────────────────────────────────────── */
+.ps-input {
+    padding: 8px 10px;
+    border: 1px solid var(--ps-border);
+    border-radius: 2px;
+    font-size: 13px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    background: #fff;
+    color: var(--ps-text);
+}
+
+.ps-input:focus {
+    border-color: var(--ps-primary);
+    outline: none;
+}
+
+/* ─── REMOVE BUTTON (共用) ────────────────────────────────── */
+.ps-remove-btn {
+    color: #ccc;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 5px;
+    transition: color 0.2s;
+}
+
+.ps-remove-btn:hover {
+    color: #d63638;
+}
+
+/* ─── COLOR PICKER (Divi-style, 共用组件) ─────────────────── */
+.ps-divi-picker-container {
+    position: relative;
+    display: inline-block;
+    z-index: 10;
+}
+
+.ps-divi-trigger {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #ddd;
+    cursor: pointer;
+    background: #ccc;
+    transition: transform 0.2s;
+}
+
+.ps-divi-trigger:hover {
+    transform: scale(1.1);
+}
+
+.ps-divi-picker-wrapper {
+    position: absolute;
+    top: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 240px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    display: none;
+    border: 1px solid #eee;
+    z-index: 1000;
+}
+
+.ps-divi-picker-wrapper.active {
+    display: block;
+    animation: psFadeIn 0.2s ease-out;
+}
+
+@keyframes psFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.ps-divi-palette {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.ps-divi-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.ps-divi-controls {
+    display: flex;
+    gap: 10px;
+    height: 120px;
+    margin-bottom: 12px;
+}
+
+.ps-divi-saturation {
+    flex: 1;
+    position: relative;
+    background-image: linear-gradient(to right, #fff, rgba(255, 255, 255, 0)),
+        linear-gradient(to top, #000, rgba(0, 0, 0, 0));
+    border-radius: 4px;
+    cursor: crosshair;
+}
+
+.ps-divi-cursor {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    margin: -5px 0 0 -5px;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+.ps-divi-sliders-col {
+    display: flex;
+    gap: 8px;
+}
+
+.ps-divi-slider-track {
+    width: 12px;
+    height: 100%;
+    border-radius: 6px;
+    position: relative;
+    cursor: pointer;
+    box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.ps-divi-hue-track {
+    background: linear-gradient(to bottom, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+}
+
+.ps-divi-alpha-track {
+    background: #fff url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAH0lEQVQYV2N89+7dfwYkYObMmf+YYUacinkinI4GAC8sZAnP2eVnAAAAAElFTkSuQmCC') repeat;
+}
+
+.ps-divi-slider-handle {
+    position: absolute;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    border: 1px solid #ddd;
+}
+
+.ps-divi-input-area input {
+    width: 100%;
+    font-family: monospace;
+    font-size: 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    padding: 6px;
+}
+
+/* --- TOOLS PAGE (Import/Export) --- */
+.ps-tools-container {
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.ps-tool-card {
+    background: #fff;
+    border-radius: var(--ps-radius);
+    padding: 40px;
+    flex: 1;
+    min-width: 300px;
+    max-width: 500px;
+    box-shadow: var(--ps-shadow);
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid var(--ps-border);
+}
+
+.ps-tool-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.ps-tool-card .ps-card-icon {
+    font-size: 48px;
+    color: var(--ps-primary);
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.ps-tool-card .ps-card-icon .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+}
+
+.ps-tool-card h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: var(--ps-text);
+}
+
+.ps-tool-card p {
+    color: var(--ps-text-soft);
+    margin-bottom: 25px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Drop Zone */
+.ps-drop-zone {
+    border: 2px dashed var(--ps-primary);
+    border-radius: var(--ps-radius);
+    padding: 30px 20px;
+    background: #f0f8ff;
+    margin-bottom: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.ps-drop-zone:hover {
+    background: #e0f0ff;
+}
+
+.ps-drop-zone input[type="file"] {
+    cursor: pointer !important;
+}
+
+.ps-drop-zone .dashicons {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: var(--ps-primary);
+    margin-bottom: 10px;
+}
+
+.ps-drop-zone p {
+    margin: 0;
+    font-weight: 600;
+    color: var(--ps-primary);
+}
+
+.ps-full-btn {
+    width: 100%;
+    justify-content: center;
+    height: 44px !important;
+    font-size: 15px !important;
+}
+
+.ps-card-footer {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.ps-text-link {
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--ps-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.ps-text-link:hover {
+    color: #135e96;
+}
+
+/* --- MODERN UI WRAPPER (Shared Layout) --- */
+.ps-modern-ui {
+    margin-top: -20px;
+}
+
+.ps-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: #fff;
+    padding: 15px 25px;
+    border-radius: var(--ps-radius);
+    box-shadow: var(--ps-shadow);
+}
+
+.ps-title-input {
+    border: none !important;
+    font-size: 24px !important;
+    font-weight: 600 !important;
+    width: 100%;
+    outline: none !important;
+    background: transparent !important;
+    color: var(--ps-text) !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.ps-title-input::placeholder {
+    color: #ccc;
+}
+
+.ps-title-input:focus {
+    box-shadow: none !important;
+}
+
+.ps-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}

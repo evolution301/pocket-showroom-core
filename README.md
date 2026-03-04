@@ -35,7 +35,7 @@ A modern B2B product catalog WordPress plugin designed for furniture exporters, 
 
 ### Method 1: Download from GitHub (Recommended)
 
-1. Download the latest release: [pocket-showroom-core-v3.0.3.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.0.3/pocket-showroom-core.zip)
+1. Download the latest release: [pocket-showroom-core-v3.1.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.1.0/pocket-showroom-core.zip)
 2. Go to **WordPress Admin** → **Plugins** → **Add New** → **Upload Plugin**
 3. Upload the ZIP file and click **Install Now**
 4. Activate the plugin
@@ -186,6 +186,12 @@ Configure image watermark:
 
 ## Changelog
 
+### v3.1.0 (2026-03-04)
+- **Fix**: Quick Edit no longer loses custom meta data or toggle states.
+- **Improvement ("Smart Confirm")**: Excel Importer now smartly confirms (turns 'ON') toggles only if an Excel column actually has data.
+- **Fix**: Excel Importer no longer duplicates Media Library images (re-uses existing attachments by checking URL / filename).
+- **Optimization**: Added a background one-time script to auto-cleanup empty toggles on old products.
+
 ### v3.0.3 (2026-02-25)
 - **UI Restore**: Reverted to the classic full-width custom admin editor UI from v2.0.4 (custom title bar, Save/Preview buttons, full-width grid layout)
 - **Fix**: Eliminated admin panel layout deformation caused by conflicting CSS/JS overrides
@@ -287,7 +293,7 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 
 ### 方法一：从 GitHub 下载（推荐）
 
-1. 下载最新版本：[pocket-showroom-core-v3.0.3.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.0.3/pocket-showroom-core.zip)
+1. 下载最新版本：[pocket-showroom-core-v3.1.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.1.0/pocket-showroom-core.zip)
 2. 进入 **WordPress 后台** → **插件** → **安装插件** → **上传插件**
 3. 上传 ZIP 文件，点击 **现在安装**
 4. 激活插件
@@ -437,6 +443,12 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 - 位置
 
 ## 更新日志
+
+### v3.1.0 (2026-03-04)
+- **修复**: Quick Edit (快速编辑) 不再导致其它字段或开关状态丢失。
+- **改善 (智能开关)**: Excel 导入器现在只有在表格里有数据时，才会开启对应字段的展示开关（没数据则保持关闭）。
+- **修复**: Excel 导入图片时不再产生重复生成的图片（基于 URL 和文件名复用现有媒体库的图片）。
+- **优化**: 增加一次性后台清理脚本，自动关闭老产品中没有数据却被强制开启的空位展示。
 
 ### v3.0.3 (2026-02-25)
 - **UI 恢复**: 将管理后台编辑界面还原为 v2.0.4 经典全屏定制版（自定义标题栏、保存/预览按钮、全宽网格布局）
