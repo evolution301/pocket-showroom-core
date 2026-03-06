@@ -100,11 +100,22 @@ jQuery(document).ready(function ($) {
         }
     }, 300));
 
-    // Category Filter (Client Side)
-    $('.ps-filter-btn').on('click', function () {
+    // Category Filter (Client Side) - Sync top filters and sidebar
+    $('.ps-filter-btn, .ps-sidebar-cat').on('click', function () {
         var cat = $(this).data('cat');
-        $('.ps-filter-btn').removeClass('active');
-        $(this).addClass('active');
+
+        // Sync active states across both navigation areas
+        $('.ps-filter-btn, .ps-sidebar-cat').removeClass('active');
+        $('.ps-filter-btn[data-cat="' + cat + '"], .ps-sidebar-cat[data-cat="' + cat + '"]').addClass('active');
+
+        // Optional: scroll back to top of gallery smoothly if clicked from sidebar
+        // This ensures the user sees the newly filtered items from the top
+        if ($(this).hasClass('ps-sidebar-cat')) {
+            var galleryTop = $('.ps-gallery-layout').offset().top - 80;
+            if ($(window).scrollTop() > galleryTop) {
+                $('html, body').animate({ scrollTop: galleryTop }, 300);
+            }
+        }
 
         // Clear search
         $('#ps-search').val('');
@@ -122,6 +133,25 @@ jQuery(document).ready(function ($) {
             });
         }
     });
+
+    // -- Sticky Sidebar Scroll Reveal --
+    $(window).on('scroll', debounce(function () {
+        var $sidebar = $('#ps-gallery-sidebar');
+        // If sidebar doesn't exist or isn't visible due to CSS media query, do nothing
+        if (!$sidebar.length || $sidebar.css('display') === 'none') return;
+
+        var $filterBar = $('.ps-gallery-filters');
+        if ($filterBar.length) {
+            var filterBottom = $filterBar.offset().top + $filterBar.outerHeight();
+            var scrollPos = $(window).scrollTop() + 120; // Accounts for sticky header height
+
+            if (scrollPos > filterBottom) {
+                $sidebar.addClass('is-visible');
+            } else {
+                $sidebar.removeClass('is-visible');
+            }
+        }
+    }, 50));
 
     // ===== CATEGORY TOGGLE (Removed in favor of horizontal scroll with mask) =====
 

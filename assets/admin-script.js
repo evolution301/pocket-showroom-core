@@ -641,11 +641,38 @@ jQuery(function ($) {
         var $alphaHandle = $alphaTrack.find('.ps-divi-slider-handle');
         var $input = $container.find('.ps-divi-hex-input');
 
-        // 开关显示/隐藏
+        // 开关显示/隐藏（含视口溢出检测，防止调色板被截断）
         $trigger.on('click', function (e) {
             e.stopPropagation();
             $('.ps-divi-picker-wrapper').not($wrapper).removeClass('active');
             $wrapper.toggleClass('active');
+
+            // 如果调色板打开，检查它是否会溢出到屏幕左边或右边
+            if ($wrapper.hasClass('active')) {
+                // 重置为默认居中对齐
+                $wrapper.css({ left: '', right: '', transform: '' });
+
+                // 获取调色板弹窗在屏幕上的位置信息
+                var wrapperRect = $wrapper[0].getBoundingClientRect();
+                var viewportWidth = $(window).width();
+                var MARGIN = 8; // 距离屏幕边缘的最小安全距离
+
+                if (wrapperRect.left < MARGIN) {
+                    // 向左溢出：把调色板移到触发按钮的左边对齐
+                    var overflowLeft = MARGIN - wrapperRect.left;
+                    $wrapper.css({
+                        left: 'calc(50% + ' + overflowLeft + 'px)',
+                        transform: 'translateX(-50%)'
+                    });
+                } else if (wrapperRect.right > viewportWidth - MARGIN) {
+                    // 向右溢出：把调色板靠右对齐
+                    var overflowRight = wrapperRect.right - (viewportWidth - MARGIN);
+                    $wrapper.css({
+                        left: 'calc(50% - ' + overflowRight + 'px)',
+                        transform: 'translateX(-50%)'
+                    });
+                }
+            }
         });
         $wrapper.on('click', function (e) { e.stopPropagation(); });
 

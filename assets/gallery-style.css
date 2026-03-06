@@ -298,6 +298,94 @@
     gap: 16px;
 }
 
+.ps-gallery-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: relative;
+}
+
+/* Sidebar (Hidden by default, shown on desktop) */
+.ps-gallery-sidebar {
+    display: none;
+    width: 250px;
+    flex-shrink: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.ps-gallery-sidebar.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.ps-sidebar-inner {
+    position: sticky;
+    top: 90px;
+    background: #fff;
+    border: 1px solid var(--ps-border-color);
+    border-radius: var(--ps-border-radius);
+    padding: 20px;
+    box-shadow: var(--ps-box-shadow);
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    /* Hide scrollbar for cleaner look */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.ps-sidebar-inner::-webkit-scrollbar {
+    display: none;
+}
+
+.ps-sidebar-title {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ps-text-color);
+    border-bottom: 2px solid var(--ps-primary-color);
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+.ps-sidebar-categories {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ps-sidebar-cat {
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--ps-text-secondary);
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.ps-sidebar-cat:hover {
+    background: var(--ps-bg-secondary);
+    color: var(--ps-primary-color);
+}
+
+.ps-sidebar-cat.active {
+    background: rgba(var(--ps-primary-rgb), 0.05);
+    color: var(--ps-primary-color);
+    border-left-color: var(--ps-primary-color);
+    font-weight: 600;
+}
+
+.ps-gallery-grid-wrapper {
+    flex: 1;
+    min-width: 0;
+}
+
 #ps-search {
     padding: 14px 20px;
     width: 100%;
@@ -327,6 +415,15 @@
     .ps-gallery-grid {
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap: 24px;
+    }
+
+    .ps-gallery-layout {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .ps-gallery-sidebar {
+        display: block;
     }
 
     /* Desktop: flex layout so filters get full width to wrap,

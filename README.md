@@ -35,7 +35,7 @@ A modern B2B product catalog WordPress plugin designed for furniture exporters, 
 
 ### Method 1: Download from GitHub (Recommended)
 
-1. Download the latest release: [pocket-showroom-core-v3.1.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.1.0/pocket-showroom-core.zip)
+1. Download the latest release: [pocket-showroom-core-v3.2.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.2.0/pocket-showroom-core.zip)
 2. Go to **WordPress Admin** → **Plugins** → **Add New** → **Upload Plugin**
 3. Upload the ZIP file and click **Install Now**
 4. Activate the plugin
@@ -186,6 +186,9 @@ Configure image watermark:
 
 ## Changelog
 
+### v3.2.0 (2026-03-06)
+- **Feature**: Added a dynamic, sticky category sidebar on desktop for a better browsing experience. The sidebar automatically appears when scrolling past the main filters.
+
 ### v3.1.0 (2026-03-04)
 - **Fix**: Quick Edit no longer loses custom meta data or toggle states.
 - **Improvement ("Smart Confirm")**: Excel Importer now smartly confirms (turns 'ON') toggles only if an Excel column actually has data.
@@ -293,7 +296,7 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 
 ### 方法一：从 GitHub 下载（推荐）
 
-1. 下载最新版本：[pocket-showroom-core-v3.1.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.1.0/pocket-showroom-core.zip)
+1. 下载最新版本：[pocket-showroom-core-v3.2.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.2.0/pocket-showroom-core.zip)
 2. 进入 **WordPress 后台** → **插件** → **安装插件** → **上传插件**
 3. 上传 ZIP 文件，点击 **现在安装**
 4. 激活插件
@@ -443,6 +446,9 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 - 位置
 
 ## 更新日志
+
+### v3.2.0 (2026-03-06)
+- **新功能**: 在桌面端新增了滚动悬浮的左侧分类导航栏，极大提升了向下浏览产品时的分类切换体验。
 
 ### v3.1.0 (2026-03-04)
 - **修复**: Quick Edit (快速编辑) 不再导致其它字段或开关状态丢失。
