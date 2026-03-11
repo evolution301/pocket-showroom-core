@@ -71,12 +71,14 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
 
             // Hook into WordPress update system
             add_filter('site_transient_update_plugins', [$this, 'check_for_update']);
+            add_filter('pre_set_site_transient_update_plugins', [$this, 'check_for_update']);
             add_filter('plugins_api', [$this, 'plugin_popup'], 10, 3);
             add_filter('upgrader_post_install', [$this, 'after_install'], 10, 3);
 
-            // Add "Check for updates" link
+            // Add "Check for updates" link and notices
             add_action('admin_init', [$this, 'manual_check_trigger']);
             add_filter('plugin_action_links_' . $this->plugin_basename, [$this, 'add_check_update_link']);
+            add_action('admin_notices', [$this, 'display_update_notice']);
         }
 
         /**
@@ -90,6 +92,17 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
             $check_link = '<a href="' . wp_nonce_url(admin_url('plugins.php?ps_check_update=1'), 'ps_check_update') . '">Check for Updates</a>';
             array_push($links, $check_link);
             return $links;
+        }
+
+        public function display_update_notice()
+        {
+            if (isset($_GET['ps_update_failed'])) {
+                echo '<div class="notice notice-error is-dismissible"><p><strong>Pocket Showroom Core:</strong>未能从 GitHub 获取更新信息。可能是由于本地环境的 SSL 证书问题、网络故障或触发了 GitHub API 频率限制。</p></div>';
+            } elseif (isset($_GET['ps_update_available'])) {
+                echo '<div class="notice notice-success is-dismissible"><p><strong>Pocket Showroom Core:</strong>发现新版本！请在下方的列表中查看更新详情。</p></div>';
+            } elseif (isset($_GET['ps_update_none'])) {
+                echo '<div class="notice notice-info is-dismissible"><p><strong>Pocket Showroom Core:</strong>您当前安装的已经是最新版本，无需更新。</p></div>';
+            }
         }
 
         /**
@@ -107,8 +120,18 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
             delete_site_transient($this->cache_key);
             delete_site_transient('update_plugins');
 
-            // Redirect back to plugins page with success message
-            wp_redirect(add_query_arg('ps_update_checked', '1', admin_url('plugins.php')));
+            $remote = $this->get_remote_info();
+
+            if (!$remote) {
+                wp_redirect(add_query_arg('ps_update_failed', '1', admin_url('plugins.php')));
+                exit;
+            }
+
+            if (version_compare($this->current_version, $remote->version, '<')) {
+                wp_redirect(add_query_arg('ps_update_available', '1', admin_url('plugins.php')));
+            } else {
+                wp_redirect(add_query_arg('ps_update_none', '1', admin_url('plugins.php')));
+            }
             exit;
         }
 
@@ -134,6 +157,8 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
             // Compare versions
             if (version_compare($this->current_version, $remote_info->version, '<')) {
                 $plugin_data = [
+                    'id' => $this->plugin_basename,
+                    'plugin' => $this->plugin_basename,
                     'slug' => dirname($this->plugin_basename),
                     'new_version' => $remote_info->version,
                     'url' => $remote_info->url,
@@ -170,6 +195,7 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
                 "https://api.github.com/repos/{$this->github_user}/{$this->github_repo}/releases/latest",
                 [
                     'timeout' => 10,
+                    'sslverify' => false, // Bypass local SSL issues
                     'headers' => [
                         'Accept' => 'application/vnd.github.v3+json',
                         'User-Agent' => 'WordPress/' . get_bloginfo('version') . '; ' . home_url(),
