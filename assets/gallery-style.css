@@ -313,11 +313,12 @@ header, .site-header, #masthead, .elementor-location-header {
     flex-direction: column;
     gap: 16px;
     position: sticky;
-    top: 0;
+    top: 20px; /* Fix #14: Add breathing room when sticky */
     z-index: 100;
     background: var(--ps-bg-color);
-    padding-top: 15px;
-    padding-bottom: 15px;
+    padding: 15px; /* Add padding inside the bar */
+    border-radius: 8px; /* Soften the edges */
+    /* Optional: Add a subtle shadow when scrolling if needed, handled by background currently */
 }
 
 /* Sidebar rules removed to favor 100% width sticky top filters */

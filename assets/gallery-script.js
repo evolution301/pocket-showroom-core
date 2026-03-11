@@ -108,12 +108,13 @@ jQuery(document).ready(function ($) {
         $('.ps-filter-btn').removeClass('active');
         $(this).addClass('active');
 
-        // Smooth scroll back to the top of the filters logic (Fix #13)
+        // Smooth scroll back to the top of the filters logic (Fix #13 & #14)
         var $filterBar = $('.ps-gallery-filters');
         if ($filterBar.length) {
-            // Target slightly above the filter bar to account for header styling delays (e.g. 50px buffer)
-            var filterTop = $filterBar.offset().top - 50; 
-            // Only scroll if we are already scrolled down past the top of the filters
+            // Target slightly above the filter bar to account for header styling delays 
+            // and the new 20px top offset (e.g. 70px buffer)
+            var filterTop = $filterBar.offset().top - 70; 
+            // Only scroll if we are already scrolled down past the target
             if ($(window).scrollTop() > filterTop) {
                 // Smoothly animate the scrollbar
                 $('html, body').animate({ scrollTop: filterTop }, 400, 'swing');
