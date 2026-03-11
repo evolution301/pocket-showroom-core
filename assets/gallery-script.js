@@ -110,7 +110,7 @@ jQuery(document).ready(function ($) {
 
         // Smooth scroll back to the top of the filters logic (Fix #13 & #14)
         var $filterBar = $('.ps-gallery-filters');
-        if ($filterBar.length) {
+        if ($filterBar.length && window.innerWidth >= 768) {
             // Target slightly above the filter bar to account for header styling delays 
             // and the new 20px top offset (e.g. 70px buffer)
             var filterTop = $filterBar.offset().top - 70; 
@@ -180,6 +180,16 @@ jQuery(document).ready(function ($) {
         lastScrollTop = $(window).scrollTop();
         if (!ticking) {
             window.requestAnimationFrame(function () {
+                // Fix #15: Disable header hiding on mobile
+                if (window.innerWidth < 768) {
+                    if (isHeaderHidden) {
+                        $('body').removeClass('ps-hide-theme-header');
+                        isHeaderHidden = false;
+                    }
+                    ticking = false;
+                    return;
+                }
+
                 var $filterBar = $('.ps-gallery-filters');
                 if ($filterBar.length) {
                     var filterTop = $filterBar.offset().top;

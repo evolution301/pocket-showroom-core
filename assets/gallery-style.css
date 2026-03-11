@@ -387,6 +387,11 @@ header, .site-header, #masthead, .elementor-location-header {
 @media (max-width: 767px) {
     .ps-gallery-filters {
         position: relative;
+        /* Fix #15: Disable desktop sticky optimizations on mobile to save screen space */
+        top: auto;
+        padding: 0;
+        border-radius: 0;
+        margin-bottom: 16px; 
     }
 
     /* Container for buttons to enable masking */

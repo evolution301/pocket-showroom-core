@@ -35,7 +35,7 @@ A modern B2B product catalog WordPress plugin designed for furniture exporters, 
 
 ### Method 1: Download from GitHub (Recommended)
 
-1. Download the latest release: [pocket-showroom-core-v3.3.2.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.3.2/pocket-showroom-core.zip)
+1. Download the latest release: [pocket-showroom-core-v3.3.4.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.3.4/pocket-showroom-core.zip)
 2. Go to **WordPress Admin** → **Plugins** → **Add New** → **Upload Plugin**
 3. Upload the ZIP file and click **Install Now**
 4. Activate the plugin
@@ -185,6 +185,9 @@ Configure image watermark:
 - Position
 
 ## Changelog
+
+### v3.3.4
+- **Fix**: Disabled "Sticky Filters", "Hide Theme Header on Scroll", and "Scroll to Top" features on mobile devices (screens < 768px). These features are designed to maximize desktop real estate and are unnecessary/intrusive when stacked on smaller screens with aggressive touch scrolling. Native swiping is restored.
 
 ### v3.3.2
 - **Feature**: Added a smart "Scroll to Top" behavior. When you click a category filter and you are currently scrolled deep into the product grid, the page will automatically and smoothly scroll back up to the filter bar, allowing you to view the new category's products from the very beginning.
