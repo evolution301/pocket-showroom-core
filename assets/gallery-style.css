@@ -296,106 +296,15 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-}
-
-.ps-gallery-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    position: relative;
-}
-
-/* Sidebar (Hidden by default, shown on desktop) */
-.ps-gallery-sidebar {
-    display: none;
-    width: 250px;
-    flex-shrink: 0;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    opacity: 0;
-    transform: translateY(10px);
-}
-
-.ps-gallery-sidebar.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.ps-sidebar-inner {
     position: sticky;
-    top: 90px;
-    background: #fff;
-    border: 1px solid var(--ps-border-color);
-    border-radius: var(--ps-border-radius);
-    padding: 20px;
-    box-shadow: var(--ps-box-shadow);
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
-    /* Hide scrollbar for cleaner look */
-    -ms-overflow-style: none;
-    /* IE and Edge */
-    scrollbar-width: none;
-    /* Firefox */
+    top: 0;
+    z-index: 100;
+    background: var(--ps-bg-color);
+    padding-top: 15px;
+    padding-bottom: 15px;
 }
 
-.ps-sidebar-inner::-webkit-scrollbar {
-    display: none;
-}
-
-.ps-sidebar-title {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--ps-text-color);
-    border-bottom: 2px solid var(--ps-primary-color);
-    padding-bottom: 10px;
-    display: inline-block;
-}
-
-.ps-sidebar-categories,
-.ps-sidebar-categories li {
-    list-style: none !important;
-    list-style-type: none !important;
-}
-
-.ps-sidebar-categories {
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-/* Force hide any theme-injected pseudo-element bullets */
-.ps-sidebar-categories li::before {
-    display: none !important;
-    content: none !important;
-}
-
-.ps-sidebar-cat {
-    padding: 10px 15px;
-    margin-bottom: 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    color: var(--ps-text-secondary);
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
-}
-
-.ps-sidebar-cat:hover {
-    background: var(--ps-bg-secondary);
-    color: var(--ps-primary-color);
-}
-
-.ps-sidebar-cat.active {
-    background: rgba(var(--ps-primary-rgb), 0.05);
-    color: var(--ps-primary-color);
-    border-left-color: var(--ps-primary-color);
-    font-weight: 600;
-}
-
-.ps-gallery-grid-wrapper {
-    flex: 1;
-    min-width: 0;
-}
+/* Sidebar rules removed to favor 100% width sticky top filters */
 
 #ps-search {
     padding: 14px 20px;
@@ -428,23 +337,7 @@
         gap: 24px;
     }
 
-    .ps-gallery-layout {
-        display: block; /* Remove flex to allow grid full width */
-    }
-
-    .ps-gallery-sidebar {
-        display: block;
-        position: absolute;
-        left: -270px; /* 250px width + 20px space */
-        top: 0;
-        bottom: 0; /* Creates the track for sticky to slide down */
-        pointer-events: none; /* Prevent this wrapper from blocking clicks */
-    }
-
-    .ps-sidebar-inner {
-        pointer-events: auto; /* Re-enable clicks for the sidebar box */
-        top: 120px; /* Give it a bit more space from the header */
-    }
+    /* Sidebar desktop rules removed */
 
     /* Desktop: flex layout so filters get full width to wrap,
        and search bar sits on the right */

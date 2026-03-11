@@ -35,7 +35,7 @@ A modern B2B product catalog WordPress plugin designed for furniture exporters, 
 
 ### Method 1: Download from GitHub (Recommended)
 
-1. Download the latest release: [pocket-showroom-core-v3.2.2.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.2.2/pocket-showroom-core.zip)
+1. Download the latest release: [pocket-showroom-core-v3.3.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.3.0/pocket-showroom-core.zip)
 2. Go to **WordPress Admin** → **Plugins** → **Add New** → **Upload Plugin**
 3. Upload the ZIP file and click **Install Now**
 4. Activate the plugin
@@ -185,6 +185,10 @@ Configure image watermark:
 - Position
 
 ## Changelog
+
+### v3.3.0
+- **Feature**: Removed the desktop left sidebar entirely in favor of a cleaner, 100% width product grid.
+- **Feature**: The top category filter pills now stick to the top of the screen (`position: sticky`) as you scroll down, allowing easy filtering from anywhere in the gallery without needing a persistent sidebar.
 
 ### v3.2.2
 - **Feature**: Upgraded Category Sidebar and Filter buttons to use an AJAX-driven Auto-Load mechanic instead of hiding/showing local DOM nodes.

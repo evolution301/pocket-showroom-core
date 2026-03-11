@@ -166,24 +166,7 @@ jQuery(document).ready(function ($) {
         });
     });
 
-    // -- Sticky Sidebar Scroll Reveal --
-    $(window).on('scroll', debounce(function () {
-        var $sidebar = $('#ps-gallery-sidebar');
-        // If sidebar doesn't exist or isn't visible due to CSS media query, do nothing
-        if (!$sidebar.length || $sidebar.css('display') === 'none') return;
 
-        var $filterBar = $('.ps-gallery-filters');
-        if ($filterBar.length) {
-            var filterBottom = $filterBar.offset().top + $filterBar.outerHeight();
-            var scrollPos = $(window).scrollTop() + 120; // Accounts for sticky header height
-
-            if (scrollPos > filterBottom) {
-                $sidebar.addClass('is-visible');
-            } else {
-                $sidebar.removeClass('is-visible');
-            }
-        }
-    }, 50));
 
     // ===== CATEGORY TOGGLE (Removed in favor of horizontal scroll with mask) =====
 

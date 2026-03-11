@@ -297,28 +297,8 @@ class PS_Frontend_Gallery
                 <?php endif; ?>
             </div>
 
-            <!-- Layout for Sidebar & Grid -->
-            <div class="ps-gallery-layout">
-                <!-- Sidebar (Desktop only) -->
-                <aside class="ps-gallery-sidebar" id="ps-gallery-sidebar">
-                    <div class="ps-sidebar-inner">
-                        <h3 class="ps-sidebar-title"><?php _e('Categories', 'pocket-showroom'); ?></h3>
-                        <ul class="ps-sidebar-categories">
-                            <li class="ps-sidebar-cat active" data-cat="all"><?php _e('All Categories', 'pocket-showroom'); ?>
-                            </li>
-                            <?php if (!empty($terms) && !is_wp_error($terms)): ?>
-                                <?php foreach ($terms as $term): ?>
-                                    <li class="ps-sidebar-cat" data-cat="<?php echo esc_attr($term->slug); ?>">
-                                        <?php echo esc_html($term->name); ?></li>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </ul>
-                    </div>
-                </aside>
-
-                <!-- Grid wrapper -->
-                <div class="ps-gallery-grid-wrapper">
-                    <div class="ps-gallery-grid">
+            <!-- Grid -->
+            <div class="ps-gallery-grid">
                         <?php if ($query->have_posts()): ?>
                             <?php while ($query->have_posts()):
                                 $query->the_post();
@@ -328,9 +308,7 @@ class PS_Frontend_Gallery
                             <p><?php _e('No items found.', 'pocket-showroom'); ?></p>
                         <?php endif;
                         wp_reset_postdata(); ?>
-                    </div>
-                </div> <!-- End Main Grid Column -->
-            </div> <!-- End Layout -->
+            </div>
 
             <?php if ($max_pages > 1): ?>
                 <!-- Load More Button (Fix #10) -->
