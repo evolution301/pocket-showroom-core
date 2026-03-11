@@ -100,20 +100,23 @@ jQuery(document).ready(function ($) {
         }
     }, 300));
 
-    // Category Filter (Client Side) - Sync top filters and sidebar
-    $('.ps-filter-btn, .ps-sidebar-cat').on('click', function () {
+    // Category Filter (Client Side) & Scroll to Top
+    $('.ps-filter-btn').on('click', function () {
         var cat = $(this).data('cat');
 
-        // Sync active states across both navigation areas
-        $('.ps-filter-btn, .ps-sidebar-cat').removeClass('active');
-        $('.ps-filter-btn[data-cat="' + cat + '"], .ps-sidebar-cat[data-cat="' + cat + '"]').addClass('active');
+        // Sync active states
+        $('.ps-filter-btn').removeClass('active');
+        $(this).addClass('active');
 
-        // Optional: scroll back to top of gallery smoothly if clicked from sidebar
-        // This ensures the user sees the newly filtered items from the top
-        if ($(this).hasClass('ps-sidebar-cat')) {
-            var galleryTop = $('.ps-gallery-layout').offset().top - 80;
-            if ($(window).scrollTop() > galleryTop) {
-                $('html, body').animate({ scrollTop: galleryTop }, 300);
+        // Smooth scroll back to the top of the filters logic (Fix #13)
+        var $filterBar = $('.ps-gallery-filters');
+        if ($filterBar.length) {
+            // Target slightly above the filter bar to account for header styling delays (e.g. 50px buffer)
+            var filterTop = $filterBar.offset().top - 50; 
+            // Only scroll if we are already scrolled down past the top of the filters
+            if ($(window).scrollTop() > filterTop) {
+                // Smoothly animate the scrollbar
+                $('html, body').animate({ scrollTop: filterTop }, 400, 'swing');
             }
         }
 

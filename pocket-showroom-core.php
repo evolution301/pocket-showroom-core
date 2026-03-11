@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Pocket Showroom Core
  * Description: A modern B2B product catalog with CSV import, multi-image gallery, and interactive frontend.
- * Version:     3.3.1
+ * Version:     3.3.2
  * Author:      Your Name
  * Text Domain: pocket-showroom
  * Domain Path: /languages
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-define('PS_CORE_VERSION', '3.3.1');
+define('PS_CORE_VERSION', '3.3.2');
 define('PS_CORE_PATH', plugin_dir_path(__FILE__));
 define('PS_CORE_URL', plugin_dir_url(__FILE__));
 
