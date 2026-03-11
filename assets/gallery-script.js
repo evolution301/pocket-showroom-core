@@ -166,7 +166,38 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    // ===== HIDE THEME HEADER ON SCROLL (Fix #12) =====
+    // Goal: Maximize screen space for the gallery by hiding WP headers when scrolled down.
+    var lastScrollTop = $(window).scrollTop();
+    var isHeaderHidden = false;
+    var ticking = false;
 
+    $(window).on('scroll', function () {
+        lastScrollTop = $(window).scrollTop();
+        if (!ticking) {
+            window.requestAnimationFrame(function () {
+                var $filterBar = $('.ps-gallery-filters');
+                if ($filterBar.length) {
+                    var filterTop = $filterBar.offset().top;
+                    var triggerPoint = filterTop - 50; // Start hiding just before filters hit the top
+
+                    if (lastScrollTop > triggerPoint) {
+                        if (!isHeaderHidden) {
+                            $('body').addClass('ps-hide-theme-header');
+                            isHeaderHidden = true;
+                        }
+                    } else {
+                        if (isHeaderHidden) {
+                            $('body').removeClass('ps-hide-theme-header');
+                            isHeaderHidden = false;
+                        }
+                    }
+                }
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
 
     // ===== CATEGORY TOGGLE (Removed in favor of horizontal scroll with mask) =====
 

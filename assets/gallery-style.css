@@ -253,6 +253,22 @@
     }
 }
 
+/* ==========================================================================
+   Theme Header Hiding (Scroll to Hide)
+   ========================================================================== */
+body.ps-hide-theme-header header,
+body.ps-hide-theme-header .site-header,
+body.ps-hide-theme-header #masthead,
+body.ps-hide-theme-header .elementor-location-header {
+    transform: translateY(-100%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+header, .site-header, #masthead, .elementor-location-header {
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.4s ease !important;
+}
+
 /* Filter Buttons - Desktop: normal wrapping */
 .ps-filter-buttons {
     margin-bottom: 15px;
