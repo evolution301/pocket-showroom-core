@@ -35,7 +35,7 @@ A modern B2B product catalog WordPress plugin designed for furniture exporters, 
 
 ### Method 1: Download from GitHub (Recommended)
 
-1. Download the latest release: [pocket-showroom-core-v3.2.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.2.0/pocket-showroom-core.zip)
+1. Download the latest release: [pocket-showroom-core-v3.2.1.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.2.1/pocket-showroom-core.zip)
 2. Go to **WordPress Admin** → **Plugins** → **Add New** → **Upload Plugin**
 3. Upload the ZIP file and click **Install Now**
 4. Activate the plugin
@@ -186,6 +186,13 @@ Configure image watermark:
 
 ## Changelog
 
+### v3.2.1 (2026-03-11)
+- **Fix**: Removed theme-injected bullet points from the new sticky sidebar.
+- **Fix**: Changed sticky sidebar layout to absolute positioning to restore full width for the product grid.
+- **Fix**: Created a full-height track for the sticky sidebar to ensure it sticks properly as you scroll down.
+- **Fix**: Resolved an issue where "Export to CSV" would append HTML to the file and download as `.txt`.
+- **Fix**: Forced "Download Sample Template" to download securely as `.csv` formatted instead of rendering as text.
+
 ### v3.2.0 (2026-03-06)
 - **Feature**: Added a dynamic, sticky category sidebar on desktop for a better browsing experience. The sidebar automatically appears when scrolling past the main filters.
 
@@ -296,7 +303,7 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 
 ### 方法一：从 GitHub 下载（推荐）
 
-1. 下载最新版本：[pocket-showroom-core-v3.2.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.2.0/pocket-showroom-core.zip)
+1. 下载最新版本：[pocket-showroom-core-v3.2.1.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.2.1/pocket-showroom-core.zip)
 2. 进入 **WordPress 后台** → **插件** → **安装插件** → **上传插件**
 3. 上传 ZIP 文件，点击 **现在安装**
 4. 激活插件
@@ -446,6 +453,13 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 - 位置
 
 ## 更新日志
+
+### v3.2.1 (2026-03-11)
+- **修复**: 强制去除了有些主题自带的侧边栏圆点符号。
+- **修复**: 更改了悬浮侧边栏的排版架构，恢复了产品网格100%的最佳浏览宽度。
+- **修复**: 修复了侧边栏在页面向下深层滚动时“粘连”失效的问题。
+- **修复**: 修复了导出 CSV 文件时被服务器错认为是纯文本（txt）的问题。
+- **修复**: 修复了模板下载时直接打开浏览器文本的错误，现在强制下载标准格式的表格。
 
 ### v3.2.0 (2026-03-06)
 - **新功能**: 在桌面端新增了滚动悬浮的左侧分类导航栏，极大提升了向下浏览产品时的分类切换体验。

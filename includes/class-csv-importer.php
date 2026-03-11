@@ -23,6 +23,7 @@ class PS_CSV_Importer
         add_action('admin_menu', [$this, 'add_import_page']);
         add_action('admin_init', [$this, 'process_csv_import']);
         add_action('admin_init', [$this, 'process_csv_export']);
+        add_action('admin_post_ps_download_template', [$this, 'handle_template_download']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
     }
 
@@ -80,7 +81,7 @@ class PS_CSV_Importer
                     </form>
 
                     <div class="ps-card-footer">
-                        <a href="<?php echo PS_CORE_URL . 'assets/sample-import.csv'; ?>" download class="ps-text-link">
+                        <a href="<?php echo esc_url(admin_url('admin-post.php?action=ps_download_template')); ?>" class="ps-text-link">
                             <span class="dashicons dashicons-download"></span>
                             <?php _e('Download Sample Template', 'pocket-showroom'); ?>
                         </a>
@@ -112,6 +113,31 @@ class PS_CSV_Importer
             </div>
         </div>
         <?php
+    }
+
+    public function handle_template_download()
+    {
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+
+        $file_path = PS_CORE_PATH . 'assets/sample-import.csv';
+        if (!file_exists($file_path)) {
+            wp_die('Template file not found.');
+        }
+
+        // Force download headers
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=sample-import.csv');
+        header('Pragma: no-cache');
+        header('Cache-Control: no-store, no-cache');
+        header('Content-Length: ' . filesize($file_path));
+
+        // UTF-8 BOM for Excel
+        echo "\xEF\xBB\xBF";
+        
+        readfile($file_path);
+        exit;
     }
 
     public function process_csv_export()
@@ -236,6 +262,7 @@ class PS_CSV_Importer
             }
             wp_reset_postdata();
 
+            // Fix BUG: Close and instantly die to prevent WP from rendering the admin page HTML into the CSV file
             fclose($output);
             exit;
         }
