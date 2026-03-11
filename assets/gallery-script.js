@@ -120,18 +120,50 @@ jQuery(document).ready(function ($) {
         // Clear search
         $('#ps-search').val('');
 
-        if (cat === 'all') {
-            $('.ps-card').show();
-        } else {
-            $('.ps-card').hide();
-            // Support multi-category: data-cat contains space-separated slugs
-            $('.ps-card').each(function () {
-                var cats = ($(this).attr('data-cat') || '').split(' ');
-                if (cats.indexOf(cat) !== -1) {
-                    $(this).show();
-                }
-            });
+        var $grid = $('.ps-gallery-grid');
+        var $wrap = $('#ps-load-more-wrap');
+        var perPage = $wrap.length ? parseInt($wrap.data('per-page'), 10) || 12 : 12;
+        var loadMoreText = psI18n('load_more', 'Load More');
+
+        // Show Loading State
+        $grid.html('<div class="ps-loader" style="grid-column: 1 / -1; margin: 40px auto; text-align: center;">' + psI18n('loading', 'Loading...') + '</div>');
+        if ($wrap.length) {
+            $wrap.hide(); // Hide load more while loading new category
         }
+
+        $.ajax({
+            url: ps_ajax.url,
+            type: 'POST',
+            timeout: 15000,
+            data: {
+                action: 'ps_load_more',
+                page: 1,
+                per_page: perPage,
+                category: cat,
+                nonce: ps_ajax.nonce
+            },
+            success: function(response) {
+                if (response.success && response.data.html) {
+                    $grid.html(response.data.html);
+                    if ($wrap.length) {
+                        var maxPages = parseInt(response.data.max_pages, 10) || 1;
+                        $wrap.data('page', 1);
+                        $wrap.data('max', maxPages);
+                        if (maxPages > 1) {
+                            $wrap.show();
+                            $wrap.find('.ps-load-more-btn').removeClass('loading').text(loadMoreText).show();
+                        } else {
+                            $wrap.hide();
+                        }
+                    }
+                } else {
+                    $grid.html('<p style="grid-column: 1 / -1; text-align: center;">' + psI18n('no_results', 'No items found.') + '</p>');
+                }
+            },
+            error: function() {
+                $grid.html('<p style="grid-column: 1 / -1; text-align: center;">' + psI18n('error', 'Error loading products.') + '</p>');
+            }
+        });
     });
 
     // -- Sticky Sidebar Scroll Reveal --
@@ -179,6 +211,7 @@ jQuery(document).ready(function ($) {
                 action: 'ps_load_more',
                 page: nextPage,
                 per_page: perPage,
+                category: $('.ps-filter-btn.active').data('cat') || 'all',
                 nonce: ps_ajax.nonce
             },
             success: function (response) {

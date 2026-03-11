@@ -628,6 +628,7 @@ class PS_Frontend_Gallery
 
         $page = isset($_POST['page']) ? absint($_POST['page']) : 1;
         $per_page = isset($_POST['per_page']) ? min(100, absint($_POST['per_page'])) : 12;
+        $category = isset($_POST['category']) ? sanitize_text_field($_POST['category']) : 'all';
 
         $args = [
             'post_type' => 'ps_item',
@@ -638,7 +639,18 @@ class PS_Frontend_Gallery
             'order' => 'DESC',
         ];
 
+        if ($category !== 'all' && !empty($category)) {
+            $args['tax_query'] = [
+                [
+                    'taxonomy' => 'ps_category',
+                    'field'    => 'slug',
+                    'terms'    => $category,
+                ],
+            ];
+        }
+
         $query = new WP_Query($args);
+        $max_pages = $query->max_num_pages;
         $watermark_text = get_option('ps_watermark_text', 'Pocket Showroom');
 
         ob_start();
@@ -651,7 +663,10 @@ class PS_Frontend_Gallery
         wp_reset_postdata();
         $html = ob_get_clean();
 
-        wp_send_json_success(['html' => $html]);
+        wp_send_json_success([
+            'html' => $html,
+            'max_pages' => $max_pages
+        ]);
     }
 
     /**
