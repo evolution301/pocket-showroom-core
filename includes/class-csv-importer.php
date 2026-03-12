@@ -25,6 +25,10 @@ class PS_CSV_Importer
         add_action('admin_init', [$this, 'process_csv_export']);
         add_action('admin_post_ps_download_template', [$this, 'handle_template_download']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
+        
+        // AJAX handlers for progress tracking
+        add_action('wp_ajax_ps_import_progress', [$this, 'handle_import_progress']);
+        add_action('wp_ajax_ps_cancel_import', [$this, 'handle_cancel_import']);
     }
 
     public function enqueue_assets($hook)
@@ -48,6 +52,9 @@ class PS_CSV_Importer
 
     public function render_import_page()
     {
+        // Check for completed import progress
+        $import_id = get_transient('ps_current_import_id');
+        $progress = $import_id ? get_transient('ps_import_progress_' . $import_id) : false;
         ?>
         <div class="ps-modern-ui wrap">
             <div class="ps-header">
@@ -58,6 +65,30 @@ class PS_CSV_Importer
                 </div>
             </div>
 
+            <!-- Progress Bar (shown during import) -->
+            <div id="ps-import-progress" style="display:none; margin-bottom: 20px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;">
+                    <span class="dashicons dashicons-update" style="animation: rotation 2s infinite linear;"></span>
+                    <?php _e('Import in Progress...', 'pocket-showroom'); ?>
+                </h3>
+                <div style="margin-bottom:10px; font-size:14px; color:#666;">
+                    <span id="ps-progress-text">Processing...</span>
+                </div>
+                <div style="background:#f0f0f1; border-radius:4px; height:24px; overflow:hidden;">
+                    <div id="ps-progress-bar" style="background:linear-gradient(90deg, #2271b1, #135e96); height:100%; width:0%; transition:width 0.3s ease;"></div>
+                </div>
+                <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-size:12px; color:#666;">
+                        <span id="ps-stats-created">0</span> created | 
+                        <span id="ps-stats-updated">0</span> updated | 
+                        <span id="ps-stats-errors">0</span> errors
+                    </div>
+                    <button type="button" id="ps-cancel-import" class="button" style="color:#d63638; border-color:#d63638;">
+                        <?php _e('Cancel Import', 'pocket-showroom'); ?>
+                    </button>
+                </div>
+            </div>
+
             <div class="ps-tools-container">
                 <!-- Import Card -->
                 <div class="ps-tool-card ps-import-card">
@@ -65,7 +96,7 @@ class PS_CSV_Importer
                     <h2><?php _e('Import Products', 'pocket-showroom'); ?></h2>
                     <p><?php _e('Bulk create or update products by uploading a CSV file.', 'pocket-showroom'); ?></p>
 
-                    <form method="post" enctype="multipart/form-data" class="ps-import-form">
+                    <form method="post" enctype="multipart/form-data" class="ps-import-form" id="ps-import-form">
                         <?php wp_nonce_field('ps_csv_import', 'ps_csv_nonce'); ?>
 
                         <div class="ps-drop-zone" onclick="document.getElementById('ps_csv_file').click();">
@@ -75,7 +106,7 @@ class PS_CSV_Importer
                                 onchange="this.previousElementSibling.textContent = this.files[0].name;" />
                         </div>
 
-                        <button type="submit" class="ps-btn ps-btn-primary ps-full-btn">
+                        <button type="submit" class="ps-btn ps-btn-primary ps-full-btn" id="ps-import-submit">
                             <?php _e('Run Importer', 'pocket-showroom'); ?>
                         </button>
                     </form>
@@ -112,6 +143,84 @@ class PS_CSV_Importer
                 </div>
             </div>
         </div>
+        
+        <style>
+            @keyframes rotation { from { transform: rotate(0deg); } to { transform: rotate(359deg); } }
+        </style>
+        
+        <script>
+        jQuery(document).ready(function($) {
+            var progressInterval = null;
+            var importId = '<?php echo esc_js($import_id ? $import_id : ''); ?>';
+            
+            // Show progress bar if import is in progress
+            <?php if ($progress): ?>
+            $('#ps-import-progress').show();
+            $('#ps-import-form').hide();
+            startProgressPolling();
+            <?php endif; ?>
+            
+            // Handle form submission
+            $('#ps-import-form').on('submit', function(e) {
+                var fileInput = document.getElementById('ps_csv_file');
+                if (fileInput.files.length > 0) {
+                    var fileSize = fileInput.files[0].size;
+                    if (fileSize > 10 * 1024 * 1024) {
+                        e.preventDefault();
+                        alert('File size exceeds 10MB limit. Please use a smaller file.');
+                        return false;
+                    }
+                }
+                $('#ps-import-progress').show();
+                $('#ps-import-form').hide();
+                startProgressPolling();
+            });
+            
+            // Cancel import
+            $('#ps-cancel-import').on('click', function() {
+                if (confirm('Are you sure you want to cancel this import?')) {
+                    $.post(ajaxurl, {
+                        action: 'ps_cancel_import',
+                        import_id: importId
+                    }, function(response) {
+                        if (response.success) {
+                            alert('Import cancelled.');
+                            location.reload();
+                        }
+                    });
+                }
+            });
+            
+            function startProgressPolling() {
+                progressInterval = setInterval(function() {
+                    $.get(ajaxurl, {
+                        action: 'ps_import_progress',
+                        import_id: importId
+                    }, function(response) {
+                        if (response.success && response.data) {
+                            var data = response.data;
+                            var percent = data.total_rows > 0 ? Math.round((data.processed_rows / data.total_rows) * 100) : 0;
+                            
+                            $('#ps-progress-bar').css('width', percent + '%');
+                            $('#ps-progress-text').text('Processed ' + data.processed_rows + ' of ' + data.total_rows + ' rows (' + percent + '%)');
+                            $('#ps-stats-created').text(data.created);
+                            $('#ps-stats-updated').text(data.updated);
+                            $('#ps-stats-errors').text(data.errors);
+                            
+                            if (data.status === 'completed') {
+                                clearInterval(progressInterval);
+                                setTimeout(function() { location.reload(); }, 2000);
+                            } else if (data.status === 'cancelled' || data.status === 'failed') {
+                                clearInterval(progressInterval);
+                                alert('Import ' + data.status + ': ' + (data.message || ''));
+                                location.reload();
+                            }
+                        }
+                    });
+                }, 500);
+            }
+        });
+        </script>
         <?php
     }
 
@@ -138,6 +247,53 @@ class PS_CSV_Importer
         
         readfile($file_path);
         exit;
+    }
+
+    /**
+     * AJAX handler for import progress
+     */
+    public function handle_import_progress()
+    {
+        // Security: Permission check
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Unauthorized'], 403);
+            return;
+        }
+        
+        $import_id = sanitize_text_field($_GET['import_id'] ?? '');
+        if (empty($import_id)) {
+            wp_send_json_error(['message' => 'Invalid import ID']);
+            return;
+        }
+
+        $progress = get_transient('ps_import_progress_' . $import_id);
+        if (!$progress) {
+            wp_send_json_error(['message' => 'Import not found or completed']);
+            return;
+        }
+
+        wp_send_json_success($progress);
+    }
+
+    /**
+     * AJAX handler for cancelling import
+     */
+    public function handle_cancel_import()
+    {
+        // Security: Permission check
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Unauthorized'], 403);
+            return;
+        }
+        
+        $import_id = sanitize_text_field($_POST['import_id'] ?? '');
+        if (empty($import_id)) {
+            wp_send_json_error(['message' => 'Invalid import ID']);
+            return;
+        }
+
+        set_transient('ps_import_cancel_' . $import_id, '1', HOUR_IN_SECONDS);
+        wp_send_json_success(['message' => 'Cancel requested']);
     }
 
     public function process_csv_export()
@@ -279,10 +435,39 @@ class PS_CSV_Importer
         }
 
         if (!empty($_FILES['ps_csv_file']['tmp_name'])) {
+            // ========== ENHANCEMENT 1: File Validation ==========
+            
+            // File size validation (max 10MB)
+            $max_file_size = 10 * 1024 * 1024; // 10MB
+            if ($_FILES['ps_csv_file']['size'] > $max_file_size) {
+                add_action('admin_notices', function() {
+                    echo '<div class="notice notice-error"><p>' . __('File size exceeds 10MB limit. Please split large files or remove images.', 'pocket-showroom') . '</p></div>';
+                });
+                return;
+            }
+
+            // MIME type validation
+            $allowed_mime_types = ['text/csv', 'application/vnd.ms-excel', 'text/plain'];
+            if (function_exists('finfo_open')) {
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mime_type = finfo_file($finfo, $_FILES['ps_csv_file']['tmp_name']);
+                finfo_close($finfo);
+                if (!in_array($mime_type, $allowed_mime_types)) {
+                    add_action('admin_notices', function() use ($mime_type) {
+                        echo '<div class="notice notice-error"><p>' . __('Invalid file type. Expected CSV, got: ', 'pocket-showroom') . esc_html($mime_type) . '</p></div>';
+                    });
+                    return;
+                }
+            }
+
             // Fix #20: Large batch imports need more time
             @set_time_limit(0);
             ini_set('auto_detect_line_endings', '1');
 
+            // ========== ENHANCEMENT 2: Progress Tracking Initialization ==========
+            $import_id = uniqid('ps_import_');
+            set_transient('ps_current_import_id', $import_id, HOUR_IN_SECONDS);
+            
             $csv_file = $_FILES['ps_csv_file']['tmp_name'];
             $file_content = file_get_contents($csv_file);
 
@@ -359,13 +544,52 @@ class PS_CSV_Importer
                 if ($map['sku'] === false) $map['sku'] = 1;
                 if ($map['title'] === false) $map['title'] = 0;
 
+                // Initialize progress tracking
+                set_transient('ps_import_progress_' . $import_id, [
+                    'total_rows' => count($raw_rows) - 1,
+                    'processed_rows' => 0,
+                    'created' => 0,
+                    'updated' => 0,
+                    'errors' => 0,
+                    'status' => 'started'
+                ], HOUR_IN_SECONDS);
+
                 $created = 0;
                 $updated = 0;
                 $skipped = 0;
                 $errors  = 0;
                 $error_messages = [];
+                $validation_failed = 0;
 
                 for ($i = 1; $i < count($raw_rows); $i++) {
+                    // ========== ENHANCEMENT 3: Progress Update & Cancel Check ==========
+                    if ($i % 50 === 0) {
+                        $progress = get_transient('ps_import_progress_' . $import_id);
+                        if ($progress) {
+                            $progress['processed_rows'] = $i;
+                            $progress['created'] = $created;
+                            $progress['updated'] = $updated;
+                            $progress['errors'] = $errors;
+                            set_transient('ps_import_progress_' . $import_id, $progress, HOUR_IN_SECONDS);
+                        }
+                        
+                        // Check if import was cancelled
+                        if (get_transient('ps_import_cancel_' . $import_id)) {
+                            add_action('admin_notices', function() use ($i, $created, $updated) {
+                                echo '<div class="notice notice-warning"><p><strong>' . __('Import Cancelled', 'pocket-showroom') . '</strong> ' . 
+                                    sprintf(__('Import was cancelled by user after processing %d rows. Created: %d, Updated: %d', 'pocket-showroom'), $i, $created, $updated) . '</p></div>';
+                            });
+                            delete_transient('ps_import_cancel_' . $import_id);
+                            // Mark import as cancelled
+                            $progress = get_transient('ps_import_progress_' . $import_id);
+                            if ($progress) {
+                                $progress['status'] = 'cancelled';
+                                set_transient('ps_import_progress_' . $import_id, $progress, HOUR_IN_SECONDS);
+                            }
+                            return;
+                        }
+                    }
+                    
                     $data = $raw_rows[$i];
                     if (count($data) < 1) {
                         $skipped++;
@@ -399,6 +623,17 @@ class PS_CSV_Importer
                     $images_raw  = ($map['images'] !== false && isset($data[$map['images']])) ? $data[$map['images']] : '';
                     $variants_raw = ($map['variants'] !== false && isset($data[$map['variants']])) ? $data[$map['variants']] : '';
                     $custom_fields_raw = ($map['custom'] !== false && isset($data[$map['custom']])) ? $data[$map['custom']] : '';
+
+                    // ========== ENHANCEMENT 4: Data Validation ==========
+                    $validation_errors = $this->validate_row_data($sku, $price, $moq, $i);
+                    if (!empty($validation_errors)) {
+                        foreach ($validation_errors as $v_error) {
+                            $error_messages[] = $v_error;
+                        }
+                        $validation_failed++;
+                        $errors++;
+                        continue; // Skip invalid rows
+                    }
 
                     // Check if product exists by SKU
                     $existing_id = $this->get_product_by_sku($sku);
@@ -500,11 +735,25 @@ class PS_CSV_Importer
                     }
                 }
 
-                add_action('admin_notices', function () use ($created, $updated, $skipped, $errors, $error_messages) {
+                // ========== ENHANCEMENT 5: Final Progress Update ==========
+                $progress = get_transient('ps_import_progress_' . $import_id);
+                if ($progress) {
+                    $progress['processed_rows'] = count($raw_rows) - 1;
+                    $progress['created'] = $created;
+                    $progress['updated'] = $updated;
+                    $progress['errors'] = $errors;
+                    $progress['status'] = 'completed';
+                    set_transient('ps_import_progress_' . $import_id, $progress, HOUR_IN_SECONDS);
+                }
+
+                add_action('admin_notices', function () use ($created, $updated, $skipped, $errors, $error_messages, $validation_failed) {
                     $class = ($created > 0 || $updated > 0) ? 'notice-success' : 'notice-warning';
                     echo '<div class="notice ' . $class . ' is-dismissible">';
                     echo '<p><strong>' . __('Import Summary:', 'pocket-showroom') . '</strong> ';
                     printf(__('Created: %d | Updated: %d | Skipped: %d | Errors: %d', 'pocket-showroom'), $created, $updated, $skipped, $errors);
+                    if ($validation_failed > 0) {
+                        echo '<br/>' . sprintf(__('Validation Failed: %d rows', 'pocket-showroom'), $validation_failed);
+                    }
                     if (!empty($error_messages)) {
                         echo '<br/>' . __('Details:', 'pocket-showroom') . ' ' . esc_html(implode(', ', array_slice($error_messages, 0, 5)));
                         if (count($error_messages) > 5) echo '...';
@@ -513,6 +762,37 @@ class PS_CSV_Importer
                 });
             }
         }
+    }
+
+    /**
+     * ENHANCEMENT 6: Row Data Validation
+     * Validates SKU format, price, and MOQ before import
+     */
+    private function validate_row_data($sku, $price, $moq, $row_number)
+    {
+        $errors = [];
+        
+        // Validate SKU - required and format check
+        if (empty($sku)) {
+            $errors[] = "Row $row_number: SKU is required";
+        } elseif (!preg_match('/^[a-zA-Z0-9_-]+$/', $sku)) {
+            $errors[] = "Row $row_number: Invalid SKU format '$sku' (only letters, numbers, hyphens, underscores allowed)";
+        }
+        
+        // Validate price - must be numeric if provided
+        if (!empty($price) && !is_numeric($price)) {
+            $errors[] = "Row $row_number: Invalid price format '$price' (must be a number)";
+        }
+        
+        // Validate MOQ - must be positive integer if provided
+        if (!empty($moq)) {
+            $moq_int = intval($moq);
+            if ($moq_int <= 0 || (string)$moq_int !== trim($moq)) {
+                $errors[] = "Row $row_number: Invalid MOQ '$moq' (must be a positive integer)";
+            }
+        }
+        
+        return $errors;
     }
 
     private function get_product_by_sku($sku)

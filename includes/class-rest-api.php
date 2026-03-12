@@ -29,22 +29,42 @@ class PS_REST_API
     {
         add_action('rest_api_init', [$this, 'register_routes']);
         add_action('init', [$this, 'add_cors_support']);
+        
+        // Generate API Key on first run
+        if (!get_option('ps_api_key')) {
+            update_option('ps_api_key', 'ps_' . wp_generate_password(32, false));
+        }
     }
 
     /**
      * Add CORS support for external clients (Mini App / WeChat Web)
      *
-     * ⚠️ NOTE: Allow-Origin is set to '*' intentionally because WeChat Mini Program
-     * requests do not send browser cookies and cannot use credentials-based CORS.
-     * For production, consider restricting this to your WeChat domain if possible.
+     * Security: Restricted to specific domains only
      */
     public function add_cors_support()
     {
         add_filter('rest_pre_serve_request', function ($value, $result, $request) {
-            header('Access-Control-Allow-Origin: *');
-            header('Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE');
-            header('Access-Control-Allow-Credentials: true');
-            header('Access-Control-Allow-Headers: Authorization, Content-Type, X-WP-Nonce');
+            // Get allowed origins from settings (comma-separated)
+            $allowed_origins_str = get_option('ps_api_allowed_origins', '');
+            $allowed_origins = array_map('trim', explode(',', $allowed_origins_str));
+            
+            $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+            
+            if (empty($allowed_origins_str)) {
+                // Default: allow same-origin requests only
+                $site_url = get_site_url();
+                if (strpos($origin, parse_url($site_url, PHP_URL_HOST)) !== false) {
+                    header('Access-Control-Allow-Origin: ' . $origin);
+                }
+            } else {
+                // Check against whitelist
+                if (in_array($origin, $allowed_origins, true)) {
+                    header('Access-Control-Allow-Origin: ' . $origin);
+                    header('Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE');
+                    header('Access-Control-Allow-Headers: Authorization, Content-Type, X-WP-Nonce, X-API-Key');
+                    header('Access-Control-Allow-Credentials: true');
+                }
+            }
             return $value;
         }, 10, 3);
     }
@@ -54,18 +74,18 @@ class PS_REST_API
      */
     public function register_routes()
     {
-        // --- Health Check ---
+        // --- Health Check (public) ---
         register_rest_route(self::API_NAMESPACE, '/ping', [
             'methods' => 'GET',
             'callback' => [$this, 'handle_ping'],
             'permission_callback' => '__return_true',
         ]);
 
-        // --- Product List ---
+        // --- Product List (requires API Key + rate limit) ---
         register_rest_route(self::API_NAMESPACE, '/products', [
             'methods' => 'GET',
             'callback' => [$this, 'get_products'],
-            'permission_callback' => '__return_true',
+            'permission_callback' => [$this, 'verify_api_key_with_rate_limit'],
             'args' => [
                 'page' => [
                     'default' => 1,
@@ -86,11 +106,11 @@ class PS_REST_API
             ],
         ]);
 
-        // --- Single Product ---
+        // --- Single Product (requires API Key + rate limit) ---
         register_rest_route(self::API_NAMESPACE, '/products/(?P<id>\d+)', [
             'methods' => 'GET',
             'callback' => [$this, 'get_product'],
-            'permission_callback' => '__return_true',
+            'permission_callback' => [$this, 'verify_api_key_with_rate_limit'],
             'args' => [
                 'id' => [
                     'validate_callback' => function ($param) {
@@ -100,18 +120,18 @@ class PS_REST_API
             ],
         ]);
 
-        // --- Categories ---
+        // --- Categories (requires API Key + rate limit) ---
         register_rest_route(self::API_NAMESPACE, '/categories', [
             'methods' => 'GET',
             'callback' => [$this, 'get_categories'],
-            'permission_callback' => '__return_true',
+            'permission_callback' => [$this, 'verify_api_key_with_rate_limit'],
         ]);
 
-        // --- Banner ---
+        // --- Banner (requires API Key + rate limit) ---
         register_rest_route(self::API_NAMESPACE, '/banner', [
             'methods' => 'GET',
             'callback' => [$this, 'get_banner'],
-            'permission_callback' => '__return_true',
+            'permission_callback' => [$this, 'verify_api_key_with_rate_limit'],
         ]);
     }
 
@@ -379,5 +399,62 @@ class PS_REST_API
             'categories' => $categories,
             'permalink' => get_permalink($post_id),
         ];
+    }
+
+    /**
+     * Security: Verify API Key
+     */
+    private function verify_api_key($request)
+    {
+        $api_key = $request->get_header('x-api-key');
+        if (empty($api_key)) {
+            return new WP_Error('rest_forbidden', 'API Key required', ['status' => 401]);
+        }
+        $valid_key = get_option('ps_api_key');
+        if ($api_key !== $valid_key) {
+            return new WP_Error('rest_forbidden', 'Invalid API Key', ['status' => 403]);
+        }
+        return true;
+    }
+
+    /**
+     * Security: Combined API Key + Rate Limit check
+     */
+    private function verify_api_key_with_rate_limit($request)
+    {
+        // First check rate limit
+        $rate_check = $this->check_rate_limit($request);
+        if (is_wp_error($rate_check)) {
+            return $rate_check;
+        }
+        
+        // Then check API key
+        return $this->verify_api_key($request);
+    }
+
+    /**
+     * Security: Rate limiting
+     */
+    private function check_rate_limit($request)
+    {
+        $user_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $rate_limit_key = 'ps_api_rate_' . md5($user_ip);
+        
+        $requests = get_transient($rate_limit_key);
+        if (false === $requests) {
+            $requests = 0;
+        }
+        
+        // Limit: 100 requests per minute
+        if ($requests >= 100) {
+            return new WP_Error(
+                'rate_limit_exceeded',
+                __('Rate limit exceeded. Please try again later.', 'pocket-showroom'),
+                ['status' => 429]
+            );
+        }
+        
+        set_transient($rate_limit_key, $requests + 1, 60);
+        return true;
     }
 }

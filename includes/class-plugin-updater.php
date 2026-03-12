@@ -195,10 +195,13 @@ if (!class_exists('PocketShowroom_Core_Updater')) {
                 "https://api.github.com/repos/{$this->github_user}/{$this->github_repo}/releases/latest",
                 [
                     'timeout' => 10,
-                    'sslverify' => false, // Bypass local SSL issues
+                    // Security: Enable SSL verification (can be disabled via filter for development)
+                    'sslverify' => apply_filters('ps_updater_sslverify', true),
                     'headers' => [
                         'Accept' => 'application/vnd.github.v3+json',
                         'User-Agent' => 'WordPress/' . get_bloginfo('version') . '; ' . home_url(),
+                        // Add GitHub API token if available (prevents rate limiting)
+                        'Authorization' => 'Bearer ' . (defined('PS_GITHUB_TOKEN') ? PS_GITHUB_TOKEN : ''),
                     ],
                 ]
             );
