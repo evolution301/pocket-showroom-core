@@ -284,40 +284,78 @@ class PS_CSV_Importer
             ini_set('auto_detect_line_endings', '1');
 
             $csv_file = $_FILES['ps_csv_file']['tmp_name'];
-            $handle = fopen($csv_file, 'r');
+            $file_content = file_get_contents($csv_file);
 
-            if ($handle !== FALSE) {
-                // Get Header and detect column mapping
-                $raw_header = fgetcsv($handle);
-                if (!$raw_header) {
-                    fclose($handle);
-                    return;
+            if ($file_content !== FALSE) {
+                // 1. Strip UTF-8 BOM if present
+                if (substr($file_content, 0, 3) === "\xEF\xBB\xBF") {
+                    $file_content = substr($file_content, 3);
                 }
 
+                // 2. Detect and fix encoding (GBK/ANSI fallback)
+                $encoding = mb_detect_encoding($file_content, ['UTF-8', 'GBK', 'BIG5', 'CP936'], true);
+                if ($encoding && $encoding !== 'UTF-8') {
+                    $file_content = mb_convert_encoding($file_content, 'UTF-8', $encoding);
+                }
+
+                // 3. Auto-detect delimiter
+                $delimiters = [',', ';', "\t"];
+                $delimiter = ',';
+                $max_count = 0;
+                $first_line = strtok($file_content, "\r\n");
+                foreach ($delimiters as $d) {
+                    $count = count(str_getcsv($first_line, $d));
+                    if ($count > $max_count) {
+                        $max_count = $count;
+                        $delimiter = $d;
+                    }
+                }
+
+                // 4. Parse rows
+                $lines = explode("\n", str_replace("\r", "", $file_content));
+                $raw_rows = array_map(function($line) use ($delimiter) {
+                    return str_getcsv($line, $delimiter);
+                }, array_filter($lines));
+
+                if (count($raw_rows) < 1) return;
+
+                $raw_header = $raw_rows[0];
                 $header = array_map('trim', array_map('strtolower', $raw_header));
                 
-                // Define keyword mapping for dynamic column detection
+                // Fuzzy find column index
+                $find_idx = function($keywords, $header) {
+                    foreach ($keywords as $kw) {
+                        $kw = strtolower($kw);
+                        // Exact match
+                        $idx = array_search($kw, $header);
+                        if ($idx !== false) return $idx;
+                        // Fuzzy match (substring)
+                        foreach ($header as $i => $h) {
+                            if (!empty($h) && (strpos($h, $kw) !== false || strpos($kw, $h) !== false)) {
+                                return $i;
+                            }
+                        }
+                    }
+                    return false;
+                };
+
+                // Define keywords
                 $map = [
-                    'title'       => array_search('product name', $header),
-                    'sku'         => array_search('model no.', $header),
-                    'price'       => array_search('exw price', $header),
-                    'category'    => array_search('category', $header),
-                    'desc'        => array_search('description', $header),
-                    'material'    => array_search('material', $header),
-                    'moq'         => array_search('moq', $header),
-                    'loading'     => array_search('loading', $header),
-                    'lead_time'   => array_search('delivery time', $header),
-                    'images'      => array_search('images', $header),
-                    'variants'    => array_search('size variants', $header),
-                    'custom'      => array_search('custom fields', $header),
+                    'title'       => $find_idx(['product name', 'title', '产品名称', '名称', '品名', '产品标题'], $header),
+                    'sku'         => $find_idx(['model no', 'sku', '型号', '款号', '编码'], $header),
+                    'price'       => $find_idx(['price', '价格', '单价', '出厂价'], $header),
+                    'category'    => $find_idx(['category', '分类', '系列'], $header),
+                    'desc'        => $find_idx(['description', 'desc', '描述', '介绍', '正文'], $header),
+                    'material'    => $find_idx(['material', '材质', '材料'], $header),
+                    'moq'         => $find_idx(['moq', '起订量', '最小起订'], $header),
+                    'loading'     => $find_idx(['loading', '装柜', '装载'], $header),
+                    'lead_time'   => $find_idx(['lead time', 'delivery', '货期', '交货'], $header),
+                    'images'      => $find_idx(['images', 'image', '图片', '图集', '照片'], $header),
+                    'variants'    => $find_idx(['variants', 'size', '规格', '尺寸', '变体'], $header),
+                    'custom'      => $find_idx(['custom fields', 'specs', '自定义', '参数', '规格字段'], $header),
                 ];
 
-                // If some critical columns aren't found by exact name, try partial match or use defaults
-                if ($map['sku'] === false) $map['sku'] = array_search('sku', $header);
-                if ($map['title'] === false) $map['title'] = array_search('title', $header);
-                if ($map['images'] === false) $map['images'] = array_search('image', $header);
-
-                // Fallback to original fixed indices if mapping completely failed
+                // Global fallback for critical columns if fuzzy failed
                 if ($map['sku'] === false) $map['sku'] = 1;
                 if ($map['title'] === false) $map['title'] = 0;
 
@@ -325,8 +363,15 @@ class PS_CSV_Importer
                 $updated = 0;
                 $skipped = 0;
                 $errors  = 0;
+                $error_messages = [];
 
-                while (($data = fgetcsv($handle)) !== FALSE) {
+                for ($i = 1; $i < count($raw_rows); $i++) {
+                    $data = $raw_rows[$i];
+                    if (count($data) < 1) {
+                        $skipped++;
+                        continue;
+                    }
+
                     // Trim all cells
                     $data = array_map(function($val) {
                         return $val === null ? '' : trim((string)$val);
@@ -449,15 +494,21 @@ class PS_CSV_Importer
                         }
                     } else {
                         $errors++;
+                        if (is_wp_error($post_id)) {
+                            $error_messages[] = $title . ': ' . $post_id->get_error_message();
+                        }
                     }
                 }
-                fclose($handle);
 
-                add_action('admin_notices', function () use ($created, $updated, $skipped, $errors) {
+                add_action('admin_notices', function () use ($created, $updated, $skipped, $errors, $error_messages) {
                     $class = ($created > 0 || $updated > 0) ? 'notice-success' : 'notice-warning';
                     echo '<div class="notice ' . $class . ' is-dismissible">';
                     echo '<p><strong>' . __('Import Summary:', 'pocket-showroom') . '</strong> ';
                     printf(__('Created: %d | Updated: %d | Skipped: %d | Errors: %d', 'pocket-showroom'), $created, $updated, $skipped, $errors);
+                    if (!empty($error_messages)) {
+                        echo '<br/>' . __('Details:', 'pocket-showroom') . ' ' . esc_html(implode(', ', array_slice($error_messages, 0, 5)));
+                        if (count($error_messages) > 5) echo '...';
+                    }
                     echo '</p></div>';
                 });
             }

@@ -186,6 +186,14 @@ Configure image watermark:
 
 ## Changelog
 
+### v3.3.7
+- **Fix (Industrial Grade CSV Parsing)**:
+    - Added **Auto-Delimiter Detection** (handles Comma, Semicolon, and Tab automatically).
+    - Added **UTF-8 BOM Stripping** (fixes the "first column not found" issue).
+    - Added **Fuzzy Column Mapping** (e.g., 'Model' now correctly matches 'Model No').
+    - Improved **Multi-language Header Support** (adds more Chinese keywords like '编码', '参数').
+    - Enhanced **Encoding Engine** (Robust support for GBK/ANSI from Chinese Excel).
+
 ### v3.3.6
 - **Fix (CSV Importer Overhaul)**: 
     - Added **Dynamic Column Mapping** (automatically detects Model No., Name, Price, etc., regardless of Excel column order).
@@ -331,7 +339,7 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 
 ### 方法一：从 GitHub 下载（推荐）
 
-1. 下载最新版本：[pocket-showroom-core-v3.3.6.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.3.6/pocket-showroom-core.zip)
+1. 下载最新版本：[pocket-showroom-core-v3.3.7.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.3.7/pocket-showroom-core.zip)
 2. 进入 **WordPress 后台** → **插件** → **安装插件** → **上传插件**
 3. 上传 ZIP 文件，点击 **现在安装**
 4. 激活插件
@@ -481,6 +489,14 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 - 位置
 
 ## 更新日志
+
+### v3.3.7 (2026-03-12)
+- **修复 (工业级 CSV 导入引擎)**:
+    - 新增 **自动分隔符识别**: 自动支持 逗号、分号、Tab 键分隔的表格（解决欧洲版/老版 Excel 导出导致的数据无法读取问题）。
+    - 新增 **BOM 自动清除**: 解决 Excel 导出时首列自带不可见二进制字符导致“型号”列匹配失败的问题。
+    - 新增 **模糊匹配识别**: 比如您的表头写的是“型号”，插件现在能智能联想到这就是“Model No”，不再死板。
+    - 新增 **多语言深度支持**: 增加了“编码”、“参数”、“货期”等更多常用中文表头关键词。
+    - **改进**: 采用了更健壮的逐行解析算法，确保在复杂的中文 Windows 环境下也能 100% 正确读取数据。
 
 ### v3.3.6 (2026-03-12)
 - **修复 (CSV 导入器大修)**:
