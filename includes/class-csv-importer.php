@@ -279,42 +279,87 @@ class PS_CSV_Importer
         }
 
         if (!empty($_FILES['ps_csv_file']['tmp_name'])) {
+            // Fix #20: Large batch imports need more time
+            @set_time_limit(0);
+            ini_set('auto_detect_line_endings', '1');
+
             $csv_file = $_FILES['ps_csv_file']['tmp_name'];
             $handle = fopen($csv_file, 'r');
 
             if ($handle !== FALSE) {
-                $header = fgetcsv($handle); // Skip header
+                // Get Header and detect column mapping
+                $raw_header = fgetcsv($handle);
+                if (!$raw_header) {
+                    fclose($handle);
+                    return;
+                }
 
-                // CSV 列顺序: Product Name, Model No., EXW Price, Category, Description, Material, MOQ, Loading, Delivery Time, Images, Size Variants, Custom Fields
-                // Images 列: 逗号分隔的 URL，第一张自动设为封面图
-                // Custom Fields 列: key:value | key:value 格式
+                $header = array_map('trim', array_map('strtolower', $raw_header));
+                
+                // Define keyword mapping for dynamic column detection
+                $map = [
+                    'title'       => array_search('product name', $header),
+                    'sku'         => array_search('model no.', $header),
+                    'price'       => array_search('exw price', $header),
+                    'category'    => array_search('category', $header),
+                    'desc'        => array_search('description', $header),
+                    'material'    => array_search('material', $header),
+                    'moq'         => array_search('moq', $header),
+                    'loading'     => array_search('loading', $header),
+                    'lead_time'   => array_search('delivery time', $header),
+                    'images'      => array_search('images', $header),
+                    'variants'    => array_search('size variants', $header),
+                    'custom'      => array_search('custom fields', $header),
+                ];
 
-                $imported = 0;
+                // If some critical columns aren't found by exact name, try partial match or use defaults
+                if ($map['sku'] === false) $map['sku'] = array_search('sku', $header);
+                if ($map['title'] === false) $map['title'] = array_search('title', $header);
+                if ($map['images'] === false) $map['images'] = array_search('image', $header);
+
+                // Fallback to original fixed indices if mapping completely failed
+                if ($map['sku'] === false) $map['sku'] = 1;
+                if ($map['title'] === false) $map['title'] = 0;
+
+                $created = 0;
+                $updated = 0;
+                $skipped = 0;
+                $errors  = 0;
 
                 while (($data = fgetcsv($handle)) !== FALSE) {
-                    // 至少要有 Title (5列最低限度)
-                    if (count($data) < 5) {
+                    // Trim all cells
+                    $data = array_map(function($val) {
+                        return $val === null ? '' : trim((string)$val);
+                    }, $data);
+
+                    // Skip effectively empty rows
+                    $title_val = ($map['title'] !== false && isset($data[$map['title']])) ? $data[$map['title']] : '';
+                    $sku_val   = ($map['sku'] !== false && isset($data[$map['sku']])) ? $data[$map['sku']] : '';
+
+                    if (empty($title_val) && empty($sku_val)) {
+                        $skipped++;
                         continue;
                     }
 
-                    $title = sanitize_text_field($data[0]);
-                    $sku = sanitize_text_field($data[1]);
-                    $price = sanitize_text_field($data[2]);
-                    $category = sanitize_text_field($data[3]);
-                    $description = wp_kses_post($data[4]);
-                    $material = isset($data[5]) ? sanitize_text_field($data[5]) : '';
-                    $moq = isset($data[6]) ? sanitize_text_field($data[6]) : '';
-                    $loading = isset($data[7]) ? sanitize_text_field($data[7]) : '';
-                    $lead_time = isset($data[8]) ? sanitize_text_field($data[8]) : '';
-                    $images_raw = isset($data[9]) ? $data[9] : '';
-                    $variants_raw = isset($data[10]) ? $data[10] : '';
-                    $custom_fields_raw = isset($data[11]) ? $data[11] : '';
+                    // Extract data based on map
+                    $title       = sanitize_text_field($title_val);
+                    $sku         = sanitize_text_field($sku_val);
+                    $price       = ($map['price'] !== false && isset($data[$map['price']])) ? sanitize_text_field($data[$map['price']]) : '';
+                    $category    = ($map['category'] !== false && isset($data[$map['category']])) ? sanitize_text_field($data[$map['category']]) : '';
+                    $description = ($map['desc'] !== false && isset($data[$map['desc']])) ? wp_kses_post($data[$map['desc']]) : '';
+                    $material    = ($map['material'] !== false && isset($data[$map['material']])) ? sanitize_text_field($data[$map['material']]) : '';
+                    $moq         = ($map['moq'] !== false && isset($data[$map['moq']])) ? sanitize_text_field($data[$map['moq']]) : '';
+                    $loading     = ($map['loading'] !== false && isset($data[$map['loading']])) ? sanitize_text_field($data[$map['loading']]) : '';
+                    $lead_time   = ($map['lead_time'] !== false && isset($data[$map['lead_time']])) ? sanitize_text_field($data[$map['lead_time']]) : '';
+                    $images_raw  = ($map['images'] !== false && isset($data[$map['images']])) ? $data[$map['images']] : '';
+                    $variants_raw = ($map['variants'] !== false && isset($data[$map['variants']])) ? $data[$map['variants']] : '';
+                    $custom_fields_raw = ($map['custom'] !== false && isset($data[$map['custom']])) ? $data[$map['custom']] : '';
 
                     // Check if product exists by SKU
                     $existing_id = $this->get_product_by_sku($sku);
 
                     $post_data = [
-                        'post_title' => $title,
+                        'post_title' => $title ? $title : $sku, // Use SKU if title is blank
                         'post_content' => $description,
                         'post_status' => 'publish',
                         'post_type' => 'ps_item',
@@ -327,17 +372,16 @@ class PS_CSV_Importer
                         $post_id = wp_insert_post($post_data);
                     }
 
-                    if ($post_id) {
+                    if ($post_id && !is_wp_error($post_id)) {
+                        // Metadata Updates
                         update_post_meta($post_id, '_ps_model', $sku);
                         update_post_meta($post_id, '_ps_list_price', $price);
-
-                        // Standard Fields — 更新模式下始终写入（允许清空旧值）
                         update_post_meta($post_id, '_ps_material', $material);
                         update_post_meta($post_id, '_ps_moq', $moq);
                         update_post_meta($post_id, '_ps_loading', $loading);
                         update_post_meta($post_id, '_ps_lead_time', $lead_time);
 
-                        // 这是一次重大改进：只有当表格里有数据时，才开启对应的展示开关；没数据则关闭。
+                        // Sync exhibition toggles
                         update_post_meta($post_id, '_ps_show_model', !empty($sku) ? '1' : '0');
                         update_post_meta($post_id, '_ps_show_list_price', !empty($price) ? '1' : '0');
                         update_post_meta($post_id, '_ps_show_material', !empty($material) ? '1' : '0');
@@ -352,56 +396,42 @@ class PS_CSV_Importer
                             $variants_array = [];
                             $variant_items = explode('|', $variants_raw);
                             foreach ($variant_items as $v_item) {
-                                $parts = explode(':', $v_item);
+                                $parts = explode(':', trim($v_item));
                                 if (count($parts) >= 2) {
-                                    $variants_array[] = [
-                                        'label' => trim($parts[0]),
-                                        'value' => trim($parts[1])
-                                    ];
+                                    $variants_array[] = ['label' => trim($parts[0]), 'value' => trim($parts[1])];
                                 }
                             }
-                            if (!empty($variants_array)) {
-                                update_post_meta($post_id, '_ps_size_variants', $variants_array);
-                            }
+                            update_post_meta($post_id, '_ps_size_variants', $variants_array);
                         }
 
-                        // Handle Category (Multi-support)
+                        // Category
                         if ($category) {
-                            // Split by comma, trim whitespace
                             $categories = array_map('trim', explode(',', $category));
-                            // true = append, false = replace. Use false to sync exactly with CSV.
                             wp_set_object_terms($post_id, $categories, 'ps_category', false);
                         }
 
-                        // Handle Images: 第一张设为封面，全部存入 Gallery
+                        // Images
                         if (!empty($images_raw)) {
                             $urls = array_map('trim', explode(',', $images_raw));
                             $gallery_ids = [];
                             $is_first = true;
-
                             foreach ($urls as $url) {
-                                if (empty($url))
-                                    continue;
-                                $url = esc_url_raw($url);
-                                // 第一张同时设为 Featured Image
-                                $att_id = $this->upload_image_from_url($url, $post_id, $is_first);
-                                if ($att_id) {
-                                    $gallery_ids[] = $att_id;
-                                }
+                                if (empty($url)) continue;
+                                $att_id = $this->upload_image_from_url(esc_url_raw($url), $post_id, $is_first);
+                                if ($att_id) $gallery_ids[] = $att_id;
                                 $is_first = false;
                             }
-
                             if (!empty($gallery_ids)) {
                                 update_post_meta($post_id, '_ps_gallery_images', implode(',', $gallery_ids));
                             }
                         }
 
-                        // Handle Custom Fields (Dynamic Specs): format "key1:value1 | key2:value2"
+                        // Custom Fields
                         if (!empty($custom_fields_raw)) {
                             $specs_array = [];
                             $spec_items = explode('|', $custom_fields_raw);
                             foreach ($spec_items as $s_item) {
-                                $parts = explode(':', trim($s_item), 2); // limit 2 to allow : in values
+                                $parts = explode(':', trim($s_item), 2);
                                 if (count($parts) >= 2) {
                                     $specs_array[] = [
                                         'key' => sanitize_text_field(trim($parts[0])),
@@ -409,18 +439,26 @@ class PS_CSV_Importer
                                     ];
                                 }
                             }
-                            if (!empty($specs_array)) {
-                                update_post_meta($post_id, '_ps_dynamic_specs', $specs_array);
-                            }
+                            update_post_meta($post_id, '_ps_dynamic_specs', $specs_array);
                         }
 
-                        $imported++;
+                        if ($existing_id) {
+                            $updated++;
+                        } else {
+                            $created++;
+                        }
+                    } else {
+                        $errors++;
                     }
                 }
                 fclose($handle);
 
-                add_action('admin_notices', function () use ($imported) {
-                    echo '<div class="notice notice-success is-dismissible"><p>' . sprintf(__('Imported %d items successfully.', 'pocket-showroom'), $imported) . '</p></div>';
+                add_action('admin_notices', function () use ($created, $updated, $skipped, $errors) {
+                    $class = ($created > 0 || $updated > 0) ? 'notice-success' : 'notice-warning';
+                    echo '<div class="notice ' . $class . ' is-dismissible">';
+                    echo '<p><strong>' . __('Import Summary:', 'pocket-showroom') . '</strong> ';
+                    printf(__('Created: %d | Updated: %d | Skipped: %d | Errors: %d', 'pocket-showroom'), $created, $updated, $skipped, $errors);
+                    echo '</p></div>';
                 });
             }
         }

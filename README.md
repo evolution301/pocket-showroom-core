@@ -35,7 +35,7 @@ A modern B2B product catalog WordPress plugin designed for furniture exporters, 
 
 ### Method 1: Download from GitHub (Recommended)
 
-1. Download the latest release: [pocket-showroom-core-v3.3.5.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.3.5/pocket-showroom-core.zip)
+1. Download the latest release: [pocket-showroom-core-v3.3.6.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.3.6/pocket-showroom-core.zip)
 2. Go to **WordPress Admin** → **Plugins** → **Add New** → **Upload Plugin**
 3. Upload the ZIP file and click **Install Now**
 4. Activate the plugin
@@ -186,6 +186,13 @@ Configure image watermark:
 
 ## Changelog
 
+### v3.3.6
+- **Fix (CSV Importer Overhaul)**: 
+    - Added **Dynamic Column Mapping** (automatically detects Model No., Name, Price, etc., regardless of Excel column order).
+    - Added **Ghost Row Protection** (ignores empty rows often produced by Excel exports).
+    - Added **Large Batch Support** (unlimited execution time for high-resolution image sideloading).
+    - Improved **Import Summary** reporting (Created vs Updated vs Errors).
+
 ### v3.3.5
 - **Fix**: Re-engineered GitHub Auto-Updater logic (`class-plugin-updater.php`). Added `sslverify => false` bypass for local dev environments prone to cURL errors. Hooked into `pre_set_site_transient_update_plugins` for deeper WordPress core integration. Added explicit WordPress Admin notices yielding direct visual feedback if the manual check fails (e.g., rate-limit), finds an update, or confirms highest version.
 
@@ -324,7 +331,7 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 
 ### 方法一：从 GitHub 下载（推荐）
 
-1. 下载最新版本：[pocket-showroom-core-v3.2.1.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.2.1/pocket-showroom-core.zip)
+1. 下载最新版本：[pocket-showroom-core-v3.3.6.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.3.6/pocket-showroom-core.zip)
 2. 进入 **WordPress 后台** → **插件** → **安装插件** → **上传插件**
 3. 上传 ZIP 文件，点击 **现在安装**
 4. 激活插件
@@ -474,6 +481,13 @@ This plugin is licensed under the GPLv2 or later. See [LICENSE](https://www.gnu.
 - 位置
 
 ## 更新日志
+
+### v3.3.6 (2026-03-12)
+- **修复 (CSV 导入器大修)**:
+    - 新增 **动态列匹配**: 自动识别“型号”、“名称”、“价格”等列。即便以后您在 Excel 里调换了列的顺序，插件也能智能匹配。
+    - 新增 **幽灵行过滤**: 自动过滤 Excel 导出时可能产生的空白行，解决“显示更新了175个产品但实际没变化”的计数错误。
+    - 新增 **大批量支持**: 为需要下载大量高清图的表格解除了 PHP 运行时间限制，防止导入中断。
+    - **改进**: 导入结果汇总现在会清晰显示“新建”、“更新”、“跳过”和“错误”的具体数量。
 
 ### v3.2.1 (2026-03-11)
 - **修复**: 强制去除了有些主题自带的侧边栏圆点符号。
