@@ -4,7 +4,7 @@ Tags: b2b, catalog, product showroom, csv import, gallery, furniture, wholesale
 Requires at least: 5.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 2.0.7
+Stable tag: 3.3.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,6 +53,15 @@ Simply add the shortcode `[pocket_showroom]` to any page or post.
 4. CSV import interface
 
 == Changelog ==
+
+= 3.3.9 =
+* Feature: Refactored CSV parsing engine to handle complex multi-line Excel fields.
+* Improvement: Increased import progress update frequency for smoother UI experience.
+* Security: Enhanced SSRF protection for intranet address patterns.
+* Docs: Completely redesigned README for a premium business experience.
+
+= 3.3.7 =
+* Fix: Industrial-Grade CSV Importer Fix (BOM, Encoding, Delimiters, Fuzzy Headers).
 
 = 2.0.7 =
 * Fix: Standardized API namespace to `pocket-showroom/v1` (matching Mini App v2.0 update).

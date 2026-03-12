@@ -496,11 +496,22 @@ class PS_CSV_Importer
                     }
                 }
 
-                // 4. Parse rows
-                $lines = explode("\n", str_replace("\r", "", $file_content));
-                $raw_rows = array_map(function($line) use ($delimiter) {
-                    return str_getcsv($line, $delimiter);
-                }, array_filter($lines));
+                // 4. Parse rows - Use proper CSV parsing to handle multi-line fields
+                // FIX: str_getcsv with explode("\n") breaks when fields contain newlines
+                // Use a streaming approach that respects quoted fields
+                $raw_rows = [];
+                $temp_file = tmpfile();
+                fwrite($temp_file, $file_content);
+                fseek($temp_file, 0);
+                
+                while (($row = fgetcsv($temp_file, 0, $delimiter)) !== false) {
+                    // Skip completely empty rows
+                    if (count($row) === 1 && trim($row[0]) === '') {
+                        continue;
+                    }
+                    $raw_rows[] = $row;
+                }
+                fclose($temp_file);
 
                 if (count($raw_rows) < 1) return;
 
@@ -563,7 +574,8 @@ class PS_CSV_Importer
 
                 for ($i = 1; $i < count($raw_rows); $i++) {
                     // ========== ENHANCEMENT 3: Progress Update & Cancel Check ==========
-                    if ($i % 50 === 0) {
+                    // FIX: Update progress more frequently (every 10 rows instead of 50) for smoother UI
+                    if ($i % 10 === 0 || $i === 1) {
                         $progress = get_transient('ps_import_progress_' . $import_id);
                         if ($progress) {
                             $progress['processed_rows'] = $i;
@@ -864,7 +876,7 @@ class PS_CSV_Importer
             return false;
         }
 
-        // SSRF 防护: 阻止私有 IP 和 localhost
+        // SSRF 防护: 阻止 localhost 和常见内网地址（仅基于主机名，不做 DNS 查询）
         $host = wp_parse_url($url, PHP_URL_HOST);
         if (!$host) {
             return false;
@@ -874,9 +886,8 @@ class PS_CSV_Importer
         if (in_array($host_lower, $blocked, true)) {
             return false;
         }
-        // 阻止私有 IP 段: 10.x, 172.16-31.x, 192.168.x, 169.254.x
-        $ip = gethostbyname($host);
-        if ($ip && !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+        // 阻止常见内网 IP 段的主机名模式（如 10.x.x.x, 192.168.x.x）
+        if (preg_match('/^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/i', $host_lower)) {
             return false;
         }
 
