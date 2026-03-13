@@ -386,12 +386,15 @@ class PS_CSV_Importer
      */
     public function handle_batch_process()
     {
+        // Fix for Mac line endings
+        @ini_set('auto_detect_line_endings', '1');
+        
         check_ajax_referer('ps_batch_nonce', 'nonce');
         if (!current_user_can('manage_options')) wp_send_json_error(['message' => 'Forbidden']);
 
         $filename = sanitize_text_field($_POST['file'] ?? '');
         $position = (int)($_POST['position'] ?? 0);
-        $batch_size = 30; // WooCommerce style batch size
+        $batch_size = 10; // Reduced from 30 to prevent timeouts during image processing
 
         $upload_dir = wp_upload_dir();
         $file_path = $upload_dir['basedir'] . '/ps-imports/' . $filename;
@@ -400,7 +403,7 @@ class PS_CSV_Importer
             wp_send_json_error(['message' => 'Import file lost. Please re-upload.']);
         }
 
-        $handle = fopen($file_path, 'r');
+        $handle = fopen($file_path, 'rb'); // Use binary mode for consistency
         if (!$handle) wp_send_json_error(['message' => 'Cannot open file.']);
 
         // First seek to start position
@@ -433,13 +436,14 @@ class PS_CSV_Importer
         while ($processed < $batch_size && ($data = fgetcsv($handle)) !== false) {
             $processed++;
 
-            // Skip empty rows
+            // Skip entirely empty rows
             if (empty(array_filter($data))) continue;
 
             $result = $this->process_single_row($data, $mapping);
             if ($result === 'created') $created++;
             elseif ($result === 'updated') $updated++;
-            else $errors++;
+            elseif ($result === 'error') $errors++;
+            // 'skipped' doesn't increment anything
         }
 
         $new_position = ftell($handle);
@@ -532,6 +536,8 @@ class PS_CSV_Importer
             'post_content' => $description,
             'post_status' => 'publish',
             'post_type' => 'ps_item',
+            'post_date' => current_time('mysql'), // Force to top of the list
+            'post_date_gmt' => current_time('mysql', 1)
         ];
 
         if ($existing_id) {
@@ -637,27 +643,45 @@ class PS_CSV_Importer
         require_once(ABSPATH . 'wp-admin/includes/file.php');
         require_once(ABSPATH . 'wp-admin/includes/media.php');
 
-        // Check if exists
+        // --- STEP 1: Fast URL Match ---
         $existing_id = attachment_url_to_postid($url);
         if ($existing_id) {
             if ($is_featured) set_post_thumbnail($post_id, $existing_id);
             return $existing_id;
         }
 
-        // Sideload
+        // --- STEP 2: Database Filename Match (Double check against duplicates) ---
+        global $wpdb;
+        $filename = basename(parse_url($url, PHP_URL_PATH));
+        if ($filename) {
+            $query = $wpdb->prepare(
+                "SELECT post_id FROM {$wpdb->postmeta} 
+                 WHERE meta_key = '_wp_attached_file' 
+                 AND meta_value LIKE %s 
+                 LIMIT 1",
+                '%' . $wpdb->esc_like($filename)
+            );
+            $meta_id = $wpdb->get_var($query);
+            if ($meta_id && get_post_type((int)$meta_id) === 'attachment') {
+                if ($is_featured) set_post_thumbnail($post_id, (int)$meta_id);
+                return (int)$meta_id;
+            }
+        }
+
+        // --- STEP 3: Actual Download ---
         $tmp = download_url($url);
         if (is_wp_error($tmp)) return false;
 
-        $file_array = ['name' => basename($url), 'tmp_name' => $tmp];
-        $id = media_handle_sideload($file_array, $post_id);
+        $file_array = ['name' => $filename ? $filename : basename($url), 'tmp_name' => $tmp];
+        $id = media_handle_sideload($file_array, (int)$post_id);
 
         if (is_wp_error($id)) {
             @unlink($file_array['tmp_name']);
             return false;
         }
 
-        if ($is_featured) set_post_thumbnail($post_id, $id);
-        return $id;
+        if ($is_featured) set_post_thumbnail($post_id, (int)$id);
+        return (int)$id;
     }
 
     /**
