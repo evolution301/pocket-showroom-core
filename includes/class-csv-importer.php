@@ -156,7 +156,7 @@ class PS_CSV_Importer
             // Show progress bar if import is in progress
             <?php if ($progress): ?>
             $('#ps-import-progress').show();
-            $('#ps-import-form').hide();
+            $('.ps-import-card').hide();
             startProgressPolling();
             <?php endif; ?>
             
@@ -172,8 +172,11 @@ class PS_CSV_Importer
                     }
                 }
                 $('#ps-import-progress').show();
-                $('#ps-import-form').hide();
-                startProgressPolling();
+                $('.ps-import-card').hide();
+                // Delay polling start to give server time to begin processing
+                setTimeout(function() {
+                    startProgressPolling();
+                }, 2000);
             });
             
             // Cancel import
@@ -185,7 +188,7 @@ class PS_CSV_Importer
                     }, function(response) {
                         if (response.success) {
                             alert('Import cancelled.');
-                            location.reload();
+                            window.location.href = window.location.href.split('?')[0] + '?post_type=ps_item&page=ps-import';
                         }
                     });
                 }
@@ -209,15 +212,21 @@ class PS_CSV_Importer
                             
                             if (data.status === 'completed') {
                                 clearInterval(progressInterval);
-                                setTimeout(function() { location.reload(); }, 2000);
+                                // Show completion message instead of reloading (prevents POST re-submission)
+                                $('#ps-import-progress h3').html('<span class="dashicons dashicons-yes-alt" style="color:#00a32a;"></span> Import Complete!');
+                                $('#ps-cancel-import').hide();
+                                // Navigate via GET to prevent POST re-submission
+                                setTimeout(function() {
+                                    window.location.href = window.location.href.split('?')[0] + '?post_type=ps_item&page=ps-import&ps_import_done=1';
+                                }, 3000);
                             } else if (data.status === 'cancelled' || data.status === 'failed') {
                                 clearInterval(progressInterval);
                                 alert('Import ' + data.status + ': ' + (data.message || ''));
-                                location.reload();
+                                window.location.href = window.location.href.split('?')[0] + '?post_type=ps_item&page=ps-import';
                             }
                         }
                     });
-                }, 500);
+                }, 1500);
             }
         });
         </script>
@@ -434,6 +443,17 @@ class PS_CSV_Importer
             return;
         }
 
+        // ====== CRITICAL FIX: Prevent duplicate submission ======
+        // If we already processed this nonce, skip (prevents infinite loop on page reload)
+        $nonce_val = sanitize_text_field($_POST['ps_csv_nonce']);
+        $nonce_key = 'ps_csv_processed_' . md5($nonce_val);
+        if (get_transient($nonce_key)) {
+            // This nonce was already processed, skip to prevent re-import
+            return;
+        }
+        // Mark this nonce as processed immediately
+        set_transient($nonce_key, '1', HOUR_IN_SECONDS);
+
         if (!empty($_FILES['ps_csv_file']['tmp_name'])) {
             // ========== ENHANCEMENT 1: File Validation ==========
             
@@ -525,16 +545,22 @@ class PS_CSV_Importer
                 $raw_header = $raw_rows[0];
                 $header = array_map('trim', array_map('strtolower', $raw_header));
                 
-                // Fuzzy find column index
+                // Column matching - exact match only, then keyword-contains (ONE direction only)
+                // CRITICAL FIX: removed dangerous reverse-substring match strpos($kw, $h)
+                // which caused false matches (e.g. header 'e' matches keyword 'price')
                 $find_idx = function($keywords, $header) {
+                    // Pass 1: Exact match
                     foreach ($keywords as $kw) {
                         $kw = strtolower($kw);
-                        // Exact match
                         $idx = array_search($kw, $header);
                         if ($idx !== false) return $idx;
-                        // Fuzzy match (substring)
+                    }
+                    // Pass 2: Header CONTAINS keyword (safe direction only)
+                    foreach ($keywords as $kw) {
+                        $kw = strtolower($kw);
+                        if (mb_strlen($kw) < 2) continue; // Skip single-char keywords
                         foreach ($header as $i => $h) {
-                            if (!empty($h) && (strpos($h, $kw) !== false || strpos($kw, $h) !== false)) {
+                            if (!empty($h) && mb_strlen($h) >= 2 && strpos($h, $kw) !== false) {
                                 return $i;
                             }
                         }
