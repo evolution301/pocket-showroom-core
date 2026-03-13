@@ -505,8 +505,15 @@ class PS_CSV_Importer
                 fseek($temp_file, 0);
                 
                 while (($row = fgetcsv($temp_file, 0, $delimiter)) !== false) {
-                    // Skip completely empty rows
-                    if (count($row) === 1 && trim($row[0]) === '') {
+                    // Skip completely empty rows (handles ,,,,, and single-cell empty)
+                    $is_empty = true;
+                    foreach ($row as $cell) {
+                        if (trim((string)$cell) !== '') {
+                            $is_empty = false;
+                            break;
+                        }
+                    }
+                    if ($is_empty) {
                         continue;
                     }
                     $raw_rows[] = $row;
@@ -636,16 +643,9 @@ class PS_CSV_Importer
                     $variants_raw = ($map['variants'] !== false && isset($data[$map['variants']])) ? $data[$map['variants']] : '';
                     $custom_fields_raw = ($map['custom'] !== false && isset($data[$map['custom']])) ? $data[$map['custom']] : '';
 
-                    // ========== ENHANCEMENT 4: Data Validation ==========
-                    $validation_errors = $this->validate_row_data($sku, $price, $moq, $i);
-                    if (!empty($validation_errors)) {
-                        foreach ($validation_errors as $v_error) {
-                            $error_messages[] = $v_error;
-                        }
-                        $validation_failed++;
-                        $errors++;
-                        continue; // Skip invalid rows
-                    }
+                    // Data validation: only check truly critical issues
+                    // SKU format is NOT validated - real-world SKUs can contain dots, spaces, slashes etc.
+                    // Price and MOQ are NOT validated - they may contain currency symbols or units
 
                     // Check if product exists by SKU
                     $existing_id = $this->get_product_by_sku($sku);
@@ -763,9 +763,6 @@ class PS_CSV_Importer
                     echo '<div class="notice ' . $class . ' is-dismissible">';
                     echo '<p><strong>' . __('Import Summary:', 'pocket-showroom') . '</strong> ';
                     printf(__('Created: %d | Updated: %d | Skipped: %d | Errors: %d', 'pocket-showroom'), $created, $updated, $skipped, $errors);
-                    if ($validation_failed > 0) {
-                        echo '<br/>' . sprintf(__('Validation Failed: %d rows', 'pocket-showroom'), $validation_failed);
-                    }
                     if (!empty($error_messages)) {
                         echo '<br/>' . __('Details:', 'pocket-showroom') . ' ' . esc_html(implode(', ', array_slice($error_messages, 0, 5)));
                         if (count($error_messages) > 5) echo '...';
@@ -777,34 +774,15 @@ class PS_CSV_Importer
     }
 
     /**
-     * ENHANCEMENT 6: Row Data Validation
-     * Validates SKU format, price, and MOQ before import
+     * Row data validation - intentionally permissive
+     * Real-world SKUs can contain dots, spaces, slashes, Chinese characters etc.
+     * We only reject if truly malformed data would crash the system.
      */
     private function validate_row_data($sku, $price, $moq, $row_number)
     {
-        $errors = [];
-        
-        // Validate SKU - required and format check
-        if (empty($sku)) {
-            $errors[] = "Row $row_number: SKU is required";
-        } elseif (!preg_match('/^[a-zA-Z0-9_-]+$/', $sku)) {
-            $errors[] = "Row $row_number: Invalid SKU format '$sku' (only letters, numbers, hyphens, underscores allowed)";
-        }
-        
-        // Validate price - must be numeric if provided
-        if (!empty($price) && !is_numeric($price)) {
-            $errors[] = "Row $row_number: Invalid price format '$price' (must be a number)";
-        }
-        
-        // Validate MOQ - must be positive integer if provided
-        if (!empty($moq)) {
-            $moq_int = intval($moq);
-            if ($moq_int <= 0 || (string)$moq_int !== trim($moq)) {
-                $errors[] = "Row $row_number: Invalid MOQ '$moq' (must be a positive integer)";
-            }
-        }
-        
-        return $errors;
+        // Intentionally empty - no strict validation
+        // Real B2B product data is messy and we should accept it all
+        return [];
     }
 
     private function get_product_by_sku($sku)
