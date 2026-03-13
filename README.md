@@ -23,13 +23,19 @@
 ## 🛠️ 安装指引 (Installation)
 
 ### 推荐方式：直接下载最新包
-1. 从 GitHub 下载 ZIP：[pocket-showroom-core-v3.3.9.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.3.9/pocket-showroom-core.zip)
+1. 从 GitHub 下载 ZIP：[pocket-showroom-core-v3.4.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.4.0/pocket-showroom-core.zip)
 2. 在 WordPress 后台 -> **插件** -> **安装插件** -> **上传插件**
 3. 激活并开启您的数字化展厅之旅。
 
 ---
 
 ## 📈 更新日志 (Changelog)
+
+### v3.4.0 (2026-03-13) - 工业级重构
+- **🚀 AJAX 分批导入**: 采用 WooCommerce 同款 2 阶段架构，彻底解决大文件上传超时、内存溢出及重复提交导致的死循环问题。
+- **📊 实时监控看板**: 新增导入进度条及实时统计（新建/更新/失败计数），让数据处理过程透明可见。
+- **🎯 零误报计数**: 通过字节游标（fseek）精准处理 CSV 行，完美解决"幽灵行"导致的产品计数偏差。
+- **🧹 自动清理**: 导入完成后自动清理服务器临时文件，保持系统清爽高效。
 
 ### v3.3.9 (2026-03-13) - 威力加强版
 - **🚀 性能巅峰**: 重构了 CSV 解析核心，现在能完美处理包含换行符的复杂 Excel 数据，不再因格式偏差导致导入失败。
