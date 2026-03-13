@@ -279,52 +279,51 @@ class PS_CSV_Importer
                         position: position,
                         nonce: '<?php echo wp_create_nonce("ps_batch_nonce"); ?>'
                     },
+                    timeout: 60000, // 60 seconds timeout
                     success: function(response) {
                         if (response.success) {
                             var data = response.data;
                             position = data.position;
                             
-                            // Update Stats
-                            stats.created += data.created;
-                            stats.updated += data.updated;
-                            stats.errors += data.errors;
-                            
-                            $('#ps-stats-created').text(stats.created);
-                            $('#ps-stats-updated').text(stats.updated);
-                            $('#ps-stats-errors').text(stats.errors);
+                            // Use TOTAL stats from server, no more front-end addition
+                            $('#ps-stats-created').text(data.total_stats.created);
+                            $('#ps-stats-updated').text(data.total_stats.updated);
+                            $('#ps-stats-errors').text(data.total_stats.errors);
                             
                             // Update Progress
                             $('#ps-progress-bar').css('width', data.percentage + '%');
                             $('#ps-progress-percent').text(data.percentage + '%');
-                            $('#ps-progress-text').text('Processing next batch...');
+                            $('#ps-progress-text').text('Processing sequence ' + position + '...');
                             $('#ps-status-title').text('Importing Products...');
 
                             if (data.position === 'done') {
-                                finishImport();
+                                finishImport(data.total_stats);
                             } else {
                                 processBatch();
                             }
                         } else {
-                            alert('Critical error: ' + (response.data ? response.data.message : 'Unknown'));
+                            // If it's a known error (like lost file), don't retry
+                            alert('Import stopped: ' + (response.data ? response.data.message : 'Unknown error'));
                             window.location.href = '<?php echo admin_url("edit.php?post_type=ps_item&page=ps-import"); ?>';
                         }
                     },
-                    error: function() {
-                        alert('Network error. Retrying in 3 seconds...');
-                        setTimeout(processBatch, 3000);
+                    error: function(xhr, status, error) {
+                        // Silent retry on network errors, server-side stats will prevent double counting
+                        console.log('Batch error, retrying...', status, error);
+                        setTimeout(processBatch, 2000);
                     }
                 });
             }
 
-            function finishImport() {
+            function finishImport(finalStats) {
                 $('#ps-progress-icon').css('animation', 'none').removeClass('dashicons-update').addClass('dashicons-yes-alt').css('color', '#00a32a');
                 $('#ps-status-title').text('Import Complete!');
-                $('#ps-progress-text').text('All items processed successfully.');
+                $('#ps-progress-text').text('All items processed and saved.');
                 $('#ps-cancel-import').hide();
                 
                 setTimeout(function() {
                     window.location.href = '<?php echo admin_url("edit.php?post_type=ps_item&page=ps-import&step=done"); ?>' + 
-                        '&created=' + stats.created + '&updated=' + stats.updated + '&errors=' + stats.errors;
+                        '&created=' + finalStats.created + '&updated=' + finalStats.updated + '&errors=' + finalStats.errors;
                 }, 2000);
             }
 
@@ -386,85 +385,99 @@ class PS_CSV_Importer
      */
     public function handle_batch_process()
     {
-        // Fix for Mac line endings
         @ini_set('auto_detect_line_endings', '1');
-        
         check_ajax_referer('ps_batch_nonce', 'nonce');
-        if (!current_user_can('manage_options')) wp_send_json_error(['message' => 'Forbidden']);
-
+        
         $filename = sanitize_text_field($_POST['file'] ?? '');
         $position = (int)($_POST['position'] ?? 0);
-        $batch_size = 10; // Reduced from 30 to prevent timeouts during image processing
+        $batch_size = 10;
 
         $upload_dir = wp_upload_dir();
         $file_path = $upload_dir['basedir'] . '/ps-imports/' . $filename;
+        $log_path = $upload_dir['basedir'] . '/ps-imports/import.log';
 
-        if (!file_exists($file_path)) {
-            wp_send_json_error(['message' => 'Import file lost. Please re-upload.']);
+        if (!file_exists($file_path)) wp_send_json_error(['message' => 'File lost']);
+
+        // --- STATEFUL STATS ---
+        $stats_key = 'ps_import_' . md5($filename);
+        $total_stats = get_transient($stats_key);
+        if (!$total_stats || $position === 0) {
+            $total_stats = ['created' => 0, 'updated' => 0, 'errors' => 0, 'processed_positions' => []];
         }
 
-        $handle = fopen($file_path, 'rb'); // Use binary mode for consistency
-        if (!$handle) wp_send_json_error(['message' => 'Cannot open file.']);
+        // Prevent double processing if AJAX retries
+        if (in_array($position, $total_stats['processed_positions'])) {
+            $file_size = filesize($file_path);
+            wp_send_json_success([
+                'position' => $position + 1, // Advance slightly to avoid deadlock if somehow stuck
+                'percentage' => floor(($position / $file_size) * 100),
+                'total_stats' => $total_stats
+            ]);
+            return;
+        }
 
-        // First seek to start position
+        $handle = fopen($file_path, 'rb');
+        
+        // --- DELIMITER AUTO-DETECTION ---
+        $first_line = fgets($handle);
+        $delimiter = (strpos($first_line, ';') !== false && strpos($first_line, ',') === false) ? ';' : ',';
+        rewind($handle);
+
         fseek($handle, $position);
 
-        // Get actual file size for percentage
-        $file_size = filesize($file_path);
-
-        // Logic for first run: find mapping
-        $mapping = [];
+        // --- MAPPING ---
         if ($position === 0) {
-            $headers = fgetcsv($handle);
+            $headers = fgetcsv($handle, 0, $delimiter);
             if (!$headers) wp_send_json_error(['message' => 'Empty CSV header.']);
             $mapping = $this->auto_map_headers($headers);
             $position = ftell($handle);
         } else {
-            // We need to know headers every time because we are stateless
-            // Simple hack: read headers again (or we could pass them from JS)
             rewind($handle);
-            $headers = fgetcsv($handle);
+            $headers = fgetcsv($handle, 0, $delimiter);
             $mapping = $this->auto_map_headers($headers);
             fseek($handle, $position);
         }
 
+        $b_created = 0; $b_updated = 0; $b_errors = 0;
         $processed = 0;
-        $created = 0;
-        $updated = 0;
-        $errors = 0;
 
-        while ($processed < $batch_size && ($data = fgetcsv($handle)) !== false) {
+        while ($processed < $batch_size && ($data = fgetcsv($handle, 0, $delimiter)) !== false) {
             $processed++;
-
-            // Skip entirely empty rows
             if (empty(array_filter($data))) continue;
 
             $result = $this->process_single_row($data, $mapping);
-            if ($result === 'created') $created++;
-            elseif ($result === 'updated') $updated++;
-            elseif ($result === 'error') $errors++;
-            // 'skipped' doesn't increment anything
+            if ($result === 'created') $b_created++;
+            elseif ($result === 'updated') $b_updated++;
+            elseif ($result === 'error') $b_errors++;
+            
+            // Log for debugging
+            $sku = (isset($mapping['sku']) && isset($data[$mapping['sku']])) ? $data[$mapping['sku']] : 'N/A';
+            error_log(sprintf("[%s] Row %d: %s (SKU: %s)\n", date('H:i:s'), $position + $processed, $result, $sku), 3, $log_path);
         }
 
         $new_position = ftell($handle);
-        $is_done = feof($handle) || ($new_position >= $file_size);
-        
-        fclose($handle);
+        $is_done = feof($handle) || ($new_position >= filesize($file_path));
+
+        // Update Global Stats
+        $total_stats['created'] += $b_created;
+        $total_stats['updated'] += $b_updated;
+        $total_stats['errors']  += $b_errors;
+        $total_stats['processed_positions'][] = $position;
+        set_transient($stats_key, $total_stats, HOUR_IN_SECONDS);
 
         if ($is_done) {
-            @unlink($file_path); // Cleanup
+            delete_transient($stats_key);
+            @unlink($file_path);
             $new_position = 'done';
             $percentage = 100;
         } else {
-            $percentage = floor(($new_position / $file_size) * 100);
+            $percentage = floor(($new_position / filesize($file_path)) * 100);
         }
 
         wp_send_json_success([
             'position' => $new_position,
             'percentage' => $percentage,
-            'created' => $created,
-            'updated' => $updated,
-            'errors' => $errors
+            'total_stats' => $total_stats
         ]);
     }
 
@@ -477,18 +490,18 @@ class PS_CSV_Importer
         ];
 
         $keywords = [
-            'title' => ['name', 'product name', 'title', '标题', '产品名称'],
-            'sku' => ['sku', 'model', 'model no', '型号', '货号'],
-            'price' => ['price', 'list price', 'exw', '价格', '单价'],
-            'category' => ['category', 'taxonomy', '分类', '类目'],
-            'desc' => ['description', 'content', 'details', '详情', '描述'],
-            'material' => ['material', '质地', '材质'],
-            'moq' => ['moq', 'minimum', '起订量'],
-            'loading' => ['loading', 'pack', '装箱'],
-            'lead_time' => ['lead', 'delivery', 'time', '交期', '货期'],
-            'images' => ['image', 'photo', 'url', '图片'],
-            'variants' => ['variant', 'size', 'color', '属性', '规格', '尺寸'],
-            'custom' => ['custom', 'extra', 'spec', '参数', '自定义']
+            'title' => ['name', 'product name', 'title', '标题', '产品名称', '款名', '产品名'],
+            'sku' => ['sku', 'model', 'model no', 'item #', 'item no', 'code', '型号', '货号', '项目号', '编号'],
+            'price' => ['price', 'list price', 'exw', 'fob', '价格', '单价', '美金价'],
+            'category' => ['category', 'taxonomy', 'collection', '系列', '分类', '类目'],
+            'desc' => ['description', 'content', 'details', 'info', '详情', '描述', '介绍'],
+            'material' => ['material', 'fabric', 'wood', '质地', '材质', '面料'],
+            'moq' => ['moq', 'minimum', 'order qty', '起订量', '最小起订'],
+            'loading' => ['loading', 'pack', 'container', '40hq', '装箱', '装柜'],
+            'lead_time' => ['lead', 'delivery', 'time', 'days', '交期', '货期', '生产周期'],
+            'images' => ['image', 'photo', 'url', 'pic', 'link', '图片', '照片', '图链'],
+            'variants' => ['variant', 'size', 'color', 'dimension', '属性', '规格', '尺寸', '颜色'],
+            'custom' => ['custom', 'extra', 'spec', 'parameter', '参数', '自定义', '备注']
         ];
 
         foreach ($headers as $idx => $header) {
