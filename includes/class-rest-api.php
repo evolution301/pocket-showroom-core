@@ -422,14 +422,15 @@ class PS_REST_API
      */
     private function verify_api_key_with_rate_limit($request)
     {
-        // First check rate limit
+        // First check rate limit to prevent DDoS/Scraping
         $rate_check = $this->check_rate_limit($request);
         if (is_wp_error($rate_check)) {
             return $rate_check;
         }
         
-        // Then check API key
-        return $this->verify_api_key($request);
+        // Remove API key check to allow Miniapp public access
+        // return $this->verify_api_key($request);
+        return true;
     }
 
     /**

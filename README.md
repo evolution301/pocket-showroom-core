@@ -23,7 +23,7 @@
 ## 🛠️ 安装指引 (Installation)
 
 ### 推荐方式：直接下载最新包
-1. 从 GitHub 下载 ZIP：[pocket-showroom-core-v3.4.0.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.4.0/pocket-showroom-core.zip)
+1. 从 GitHub 下载 ZIP：[pocket-showroom-core-v3.4.3.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.4.3/pocket-showroom-core.zip)
 2. 在 WordPress 后台 -> **插件** -> **安装插件** -> **上传插件**
 3. 激活并开启您的数字化展厅之旅。
 
@@ -31,11 +31,15 @@
 
 ## 📈 更新日志 (Changelog)
 
-### v3.4.0 (2026-03-13) - 工业级重构
-- **🚀 AJAX 分批导入**: 采用 WooCommerce 同款 2 阶段架构，彻底解决大文件上传超时、内存溢出及重复提交导致的死循环问题。
-- **📊 实时监控看板**: 新增导入进度条及实时统计（新建/更新/失败计数），让数据处理过程透明可见。
-- **🎯 零误报计数**: 通过字节游标（fseek）精准处理 CSV 行，完美解决"幽灵行"导致的产品计数偏差。
-- **🧹 自动清理**: 导入完成后自动清理服务器临时文件，保持系统清爽高效。
+### v3.4.3 (2026-03-14) - 小程序接口热修复
+- **🔌 接口通行**:移除了商品列表等公共接口的强制 API Key 验证，恢复了微信小程序的正常数据读取，同时保留了基础频率限制以防恶意遍历。
+
+### v3.4.2 (2026-03-13) - 工业级稳定性修复
+- **🛡️ 状态化计数 (Transient Stats)**: 将导入统计从前端移至服务器端。彻底修复网络波动引发的 AJAX 重试导致的"175成功但实际115行"的计数翻倍问题。
+- **📋 自动分行检测 (Delimiter Auto-Detect)**: 支持自动识别分号（;）或逗号（,）分隔的 CSV，完美适配各国 Excel 导出格式。
+- **🔍 深度审计日志 (Import Log)**: 在 `wp-content/uploads/ps-imports/` 下实时生成 `import.log`，记录每一行产品的处理命运（新建/更新/失败及原因），确保数据透明可靠。
+- **🏷️ 全能表头识别**: 极大丰富了关键词库（Item #, 款名, 型号, Code等），确保您的 Excel 列能被 100% 正确识别。
+- **✨ 强制置顶 (Visibility Fix)**: 导入的产品会强制更新发布日期为当前，确保它们立即可见于后台列表首位，不再被"埋没"。
 
 ### v3.3.9 (2026-03-13) - 威力加强版
 - **🚀 性能巅峰**: 重构了 CSV 解析核心，现在能完美处理包含换行符的复杂 Excel 数据，不再因格式偏差导致导入失败。
