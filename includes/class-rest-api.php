@@ -161,54 +161,63 @@ class PS_REST_API
      */
     public function get_products($request)
     {
-        $page = $request->get_param('page');
-        $per_page = $request->get_param('per_page');
-        $category = $request->get_param('category');
-        $search = $request->get_param('search');
+        try {
+            $page     = intval($request->get_param('page') ?: 1);
+            $per_page = intval($request->get_param('per_page') ?: 12);
+            $category = sanitize_text_field($request->get_param('category') ?: '');
+            $search   = sanitize_text_field($request->get_param('search') ?: '');
 
-        $args = [
-            'post_type' => 'ps_item',
-            'post_status' => 'publish',
-            'posts_per_page' => $per_page,
-            'paged' => $page,
-            'orderby' => 'date',
-            'order' => 'DESC',
-        ];
-
-        // Category filter
-        if (!empty($category)) {
-            $args['tax_query'] = [
-                [
-                    'taxonomy' => 'ps_category',
-                    'field' => 'slug',
-                    'terms' => $category,
-                ],
+            $args = [
+                'post_type'      => 'ps_item',
+                'post_status'    => 'publish',
+                'posts_per_page' => $per_page,
+                'paged'          => $page,
+                'orderby'        => 'date',
+                'order'          => 'DESC',
+                'no_found_rows'  => false,
             ];
-        }
 
-        // Search filter
-        if (!empty($search)) {
-            $args['s'] = $search;
-        }
-
-        $query = new WP_Query($args);
-        $items = [];
-
-        if ($query->have_posts()) {
-            while ($query->have_posts()) {
-                $query->the_post();
-                $items[] = $this->format_product_summary(get_the_ID());
+            // 分类过滤
+            if (!empty($category)) {
+                $args['tax_query'] = [[
+                    'taxonomy' => 'ps_category',
+                    'field'    => 'slug',
+                    'terms'    => $category,
+                ]];
             }
-            wp_reset_postdata();
-        }
 
-        return new WP_REST_Response([
-            'items' => $items,
-            'total' => (int) $query->found_posts,
-            'total_pages' => (int) $query->max_num_pages,
-            'page' => $page,
-            'per_page' => $per_page,
-        ], 200);
+            // 关键词搜索
+            if (!empty($search)) {
+                $args['s'] = $search;
+            }
+
+            $query = new WP_Query($args);
+            $items = [];
+
+            if ($query->have_posts()) {
+                while ($query->have_posts()) {
+                    $query->the_post();
+                    try {
+                        $items[] = $this->format_product_summary(get_the_ID());
+                    } catch (\Throwable $row_e) {
+                        // 某一行格式化异常时，记录日志但继续处理其余行，不让整页崩溃
+                        error_log('[PS REST API] format_product_summary error for post ' . get_the_ID() . ': ' . $row_e->getMessage());
+                    }
+                }
+                wp_reset_postdata();
+            }
+
+            return new WP_REST_Response([
+                'items'       => $items,
+                'total'       => (int) $query->found_posts,
+                'total_pages' => (int) $query->max_num_pages,
+                'page'        => $page,
+                'per_page'    => $per_page,
+            ], 200);
+        } catch (\Throwable $e) {
+            error_log('[PS REST API] get_products fatal error: ' . $e->getMessage());
+            return new WP_REST_Response(['error' => 'Server error: ' . $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -216,16 +225,19 @@ class PS_REST_API
      */
     public function get_product($request)
     {
-        $post_id = $request->get_param('id');
-        $post = get_post($post_id);
+        try {
+            $post_id = intval($request->get_param('id'));
+            $post = get_post($post_id);
 
-        if (!$post || $post->post_type !== 'ps_item' || $post->post_status !== 'publish') {
-            return new WP_REST_Response([
-                'error' => 'Product not found',
-            ], 404);
+            if (!$post || $post->post_type !== 'ps_item' || $post->post_status !== 'publish') {
+                return new WP_REST_Response(['error' => 'Product not found'], 404);
+            }
+
+            return new WP_REST_Response($this->format_product_detail($post), 200);
+        } catch (\Throwable $e) {
+            error_log('[PS REST API] get_product fatal error: ' . $e->getMessage());
+            return new WP_REST_Response(['error' => 'Server error: ' . $e->getMessage()], 500);
         }
-
-        return new WP_REST_Response($this->format_product_detail($post), 200);
     }
 
     // =============================================
@@ -237,29 +249,31 @@ class PS_REST_API
      */
     public function get_categories()
     {
-        $terms = get_terms([
-            'taxonomy' => 'ps_category',
-            'hide_empty' => false,
-            'orderby' => 'name',
-            'order' => 'ASC',
-        ]);
+        try {
+            $terms = get_terms([
+                'taxonomy'   => 'ps_category',
+                'hide_empty' => false,
+                'orderby'    => 'name',
+                'order'      => 'ASC',
+            ]);
 
-        $categories = [];
-
-        if (!is_wp_error($terms)) {
-            foreach ($terms as $term) {
-                $categories[] = [
-                    'id' => $term->term_id,
-                    'name' => $term->name,
-                    'slug' => $term->slug,
-                    'count' => $term->count,
-                ];
+            $categories = [];
+            if (!is_wp_error($terms) && is_array($terms)) {
+                foreach ($terms as $term) {
+                    $categories[] = [
+                        'id'    => $term->term_id,
+                        'name'  => $term->name,
+                        'slug'  => $term->slug,
+                        'count' => $term->count,
+                    ];
+                }
             }
-        }
 
-        return new WP_REST_Response([
-            'categories' => $categories,
-        ], 200);
+            return new WP_REST_Response(['categories' => $categories], 200);
+        } catch (\Throwable $e) {
+            error_log('[PS REST API] get_categories fatal error: ' . $e->getMessage());
+            return new WP_REST_Response(['error' => 'Server error: ' . $e->getMessage()], 500);
+        }
     }
 
     // =============================================
@@ -271,24 +285,30 @@ class PS_REST_API
      */
     public function get_banner()
     {
-        $banner_image_id = get_option('ps_banner_image_id');
-        $banner_bg = '';
-        if ($banner_image_id) {
-            $banner_bg = wp_get_attachment_image_url($banner_image_id, 'full');
-        }
+        try {
+            $banner_image_id = get_option('ps_banner_image_id');
+            $banner_bg = '';
+            if ($banner_image_id) {
+                $url = wp_get_attachment_image_url($banner_image_id, 'full');
+                $banner_bg = $url ?: '';
+            }
 
-        return new WP_REST_Response([
-            'title' => get_option('ps_banner_title', 'Pocket Showroom'),
-            'description' => get_option('ps_banner_desc', ''),
-            'buttonText' => get_option('ps_banner_button_text', 'Get a Quote'),
-            'buttonUrl' => get_option('ps_banner_button_url', ''),
-            'backgroundUrl' => $banner_bg ?: '',
-            'overlayColor' => get_option('ps_banner_overlay_color', 'rgba(46, 125, 50, 0.4)'),
-            'primaryColor' => get_option('ps_primary_color', '#2E7D32'),
-            'buttonTextColor' => get_option('ps_button_text_color', '#ffffff'),
-            'titleColor' => get_option('ps_banner_title_color', '#ffffff'),
-            'descColor' => get_option('ps_banner_desc_color', '#ffffffcc'),
-        ], 200);
+            return new WP_REST_Response([
+                'title'          => get_option('ps_banner_title', 'Pocket Showroom'),
+                'description'    => get_option('ps_banner_desc', ''),
+                'buttonText'     => get_option('ps_banner_button_text', 'Get a Quote'),
+                'buttonUrl'      => get_option('ps_banner_button_url', ''),
+                'backgroundUrl'  => $banner_bg,
+                'overlayColor'   => get_option('ps_banner_overlay_color', 'rgba(46, 125, 50, 0.4)'),
+                'primaryColor'   => get_option('ps_primary_color', '#2E7D32'),
+                'buttonTextColor'=> get_option('ps_button_text_color', '#ffffff'),
+                'titleColor'     => get_option('ps_banner_title_color', '#ffffff'),
+                'descColor'      => get_option('ps_banner_desc_color', '#ffffffcc'),
+            ], 200);
+        } catch (\Throwable $e) {
+            error_log('[PS REST API] get_banner fatal error: ' . $e->getMessage());
+            return new WP_REST_Response(['error' => 'Server error: ' . $e->getMessage()], 500);
+        }
     }
 
     // =============================================
@@ -300,19 +320,19 @@ class PS_REST_API
      */
     private function format_product_summary($post_id)
     {
-        $model = get_post_meta($post_id, '_ps_model', true);
-        $price = get_post_meta($post_id, '_ps_list_price', true);
+        $model = (string) (get_post_meta($post_id, '_ps_model', true) ?: '');
+        $price = (string) (get_post_meta($post_id, '_ps_list_price', true) ?: '');
 
-        $thumb_id = get_post_thumbnail_id($post_id);
-        $thumb_url = $thumb_id ? wp_get_attachment_image_url($thumb_id, 'medium') : '';
+        $thumb_id  = get_post_thumbnail_id($post_id);
+        $thumb_url = ($thumb_id) ? (wp_get_attachment_image_url($thumb_id, 'medium') ?: '') : '';
 
-        // Categories
-        $terms = get_the_terms($post_id, 'ps_category');
+        // 分类信息
+        $terms      = get_the_terms($post_id, 'ps_category');
         $categories = [];
-        if ($terms && !is_wp_error($terms)) {
+        if ($terms && !is_wp_error($terms) && is_array($terms)) {
             foreach ($terms as $t) {
                 $categories[] = [
-                    'id' => $t->term_id,
+                    'id'   => $t->term_id,
                     'name' => $t->name,
                     'slug' => $t->slug,
                 ];
@@ -320,11 +340,11 @@ class PS_REST_API
         }
 
         return [
-            'id' => $post_id,
-            'title' => get_the_title($post_id),
-            'model' => $model ?: '',
-            'price' => $price ?: '',
-            'thumbnail' => $thumb_url,
+            'id'         => $post_id,
+            'title'      => (string) get_the_title($post_id),
+            'model'      => $model,
+            'price'      => $price,
+            'thumbnail'  => $thumb_url,
             'categories' => $categories,
         ];
     }
