@@ -424,7 +424,7 @@ class PS_REST_API
     /**
      * Security: Verify API Key
      */
-    private function verify_api_key($request)
+    public function verify_api_key($request)
     {
         $api_key = $request->get_header('x-api-key');
         if (empty($api_key)) {
@@ -440,7 +440,7 @@ class PS_REST_API
     /**
      * Security: Combined API Key + Rate Limit check
      */
-    private function verify_api_key_with_rate_limit($request)
+    public function verify_api_key_with_rate_limit($request)
     {
         // First check rate limit to prevent DDoS/Scraping
         $rate_check = $this->check_rate_limit($request);
@@ -456,7 +456,7 @@ class PS_REST_API
     /**
      * Security: Rate limiting
      */
-    private function check_rate_limit($request)
+    public function check_rate_limit($request)
     {
         $user_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $rate_limit_key = 'ps_api_rate_' . md5($user_ip);

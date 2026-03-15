@@ -23,7 +23,7 @@
 ## 🛠️ 安装指引 (Installation)
 
 ### 推荐方式：直接下载最新包
-1. 从 GitHub 下载 ZIP：[pocket-showroom-core-v3.4.3.zip](https://github.com/evolution301/pocket-showroom-core/releases/download/v3.4.3/pocket-showroom-core.zip)
+1. Download the latest release from GitHub: [pocket-showroom-core-v3.4.5.zip](https://github.com/leokhoa/pocket-showroom-core/releases/latest/download/pocket-showroom-core.zip)
 2. 在 WordPress 后台 -> **插件** -> **安装插件** -> **上传插件**
 3. 激活并开启您的数字化展厅之旅。
 
